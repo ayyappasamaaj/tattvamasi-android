@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "638136181116",
+    "firebase_url": "https://tattvamasi-502d0.firebaseio.com",
+    "project_id": "tattvamasi-502d0",
+    "storage_bucket": "tattvamasi-502d0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:638136181116:android:5f418beb55d96485",
+        "android_client_info": {
+          "package_name": "com.ayyappasamaaj.tattvamasi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "638136181116-f5pu5adnnre93mqahpmmkdi9bn1ml8fq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-TG30cemeKa2UXqzREsXPy8FFKb7tscw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
