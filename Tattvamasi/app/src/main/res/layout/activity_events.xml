@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".EventsActivity">
+<layout xmlns:bind="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name="header"
+            type="com.ayyappasamaaj.tattvamasi.model.Header" />
+    </data>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.ayyappasamaaj.tattvamasi.DonateActivity">
 
-</android.support.constraint.ConstraintLayout>
+        <include
+            android:id="@+id/header"
+            layout="@layout/header"
+            bind:header="@{header}"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorBackground"
+            android:orientation="vertical">
+
+        </LinearLayout>
+    </LinearLayout>
+</layout>
+
