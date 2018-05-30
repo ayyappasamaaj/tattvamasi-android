@@ -1,4 +1,4 @@
-package com.ayyappasamaaj.tattvamasi;
+package com.ayyappasamaaj.tattvamasi.view;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityHomeBinding;
 import com.ayyappasamaaj.tattvamasi.model.Header;
 

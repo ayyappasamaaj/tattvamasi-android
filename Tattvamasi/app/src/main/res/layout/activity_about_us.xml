@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="com.ayyappasamaaj.tattvamasi.AboutUsActivity">
+        tools:context="com.ayyappasamaaj.tattvamasi.view.AboutUsActivity">
 
         <include
             android:id="@+id/header"
