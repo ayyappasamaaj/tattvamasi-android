@@ -33,25 +33,24 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_events);
+        // binding the view
         binding = DataBindingUtil.setContentView(this, R.layout.activity_events);
+        // header model to create header
         Header header = new Header();
         header.setTitle("Events");
         binding.setHeader(header);
-
-        readEvents();
+        // init the events list
         initRecyclerView();
+
+        // read the events from firebase
+        readEvents();
     }
 
-    /**
-     * Renders RecyclerView with Grid Images in 3 columns
-     */
     private void initRecyclerView() {
         recyclerView = binding.recyclerView;
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
-        //recyclerView.setItemAnimator(new DefaultItemAnimator());
         mAdapter = new EventsAdapter(eventsList, this);
         recyclerView.setAdapter(mAdapter);
     }

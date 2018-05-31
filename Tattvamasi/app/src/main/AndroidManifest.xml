@@ -8,18 +8,19 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.HomeActivity">
+        <activity android:name=".view.HomeActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.BhajansActivity" />
-        <activity android:name=".view.PoojaActivity" />
-        <activity android:name=".view.ArticlesActivity" />
-        <activity android:name=".view.EventsActivity" />
-        <activity android:name=".view.AboutUsActivity" />
-        <activity android:name=".view.DonateActivity" />
+        <activity android:name=".view.BhajansActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".view.PoojaActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".view.ArticlesActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".view.EventsActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".view.AboutUsActivity" android:screenOrientation="portrait" />
+        <activity android:name=".view.DonateActivity" android:screenOrientation="portrait"/>
+        <activity android:name=".view.PDFViewerActivity" />
     </application>
 
 </manifest>
