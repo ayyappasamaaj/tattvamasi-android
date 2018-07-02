@@ -50,8 +50,8 @@ public class BhajansAdapter extends RecyclerView.Adapter<BhajansAdapter.MyViewHo
         holder.binding.setBhajan(bhajanList.get(position));
         Resources res = layoutInflater.getContext().getResources();
         int resourceId = res.getIdentifier(bhajanList.get(position).getName().toLowerCase(), "drawable", layoutInflater.getContext().getPackageName());
-        holder.binding.bhajan.setImageResource(resourceId);
-        holder.binding.bhajan.setOnClickListener(new View.OnClickListener() {
+        holder.binding.bhajanImage.setImageResource(resourceId);
+        holder.binding.bhajanImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (listener != null) {

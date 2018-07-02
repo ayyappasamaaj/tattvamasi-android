@@ -33,7 +33,7 @@ public class BhajansActivity extends AppCompatActivity implements BhajansAdapter
         header.setTitle("Bhajans");
         binding.setHeader(header);
 
-        // init the bhajan list
+        // init the bhajans list
         loadBhajans();
         initRecyclerView();
     }
