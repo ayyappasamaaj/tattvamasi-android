@@ -1,7 +1,10 @@
 package com.ayyappasamaaj.tattvamasi.model;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class Event {
     private long date;
@@ -46,9 +49,11 @@ public class Event {
 
     public void setDate(long date) {
         this.date = date;
+        Log.d("Event", "Event date = "+date);
         // from date set month, day
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(date);
+        calendar.setTimeZone(TimeZone.getTimeZone("America/Santiago"));
 
         // set month
         int month = calendar.get(Calendar.MONTH);

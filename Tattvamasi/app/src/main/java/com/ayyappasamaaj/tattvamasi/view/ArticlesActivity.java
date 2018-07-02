@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.adapter.ArticlesAdapter;
@@ -29,16 +30,20 @@ public class ArticlesActivity extends AppCompatActivity implements ArticlesAdapt
     private ActivityArticlesBinding binding;
     private ArrayList<Article> articlesList = new ArrayList<Article>();
     private ArticlesAdapter mAdapter;
+    private String category = "Articles";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        category = getIntent().getStringExtra("CATEGORY");
+
         // binding the view
         binding = DataBindingUtil.setContentView(this, R.layout.activity_articles);
         // header model to create header
         Header header = new Header();
-        header.setTitle("Article");
+        header.setTitle(category);
         binding.setHeader(header);
+
         // init the articles list
         initRecyclerView();
 
@@ -58,7 +63,14 @@ public class ArticlesActivity extends AppCompatActivity implements ArticlesAdapt
     private void readArticles(){
         // get reference to database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("articles");
+        category = category.toLowerCase();
+        Log.d(TAG, "category = "+ category);
+        DatabaseReference myRef;
+        if(category.contains("articles")) {
+            myRef = database.getReference(category);
+        } else {
+            myRef = database.getReference("bhajans/" + category);
+        }
 
         // get the list of events
         myRef.addValueEventListener(new ValueEventListener() {
@@ -92,5 +104,10 @@ public class ArticlesActivity extends AppCompatActivity implements ArticlesAdapt
         intent.putExtra("URL", article.getFileUrl());
         intent.putExtra("TITLE", article.getItemTitle());
         this.startActivity(intent);
+    }
+
+    public void backClicked(View view) {
+        Log.d(TAG, "Back clicked");
+        this.finish();
     }
 }

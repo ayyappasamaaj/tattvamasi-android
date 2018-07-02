@@ -33,6 +33,7 @@ public class HomeActivity extends AppCompatActivity {
 
     public void OnArticlesClick(View view){
         Intent intent = new Intent(this, ArticlesActivity.class);
+        intent.putExtra("CATEGORY", "Articles");
         this.startActivity(intent);
     }
 

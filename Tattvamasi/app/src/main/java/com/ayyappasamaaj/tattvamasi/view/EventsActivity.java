@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.ayyappasamaaj.tattvamasi.R;
@@ -13,7 +14,6 @@ import com.ayyappasamaaj.tattvamasi.adapter.EventsAdapter;
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityEventsBinding;
 import com.ayyappasamaaj.tattvamasi.model.Event;
 import com.ayyappasamaaj.tattvamasi.model.Header;
-import com.ayyappasamaaj.tattvamasi.util.SimpleDividerItemDecoration;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -50,7 +50,7 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
         recyclerView = binding.recyclerView;
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
+        //recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
         mAdapter = new EventsAdapter(eventsList, this);
         recyclerView.setAdapter(mAdapter);
     }
@@ -86,6 +86,11 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
     @Override
     public void onEventClicked(Event event) {
         Toast.makeText(getApplicationContext(), "Events clicked! " + event.getName(), Toast.LENGTH_SHORT).show();
+    }
+
+    public void backClicked(View view) {
+        Log.d(TAG, "Back clicked");
+        this.finish();
     }
 
 }
