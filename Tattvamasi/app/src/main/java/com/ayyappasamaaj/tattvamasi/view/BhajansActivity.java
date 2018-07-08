@@ -44,7 +44,7 @@ public class BhajansActivity extends AppCompatActivity implements BhajansAdapter
         bhajanList.add(new Bhajan("Ganesha"));
         bhajanList.add(new Bhajan("Guru"));
         bhajanList.add(new Bhajan("Hanuman"));
-        bhajanList.add(new Bhajan("Murugan"));
+        bhajanList.add(new Bhajan("Muruga"));
         bhajanList.add(new Bhajan("Rama"));
         bhajanList.add(new Bhajan("Shiva"));
         bhajanList.add(new Bhajan("Vishnu"));
