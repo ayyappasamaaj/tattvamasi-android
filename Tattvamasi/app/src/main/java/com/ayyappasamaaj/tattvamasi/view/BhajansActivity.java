@@ -10,20 +10,20 @@ import android.util.Log;
 import android.view.View;
 
 import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.adapter.BhajansAdapter;
+import com.ayyappasamaaj.tattvamasi.adapter.GridRowAdapter;
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityBhajansBinding;
-import com.ayyappasamaaj.tattvamasi.model.Bhajan;
+import com.ayyappasamaaj.tattvamasi.model.GridItem;
 import com.ayyappasamaaj.tattvamasi.model.Header;
 
 import java.util.ArrayList;
 
-public class BhajansActivity extends AppCompatActivity implements BhajansAdapter.BhajanAdapterListener{
+public class BhajansActivity extends AppCompatActivity implements GridRowAdapter.GridRowClickListener {
 
     private static final String TAG = "BhajansActivity";
     private RecyclerView recyclerView;
     private ActivityBhajansBinding binding;
-    private ArrayList<Bhajan> bhajanList = new ArrayList<Bhajan>();
-    private BhajansAdapter mAdapter;
+    private ArrayList<GridItem> gridItemList = new ArrayList<GridItem>();
+    private GridRowAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,15 +39,15 @@ public class BhajansActivity extends AppCompatActivity implements BhajansAdapter
     }
 
     private void loadBhajans() {
-        bhajanList.add(new Bhajan("Ayyappan"));
-        bhajanList.add(new Bhajan("Devi"));
-        bhajanList.add(new Bhajan("Ganesha"));
-        bhajanList.add(new Bhajan("Guru"));
-        bhajanList.add(new Bhajan("Hanuman"));
-        bhajanList.add(new Bhajan("Muruga"));
-        bhajanList.add(new Bhajan("Rama"));
-        bhajanList.add(new Bhajan("Shiva"));
-        bhajanList.add(new Bhajan("Vishnu"));
+        gridItemList.add(new GridItem("Ayyappan"));
+        gridItemList.add(new GridItem("Devi"));
+        gridItemList.add(new GridItem("Ganesha"));
+        gridItemList.add(new GridItem("Guru"));
+        gridItemList.add(new GridItem("Hanuman"));
+        gridItemList.add(new GridItem("Muruga"));
+        gridItemList.add(new GridItem("Rama"));
+        gridItemList.add(new GridItem("Shiva"));
+        gridItemList.add(new GridItem("Vishnu"));
     }
 
     private void initRecyclerView() {
@@ -56,7 +56,7 @@ public class BhajansActivity extends AppCompatActivity implements BhajansAdapter
         //recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         //recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
-        mAdapter = new BhajansAdapter(bhajanList, this);
+        mAdapter = new GridRowAdapter(gridItemList, this);
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -66,10 +66,10 @@ public class BhajansActivity extends AppCompatActivity implements BhajansAdapter
     }
 
     @Override
-    public void onBhajanClicked(Bhajan bhajan) {
-        Log.d(TAG, "Bhajan item clicked = "+bhajan.getName());
+    public void onGridRowItemClicked(GridItem gridItem) {
+        Log.d(TAG, "GridItem item clicked = "+ gridItem.getName());
         Intent intent = new Intent(this, ArticlesActivity.class);
-        intent.putExtra("CATEGORY", bhajan.getName());
+        intent.putExtra("CATEGORY", gridItem.getName());
         this.startActivity(intent);
     }
 }

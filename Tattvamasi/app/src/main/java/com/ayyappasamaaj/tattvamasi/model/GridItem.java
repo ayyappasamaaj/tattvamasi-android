@@ -1,13 +1,13 @@
 package com.ayyappasamaaj.tattvamasi.model;
 
-public class Bhajan {
-    public Bhajan(){ }
+public class GridItem {
+    public GridItem(){ }
 
-    public Bhajan(String name){
+    public GridItem(String name){
         this.name = name;
     }
 
-    public Bhajan(String name, String imageName){
+    public GridItem(String name, String imageName){
         this.name = name;
         this.imageName = imageName;
     }

@@ -4,8 +4,8 @@
 
     <data>
         <variable
-            name="bhajan"
-            type="com.ayyappasamaaj.tattvamasi.model.Bhajan" />
+            name="gridItem"
+            type="com.ayyappasamaaj.tattvamasi.model.GridItem" />
     </data>
 
     <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{bhajan.name}"
+                android:text="@{gridItem.name}"
                 android:textColor="@color/colorText"
                 android:textSize="20sp" />
 

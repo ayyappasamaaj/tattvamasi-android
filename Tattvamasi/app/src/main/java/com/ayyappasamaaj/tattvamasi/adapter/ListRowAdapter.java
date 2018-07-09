@@ -7,30 +7,30 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.databinding.ArticleRowItemBinding;
-import com.ayyappasamaaj.tattvamasi.model.Article;
+import com.ayyappasamaaj.tattvamasi.databinding.ListRowItemBinding;
+import com.ayyappasamaaj.tattvamasi.model.ListItem;
 
 import java.util.List;
 
-public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.MyViewHolder> {
+public class ListRowAdapter extends RecyclerView.Adapter<ListRowAdapter.MyViewHolder> {
 
-    private List<Article> articleList;
+    private List<ListItem> listItemList;
     private LayoutInflater layoutInflater;
-    private ArticleAdapterListener listener;
+    private ListRowClickListener listener;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private final ArticleRowItemBinding binding;
+        private final ListRowItemBinding binding;
 
-        public MyViewHolder(final ArticleRowItemBinding itemBinding) {
+        public MyViewHolder(final ListRowItemBinding itemBinding) {
             super(itemBinding.getRoot());
             this.binding = itemBinding;
         }
     }
 
 
-    public ArticlesAdapter(List<Article> articleList, ArticleAdapterListener listener) {
-        this.articleList = articleList;
+    public ListRowAdapter(List<ListItem> listItemList, ListRowClickListener listener) {
+        this.listItemList = listItemList;
         this.listener = listener;
     }
 
@@ -39,19 +39,19 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.MyView
         if (layoutInflater == null) {
             layoutInflater = LayoutInflater.from(parent.getContext());
         }
-        ArticleRowItemBinding binding =
-                DataBindingUtil.inflate(layoutInflater, R.layout.article_row_item, parent, false);
+        ListRowItemBinding binding =
+                DataBindingUtil.inflate(layoutInflater, R.layout.list_row_item, parent, false);
         return new MyViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
-        holder.binding.setArticle(articleList.get(position));
-        holder.binding.article.setOnClickListener(new View.OnClickListener() {
+        holder.binding.setListItem(listItemList.get(position));
+        holder.binding.listItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
-                    listener.onArticleClicked(articleList.get(position));
+                    listener.onListRowItemClicked(listItemList.get(position));
                 }
             }
         });
@@ -59,10 +59,10 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.MyView
 
     @Override
     public int getItemCount() {
-        return articleList.size();
+        return listItemList.size();
     }
 
-    public interface ArticleAdapterListener {
-        void onArticleClicked(Article article);
+    public interface ListRowClickListener {
+        void onListRowItemClicked(ListItem listItem);
     }
 }

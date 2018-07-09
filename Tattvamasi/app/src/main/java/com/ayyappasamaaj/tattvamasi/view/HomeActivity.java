@@ -11,21 +11,21 @@ import android.util.Log;
 import android.util.TypedValue;
 
 import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.adapter.BhajansAdapter;
+import com.ayyappasamaaj.tattvamasi.adapter.GridRowAdapter;
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityHomeBinding;
-import com.ayyappasamaaj.tattvamasi.model.Bhajan;
+import com.ayyappasamaaj.tattvamasi.model.GridItem;
 import com.ayyappasamaaj.tattvamasi.model.Header;
 import com.ayyappasamaaj.tattvamasi.util.GridSpacingItemDecoration;
 
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity implements BhajansAdapter.BhajanAdapterListener{
+public class HomeActivity extends AppCompatActivity implements GridRowAdapter.GridRowClickListener {
 
     private static final String TAG = "HomeActivity";
     private RecyclerView recyclerView;
     private ActivityHomeBinding binding;
-    private ArrayList<Bhajan> bhajanList = new ArrayList<Bhajan>();
-    private BhajansAdapter mAdapter;
+    private ArrayList<GridItem> gridItemList = new ArrayList<GridItem>();
+    private GridRowAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,12 +41,12 @@ public class HomeActivity extends AppCompatActivity implements BhajansAdapter.Bh
     }
 
     private void loadBhajans() {
-        bhajanList.add(new Bhajan("Bhajans"));
-        bhajanList.add(new Bhajan("Pooja"));
-        bhajanList.add(new Bhajan("Articles"));
-        bhajanList.add(new Bhajan("Events"));
-        bhajanList.add(new Bhajan("About"));
-        bhajanList.add(new Bhajan("Donate"));
+        gridItemList.add(new GridItem("Bhajans"));
+        gridItemList.add(new GridItem("Pooja"));
+        gridItemList.add(new GridItem("Articles"));
+        gridItemList.add(new GridItem("Events"));
+        gridItemList.add(new GridItem("About"));
+        gridItemList.add(new GridItem("Donate"));
     }
 
     private void initRecyclerView() {
@@ -61,14 +61,14 @@ public class HomeActivity extends AppCompatActivity implements BhajansAdapter.Bh
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(4), true));
 
-        mAdapter = new BhajansAdapter(bhajanList, this);
+        mAdapter = new GridRowAdapter(gridItemList, this);
         recyclerView.setAdapter(mAdapter);
     }
 
     @Override
-    public void onBhajanClicked(Bhajan bhajan) {
-        Log.d(TAG, "Bhajan item clicked = "+bhajan.getName());
-        switch (bhajan.getName()){
+    public void onGridRowItemClicked(GridItem gridItem) {
+        Log.d(TAG, "GridItem item clicked = "+ gridItem.getName());
+        switch (gridItem.getName()){
             case "Bhajans":
                 Intent bhajanIntent = new Intent(this, BhajansActivity.class);
                 this.startActivity(bhajanIntent);

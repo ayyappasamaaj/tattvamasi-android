@@ -4,12 +4,12 @@
 
     <data>
         <variable
-            name="article"
-            type="com.ayyappasamaaj.tattvamasi.model.Article" />
+            name="listItem"
+            type="com.ayyappasamaaj.tattvamasi.model.ListItem" />
     </data>
 
     <RelativeLayout xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/article"
+        android:id="@+id/listItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorBackground"
@@ -22,7 +22,7 @@
             android:layout_alignParentLeft="true"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@{article.itemTitle}"
+            android:text="@{listItem.itemTitle}"
             android:textColor="@color/colorText"
             android:textSize="20sp"
             tools:text="Article Name" />

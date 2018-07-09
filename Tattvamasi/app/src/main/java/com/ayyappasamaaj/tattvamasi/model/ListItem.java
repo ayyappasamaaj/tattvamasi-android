@@ -1,6 +1,6 @@
 package com.ayyappasamaaj.tattvamasi.model;
 
-public class Article {
+public class ListItem {
     private String fileUrl;
     private String itemTitle;
 

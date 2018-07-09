@@ -8,30 +8,30 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.databinding.BhajanRowItemBinding;
-import com.ayyappasamaaj.tattvamasi.model.Bhajan;
+import com.ayyappasamaaj.tattvamasi.databinding.GridRowItemBinding;
+import com.ayyappasamaaj.tattvamasi.model.GridItem;
 
 import java.util.List;
 
-public class BhajansAdapter extends RecyclerView.Adapter<BhajansAdapter.MyViewHolder> {
+public class GridRowAdapter extends RecyclerView.Adapter<GridRowAdapter.MyViewHolder> {
 
-    private List<Bhajan> bhajanList;
+    private List<GridItem> gridItemList;
     private LayoutInflater layoutInflater;
-    private BhajanAdapterListener listener;
+    private GridRowClickListener listener;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        private final BhajanRowItemBinding binding;
+        private final GridRowItemBinding binding;
 
-        public MyViewHolder(final BhajanRowItemBinding itemBinding) {
+        public MyViewHolder(final GridRowItemBinding itemBinding) {
             super(itemBinding.getRoot());
             this.binding = itemBinding;
         }
     }
 
 
-    public BhajansAdapter(List<Bhajan> bhajanList, BhajanAdapterListener listener) {
-        this.bhajanList = bhajanList;
+    public GridRowAdapter(List<GridItem> gridItemList, GridRowClickListener listener) {
+        this.gridItemList = gridItemList;
         this.listener = listener;
     }
 
@@ -40,22 +40,22 @@ public class BhajansAdapter extends RecyclerView.Adapter<BhajansAdapter.MyViewHo
         if (layoutInflater == null) {
             layoutInflater = LayoutInflater.from(parent.getContext());
         }
-        BhajanRowItemBinding binding =
-                DataBindingUtil.inflate(layoutInflater, R.layout.bhajan_row_item, parent, false);
+        GridRowItemBinding binding =
+                DataBindingUtil.inflate(layoutInflater, R.layout.grid_row_item, parent, false);
         return new MyViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
-        holder.binding.setBhajan(bhajanList.get(position));
+        holder.binding.setGridItem(gridItemList.get(position));
         Resources res = layoutInflater.getContext().getResources();
-        int resourceId = res.getIdentifier(bhajanList.get(position).getName().toLowerCase(), "drawable", layoutInflater.getContext().getPackageName());
+        int resourceId = res.getIdentifier(gridItemList.get(position).getName().toLowerCase(), "drawable", layoutInflater.getContext().getPackageName());
         holder.binding.bhajanImage.setImageResource(resourceId);
         holder.binding.bhajanImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
-                    listener.onBhajanClicked(bhajanList.get(position));
+                    listener.onGridRowItemClicked(gridItemList.get(position));
                 }
             }
         });
@@ -63,10 +63,10 @@ public class BhajansAdapter extends RecyclerView.Adapter<BhajansAdapter.MyViewHo
 
     @Override
     public int getItemCount() {
-        return bhajanList.size();
+        return gridItemList.size();
     }
 
-    public interface BhajanAdapterListener {
-        void onBhajanClicked(Bhajan bhajan);
+    public interface GridRowClickListener {
+        void onGridRowItemClicked(GridItem gridItem);
     }
 }

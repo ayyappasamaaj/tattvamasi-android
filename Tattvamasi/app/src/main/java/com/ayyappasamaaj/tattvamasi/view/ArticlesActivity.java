@@ -10,9 +10,9 @@ import android.util.Log;
 import android.view.View;
 
 import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.adapter.ArticlesAdapter;
+import com.ayyappasamaaj.tattvamasi.adapter.ListRowAdapter;
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityArticlesBinding;
-import com.ayyappasamaaj.tattvamasi.model.Article;
+import com.ayyappasamaaj.tattvamasi.model.ListItem;
 import com.ayyappasamaaj.tattvamasi.model.Header;
 import com.ayyappasamaaj.tattvamasi.util.SimpleDividerItemDecoration;
 import com.google.firebase.database.DataSnapshot;
@@ -23,13 +23,13 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class ArticlesActivity extends AppCompatActivity implements ArticlesAdapter.ArticleAdapterListener{
+public class ArticlesActivity extends AppCompatActivity implements ListRowAdapter.ListRowClickListener {
 
     private static final String TAG = "ArticlesActivity";
     private RecyclerView recyclerView;
     private ActivityArticlesBinding binding;
-    private ArrayList<Article> articlesList = new ArrayList<Article>();
-    private ArticlesAdapter mAdapter;
+    private ArrayList<ListItem> articlesList = new ArrayList<ListItem>();
+    private ListRowAdapter mAdapter;
     private String category = "Articles";
 
     @Override
@@ -56,7 +56,7 @@ public class ArticlesActivity extends AppCompatActivity implements ArticlesAdapt
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
-        mAdapter = new ArticlesAdapter(articlesList, this);
+        mAdapter = new ListRowAdapter(articlesList, this);
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -78,11 +78,11 @@ public class ArticlesActivity extends AppCompatActivity implements ArticlesAdapt
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
 
-                    Article article = postSnapshot.getValue(Article.class);
-                    articlesList.add(article);
+                    ListItem listItem = postSnapshot.getValue(ListItem.class);
+                    articlesList.add(listItem);
                     mAdapter.notifyDataSetChanged();
 
-                    Log.d(TAG, "Article Name = "+article.getItemTitle());
+                    Log.d(TAG, "ListItem Name = "+ listItem.getItemTitle());
                     Log.d(TAG, "size = "+ articlesList.size());
                 }
             }
@@ -96,13 +96,13 @@ public class ArticlesActivity extends AppCompatActivity implements ArticlesAdapt
     }
 
     @Override
-    public void onArticleClicked(Article article) {
-        Log.d(TAG, "article clicked = "+article.getItemTitle());
+    public void onListRowItemClicked(ListItem listItem) {
+        Log.d(TAG, "listItem clicked = "+ listItem.getItemTitle());
 
         // call the pdf viewer
         Intent intent = new Intent(this, PDFViewerActivity.class);
-        intent.putExtra("URL", article.getFileUrl());
-        intent.putExtra("TITLE", article.getItemTitle());
+        intent.putExtra("URL", listItem.getFileUrl());
+        intent.putExtra("TITLE", listItem.getItemTitle());
         this.startActivity(intent);
     }
 
