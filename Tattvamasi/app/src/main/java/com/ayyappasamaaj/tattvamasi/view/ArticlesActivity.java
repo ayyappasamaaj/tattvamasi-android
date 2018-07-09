@@ -31,11 +31,13 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
     private ArrayList<ListItem> articlesList = new ArrayList<ListItem>();
     private ListRowAdapter mAdapter;
     private String category = "Articles";
+    private String parentCategory = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         category = getIntent().getStringExtra("CATEGORY");
+        parentCategory = getIntent().getStringExtra("PARENT-CATEGORY");
 
         // binding the view
         binding = DataBindingUtil.setContentView(this, R.layout.activity_articles);
@@ -69,7 +71,7 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
         if(category.contains("articles")) {
             myRef = database.getReference(category);
         } else {
-            myRef = database.getReference("bhajans/" + category);
+            myRef = database.getReference(parentCategory +"/" + category);
         }
 
         // get the list of events

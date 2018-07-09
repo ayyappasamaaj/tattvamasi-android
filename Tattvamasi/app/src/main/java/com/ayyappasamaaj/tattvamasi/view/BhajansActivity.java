@@ -69,6 +69,7 @@ public class BhajansActivity extends AppCompatActivity implements GridRowAdapter
     public void onGridRowItemClicked(GridItem gridItem) {
         Log.d(TAG, "GridItem item clicked = "+ gridItem.getName());
         Intent intent = new Intent(this, ArticlesActivity.class);
+        intent.putExtra("PARENT-CATEGORY", "bhajans");
         intent.putExtra("CATEGORY", gridItem.getName());
         this.startActivity(intent);
     }

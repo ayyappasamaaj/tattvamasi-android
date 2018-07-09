@@ -104,35 +104,4 @@ public class HomeActivity extends AppCompatActivity implements GridRowAdapter.Gr
         Resources r = getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
     }
-
-    /*public void OnBhajanClick(View view){
-        Intent intent = new Intent(this, BhajansActivity.class);
-        this.startActivity(intent);
-    }
-
-    public void OnPoojaClick(View view){
-        Intent intent = new Intent(this, PoojaActivity.class);
-        this.startActivity(intent);
-    }
-
-    public void OnArticlesClick(View view){
-        Intent intent = new Intent(this, ArticlesActivity.class);
-        intent.putExtra("CATEGORY", "Articles");
-        this.startActivity(intent);
-    }
-
-    public void OnEventsClick(View view){
-        Intent intent = new Intent(this, EventsActivity.class);
-        this.startActivity(intent);
-    }
-
-    public void OnAboutUsClick(View view){
-        Intent intent = new Intent(this, AboutUsActivity.class);
-        this.startActivity(intent);
-    }
-
-    public void OnDonateClick(View view){
-        Intent intent = new Intent(this, DonateActivity.class);
-        this.startActivity(intent);
-    }*/
 }
