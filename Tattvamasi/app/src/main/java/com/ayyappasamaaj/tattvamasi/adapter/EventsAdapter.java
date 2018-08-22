@@ -2,7 +2,10 @@ package com.ayyappasamaaj.tattvamasi.adapter;
 
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.ayyappasamaaj.tattvamasi.R;
@@ -46,14 +49,19 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         holder.binding.setEvent(eventList.get(position));
-        /*holder.binding.thumbnail.setOnClickListener(new View.OnClickListener() {
+
+        SpannableString content = new SpannableString(eventList.get(position).getVenue());
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        holder.binding.venue.setText(content);
+
+        holder.binding.venue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
-                    listener.onEventClicked(eventList.get(position));
+                    listener.onVenueClicked(eventList.get(position));
                 }
             }
-        });*/
+        });
     }
 
     @Override
@@ -62,6 +70,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
     }
 
     public interface EventsAdapterListener {
-        void onEventClicked(Event event);
+        void onVenueClicked(Event event);
     }
 }

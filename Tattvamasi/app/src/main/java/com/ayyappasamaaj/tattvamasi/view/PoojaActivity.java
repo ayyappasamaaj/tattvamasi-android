@@ -30,7 +30,7 @@ public class PoojaActivity extends AppCompatActivity implements ParentListRowAda
     private ActivityPoojaBinding binding;
     private ArrayList<ParentListItem> poojaList = new ArrayList<ParentListItem>();
     private ParentListRowAdapter mAdapter;
-    private String category = "pooja-categories";
+    private String category = "pooja_categories";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,13 +1,14 @@
 package com.ayyappasamaaj.tattvamasi.view;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.adapter.EventsAdapter;
@@ -84,8 +85,20 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
     }
 
     @Override
-    public void onEventClicked(Event event) {
-        Toast.makeText(getApplicationContext(), "Events clicked! " + event.getName(), Toast.LENGTH_SHORT).show();
+    public void onVenueClicked(Event event) {
+        String uri = "http://maps.google.co.in/maps?q=" + event.getVenue();
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        startActivity(intent);
+
+        /*Calendar cal = Calendar.getInstance();
+        Intent intent = new Intent(Intent.ACTION_EDIT);
+        intent.setType("vnd.android.cursor.item/event");
+        intent.putExtra("beginTime", cal.getTimeInMillis());
+        intent.putExtra("allDay", false);
+        intent.putExtra("rrule", "FREQ=DAILY");
+        intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000);
+        intent.putExtra("title", "A Test Event from android app");
+        startActivity(intent);*/
     }
 
     public void backClicked(View view) {
