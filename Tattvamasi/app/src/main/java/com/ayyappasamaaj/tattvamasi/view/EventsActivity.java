@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.app.ProgressDialog;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.adapter.EventsAdapter;
@@ -30,10 +31,12 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
     private ActivityEventsBinding binding;
     private ArrayList<Event> eventsList = new ArrayList<Event>();
     private EventsAdapter mAdapter;
+    private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        progress = new ProgressDialog(this);
         // binding the view
         binding = DataBindingUtil.setContentView(this, R.layout.activity_events);
         // header model to create header
@@ -57,6 +60,8 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
     }
 
     private void readEvents(){
+        showLoader();
+
         // get reference to database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("events");
@@ -65,6 +70,7 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                dismissLoader();
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
 
                     Event event = postSnapshot.getValue(Event.class);
@@ -78,6 +84,7 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                dismissLoader();
                 // Getting Post failed, log a message
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
             }
@@ -104,6 +111,18 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
     public void backClicked(View view) {
         Log.d(TAG, "Back clicked");
         this.finish();
+    }
+
+    private void showLoader(){
+        //progress.setTitle("Loading");
+        progress.setMessage("Wait while loading...");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
+    }
+
+    private void dismissLoader(){
+        // To dismiss the dialog
+        progress.dismiss();
     }
 
 }

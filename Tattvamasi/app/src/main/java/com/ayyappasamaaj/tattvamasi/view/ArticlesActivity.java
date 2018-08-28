@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.app.ProgressDialog;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.adapter.ListRowAdapter;
@@ -32,10 +33,12 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
     private ListRowAdapter mAdapter;
     private String category = "Articles";
     private String parentCategory = "";
+    private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        progress = new ProgressDialog(this);
         category = getIntent().getStringExtra("CATEGORY");
         parentCategory = getIntent().getStringExtra("PARENT-CATEGORY");
 
@@ -63,6 +66,8 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
     }
 
     private void readArticles(){
+        showLoader();
+
         // get reference to database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         category = category.toLowerCase();
@@ -78,6 +83,7 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                dismissLoader();
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
 
                     ListItem listItem = postSnapshot.getValue(ListItem.class);
@@ -91,6 +97,8 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                dismissLoader();
+
                 // Getting Post failed, log a message
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
             }
@@ -111,5 +119,17 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
     public void backClicked(View view) {
         Log.d(TAG, "Back clicked");
         this.finish();
+    }
+
+    private void showLoader(){
+        //progress.setTitle("Loading");
+        progress.setMessage("Wait while loading...");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
+    }
+
+    private void dismissLoader(){
+        // To dismiss the dialog
+        progress.dismiss();
     }
 }

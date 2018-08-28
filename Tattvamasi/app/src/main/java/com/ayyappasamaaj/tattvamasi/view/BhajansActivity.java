@@ -73,4 +73,5 @@ public class BhajansActivity extends AppCompatActivity implements GridRowAdapter
         intent.putExtra("CATEGORY", gridItem.getName());
         this.startActivity(intent);
     }
+
 }

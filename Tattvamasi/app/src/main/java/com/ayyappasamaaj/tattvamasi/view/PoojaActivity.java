@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.app.ProgressDialog;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.adapter.ParentListRowAdapter;
@@ -31,10 +32,12 @@ public class PoojaActivity extends AppCompatActivity implements ParentListRowAda
     private ArrayList<ParentListItem> poojaList = new ArrayList<ParentListItem>();
     private ParentListRowAdapter mAdapter;
     private String category = "pooja_categories";
+    private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        progress = new ProgressDialog(this);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pooja);
         Header header = new Header();
         header.setTitle("Poojas");
@@ -57,6 +60,7 @@ public class PoojaActivity extends AppCompatActivity implements ParentListRowAda
     }
 
     private void readPoojas(){
+        showLoader();
         // get reference to database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         category = category.toLowerCase();
@@ -67,6 +71,7 @@ public class PoojaActivity extends AppCompatActivity implements ParentListRowAda
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                dismissLoader();
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
 
                     String name = postSnapshot.getValue(String.class);
@@ -80,6 +85,7 @@ public class PoojaActivity extends AppCompatActivity implements ParentListRowAda
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                dismissLoader();
                 // Getting Post failed, log a message
                 Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
             }
@@ -98,5 +104,17 @@ public class PoojaActivity extends AppCompatActivity implements ParentListRowAda
     public void backClicked(View view) {
         Log.d(TAG, "Back clicked");
         this.finish();
+    }
+
+    private void showLoader(){
+        //progress.setTitle("Loading");
+        progress.setMessage("Wait while loading...");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
+    }
+
+    private void dismissLoader(){
+        // To dismiss the dialog
+        progress.dismiss();
     }
 }
