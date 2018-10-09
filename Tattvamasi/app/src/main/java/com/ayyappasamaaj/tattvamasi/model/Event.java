@@ -52,7 +52,7 @@ public class Event {
         Log.d("Event", "Event date = "+date);
         // from date set month, day
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(date);
+        calendar.setTimeInMillis(date * 1000);
         calendar.setTimeZone(TimeZone.getTimeZone("America/Santiago"));
 
         // set month
@@ -64,8 +64,8 @@ public class Event {
         setDay(String.valueOf(day));
 
         // set time
-        String amPm = new SimpleDateFormat("HH:mm aa").format(calendar.getTimeInMillis());
-        setTime(amPm+" PST");
+        String amPm = new SimpleDateFormat("hh:mm aa").format(calendar.getTimeInMillis());
+        setTime(amPm);
     }
 
     public String getDesc() {

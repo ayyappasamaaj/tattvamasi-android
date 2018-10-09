@@ -91,6 +91,7 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
                     mAdapter.notifyDataSetChanged();
 
                     Log.d(TAG, "ListItem Name = "+ listItem.getItemTitle());
+                    Log.d(TAG, "ListItem URL = "+ listItem.getFileUrl());
                     Log.d(TAG, "size = "+ articlesList.size());
                 }
             }

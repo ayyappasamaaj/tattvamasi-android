@@ -96,16 +96,6 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
         String uri = "http://maps.google.co.in/maps?q=" + event.getVenue();
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         startActivity(intent);
-
-        /*Calendar cal = Calendar.getInstance();
-        Intent intent = new Intent(Intent.ACTION_EDIT);
-        intent.setType("vnd.android.cursor.item/event");
-        intent.putExtra("beginTime", cal.getTimeInMillis());
-        intent.putExtra("allDay", false);
-        intent.putExtra("rrule", "FREQ=DAILY");
-        intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000);
-        intent.putExtra("title", "A Test Event from android app");
-        startActivity(intent);*/
     }
 
     public void backClicked(View view) {
@@ -114,7 +104,6 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
     }
 
     private void showLoader(){
-        //progress.setTitle("Loading");
         progress.setMessage("Wait while loading...");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();

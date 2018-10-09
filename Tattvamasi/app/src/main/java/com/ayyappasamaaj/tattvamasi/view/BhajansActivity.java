@@ -39,23 +39,20 @@ public class BhajansActivity extends AppCompatActivity implements GridRowAdapter
     }
 
     private void loadBhajans() {
-        gridItemList.add(new GridItem("Ayyappan"));
-        gridItemList.add(new GridItem("Devi"));
         gridItemList.add(new GridItem("Ganesha"));
         gridItemList.add(new GridItem("Guru"));
-        gridItemList.add(new GridItem("Hanuman"));
         gridItemList.add(new GridItem("Muruga"));
-        gridItemList.add(new GridItem("Rama"));
+        gridItemList.add(new GridItem("Devi"));
         gridItemList.add(new GridItem("Shiva"));
         gridItemList.add(new GridItem("Vishnu"));
+        gridItemList.add(new GridItem("Rama"));
+        gridItemList.add(new GridItem("Hanuman"));
+        gridItemList.add(new GridItem("Ayyappan"));
     }
 
     private void initRecyclerView() {
         recyclerView = binding.recyclerView;
-        //RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        //recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        //recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
         mAdapter = new GridRowAdapter(gridItemList, this);
         recyclerView.setAdapter(mAdapter);
     }
