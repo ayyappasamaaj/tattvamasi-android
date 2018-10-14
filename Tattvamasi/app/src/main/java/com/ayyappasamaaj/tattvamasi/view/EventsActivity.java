@@ -54,7 +54,6 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
         recyclerView = binding.recyclerView;
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
-        //recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
         mAdapter = new EventsAdapter(eventsList, this);
         recyclerView.setAdapter(mAdapter);
     }
@@ -74,8 +73,14 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.E
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
 
                     Event event = postSnapshot.getValue(Event.class);
-                    eventsList.add(event);
-                    mAdapter.notifyDataSetChanged();
+
+                    long eventTime = event.getDate();
+                    long currentTime = System.currentTimeMillis()/1000;
+
+                    if (eventTime > currentTime) {
+                        eventsList.add(event);
+                        mAdapter.notifyDataSetChanged();
+                    }
 
                     Log.d(TAG, "Event Name = "+event.getName());
                     Log.d(TAG, "size = "+eventsList.size());
