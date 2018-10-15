@@ -30,7 +30,6 @@ public class HomeActivity extends AppCompatActivity implements GridRowAdapter.Gr
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_home);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_home);
         Header header = new Header();
         binding.setHeader(header);
@@ -45,17 +44,12 @@ public class HomeActivity extends AppCompatActivity implements GridRowAdapter.Gr
         gridItemList.add(new GridItem("Pooja"));
         gridItemList.add(new GridItem("Articles"));
         gridItemList.add(new GridItem("Events"));
-        gridItemList.add(new GridItem("About"));
         gridItemList.add(new GridItem("Donate"));
+        gridItemList.add(new GridItem("About"));
     }
 
     private void initRecyclerView() {
         recyclerView = binding.recyclerView;
-
-        // This style is for row
-        //RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        //recyclerView.setLayoutManager(mLayoutManager);
-        //recyclerView.addItemDecoration(new SimpleDividerItemDecoration(this));
 
         // this style is for grid 2x2
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
