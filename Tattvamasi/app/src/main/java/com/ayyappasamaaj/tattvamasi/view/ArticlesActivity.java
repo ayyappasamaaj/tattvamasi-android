@@ -87,6 +87,11 @@ public class ArticlesActivity extends AppCompatActivity implements ListRowAdapte
                 for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
 
                     ListItem listItem = postSnapshot.getValue(ListItem.class);
+                    if (parentCategory.equalsIgnoreCase("pooja")) {
+                        String name = listItem.getItemTitle();
+                        String lang = listItem.getLanguage();
+                        listItem.setItemTitle(name + " (" + lang + ")");
+                    }
                     articlesList.add(listItem);
                     mAdapter.notifyDataSetChanged();
 
