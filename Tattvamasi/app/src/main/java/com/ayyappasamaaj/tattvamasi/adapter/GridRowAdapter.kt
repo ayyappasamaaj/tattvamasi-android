@@ -10,7 +10,7 @@ import com.ayyappasamaaj.tattvamasi.databinding.GridRowItemBinding
 import com.ayyappasamaaj.tattvamasi.model.GridItem
 
 class GridRowAdapter(
-    private val gridItemList: List<GridItem>,
+    private val gridItemList: ArrayList<GridItem>,
     private val listener: GridRowClickListener?
 ) : RecyclerView.Adapter<GridRowAdapter.MyViewHolder>() {
 

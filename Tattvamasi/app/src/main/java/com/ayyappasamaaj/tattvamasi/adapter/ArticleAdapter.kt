@@ -9,10 +9,10 @@ import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.databinding.ListRowItemBinding
 import com.ayyappasamaaj.tattvamasi.model.ListItem
 
-class ListRowAdapter(
-    private val listItemList: List<ListItem>,
+class ArticleAdapter(
+    private var listItemList: List<ListItem>,
     private val listener: ListRowClickListener?
-) : RecyclerView.Adapter<ListRowAdapter.MyViewHolder>() {
+) : RecyclerView.Adapter<ArticleAdapter.MyViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val binding: ListRowItemBinding = DataBindingUtil.inflate(
@@ -32,6 +32,11 @@ class ListRowAdapter(
 
     override fun getItemCount(): Int {
         return listItemList.size
+    }
+
+    fun updateData(listItemList: List<ListItem>) {
+        this.listItemList = listItemList
+        notifyDataSetChanged()
     }
 
     interface ListRowClickListener {

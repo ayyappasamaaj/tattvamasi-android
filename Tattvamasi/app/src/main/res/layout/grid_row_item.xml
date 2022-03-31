@@ -33,7 +33,7 @@
                 android:layout_height="120dp"
                 android:layout_margin="10dp"
                 android:clickable="true"
-                android:contentDescription="@string/desc_bhajanas"
+                android:contentDescription="@string/bhajans"
                 android:focusable="true"
                 card_view:srcCompat="@drawable/bhajans" />
 

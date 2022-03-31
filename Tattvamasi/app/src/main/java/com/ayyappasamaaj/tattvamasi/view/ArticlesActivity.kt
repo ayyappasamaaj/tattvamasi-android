@@ -3,30 +3,27 @@ package com.ayyappasamaaj.tattvamasi.view
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.ayyappasamaaj.tattvamasi.R
-import com.ayyappasamaaj.tattvamasi.adapter.ListRowAdapter
+import com.ayyappasamaaj.tattvamasi.adapter.ArticleAdapter
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityArticlesBinding
 import com.ayyappasamaaj.tattvamasi.model.Header
 import com.ayyappasamaaj.tattvamasi.model.ListItem
 import com.ayyappasamaaj.tattvamasi.util.AppLog
 import com.ayyappasamaaj.tattvamasi.util.SimpleDividerItemDecoration
-import com.google.firebase.database.*
+import com.ayyappasamaaj.tattvamasi.viewmodels.ArticleViewModel
 
-class ArticlesActivity : AppCompatActivity(), ListRowAdapter.ListRowClickListener {
-    private var recyclerView: RecyclerView? = null
-    private val articlesList: ArrayList<ListItem> = ArrayList()
-    private var mAdapter: ListRowAdapter? = null
+class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListener {
+
     private var category = "Articles"
     private var parentCategory = ""
     private var progress: ProgressDialog? = null
 
-    private var binding: ActivityArticlesBinding? = null
+    private val viewModel: ArticleViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,65 +32,32 @@ class ArticlesActivity : AppCompatActivity(), ListRowAdapter.ListRowClickListene
         parentCategory = intent.getStringExtra("PARENT-CATEGORY").toString()
 
         // binding the view
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_articles)
+        val binding: ActivityArticlesBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_articles)
         // header model to create header
-        binding?.setHeader(Header(category))
+        binding.setHeader(Header(category))
 
         // init the articles list
-        initRecyclerView()
+        initRecyclerView(binding)
 
         // read the articles from firebase
-        readArticles()
+        viewModel.loadArticles(category.lowercase(), parentCategory)
+        observeArticleData(binding)
     }
 
-    private fun initRecyclerView() {
-        recyclerView = binding?.recyclerView
-        val mLayoutManager: RecyclerView.LayoutManager = LinearLayoutManager(applicationContext)
-        recyclerView?.layoutManager = mLayoutManager
-        recyclerView?.addItemDecoration(SimpleDividerItemDecoration(this))
-        mAdapter = ListRowAdapter(articlesList, this)
-        recyclerView?.adapter = mAdapter
+    private fun initRecyclerView(binding: ActivityArticlesBinding) {
+        binding.recyclerView.layoutManager = LinearLayoutManager(applicationContext)
+        binding.recyclerView.addItemDecoration(SimpleDividerItemDecoration(this))
     }
 
-    private fun readArticles() {
+    private fun observeArticleData(binding: ActivityArticlesBinding) {
         showLoader()
-
-        // get reference to database
-        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-        category = category.lowercase()
-        AppLog.d(TAG, "category = $category")
-        val myRef: DatabaseReference = if (category.contains("articles")) {
-            database.getReference(category)
-        } else {
-            database.getReference("$parentCategory/$category")
+        viewModel.articleListLiveData.observe(this) { result ->
+            dismissLoader()
+            if (!result.isNullOrEmpty()) {
+                binding.recyclerView.adapter = ArticleAdapter(result, this)
+            }
         }
-
-        // get the list of events
-        myRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                dismissLoader()
-                for (postSnapshot in dataSnapshot.children) {
-                    val listItem = postSnapshot.getValue(ListItem::class.java)
-                    if (parentCategory.equals("pooja", ignoreCase = true)) {
-                        val name = listItem?.itemTitle
-                        val lang = listItem?.language
-                        listItem?.itemTitle = "$name ($lang)"
-                    }
-                    listItem?.let { articlesList.add(it) }
-                    mAdapter?.notifyDataSetChanged()
-                    AppLog.d(TAG, "ListItem Name = " + listItem?.itemTitle)
-                    AppLog.d(TAG, "ListItem URL = " + listItem?.fileUrl)
-                    AppLog.d(TAG, "size = " + articlesList.size)
-                }
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                dismissLoader()
-
-                // Getting Post failed, AppLog a message
-                AppLog.w(TAG, "loadPost:onCancelled "+databaseError.toException())
-            }
-        })
     }
 
     override fun onListRowItemClicked(listItem: ListItem?) {

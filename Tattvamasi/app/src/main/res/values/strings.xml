@@ -4,7 +4,13 @@
     <string name="title_activity_bhajans">BhajansActivity</string>
     <string name="title_activity_splash">SplashActivity</string>
 
-    <string name="desc_bhajanas">Bhajanas</string>
     <string name="desc_article">select article</string>
+
+    <string name="bhajans">Bhajans</string>
+    <string name="pooja">Pooja</string>
+    <string name="articles">Articles</string>
+    <string name="events">Events</string>
+    <string name="donate">Donate</string>
+    <string name="about">About</string>
 
 </resources>
