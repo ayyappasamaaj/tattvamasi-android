@@ -1,103 +1,100 @@
-package com.ayyappasamaaj.tattvamasi.view;
+package com.ayyappasamaaj.tattvamasi.view
 
-import android.content.Intent;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.util.Log;
-import android.util.TypedValue;
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+import android.util.TypedValue
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.GridLayoutManager
+import com.ayyappasamaaj.tattvamasi.R
+import com.ayyappasamaaj.tattvamasi.adapter.GridRowAdapter
+import com.ayyappasamaaj.tattvamasi.adapter.GridRowAdapter.GridRowClickListener
+import com.ayyappasamaaj.tattvamasi.databinding.ActivityHomeBinding
+import com.ayyappasamaaj.tattvamasi.model.GridItem
+import com.ayyappasamaaj.tattvamasi.model.Header
+import com.ayyappasamaaj.tattvamasi.util.AppLog
+import com.ayyappasamaaj.tattvamasi.util.GridSpacingItemDecoration
+import kotlin.math.roundToInt
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+class HomeActivity : AppCompatActivity(), GridRowClickListener {
 
-import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.adapter.GridRowAdapter;
-import com.ayyappasamaaj.tattvamasi.databinding.ActivityHomeBinding;
-import com.ayyappasamaaj.tattvamasi.model.GridItem;
-import com.ayyappasamaaj.tattvamasi.model.Header;
-import com.ayyappasamaaj.tattvamasi.util.GridSpacingItemDecoration;
+    private lateinit var binding: ActivityHomeBinding
+    private val gridItemList = ArrayList<GridItem>()
+    private var mAdapter: GridRowAdapter? = null
 
-import java.util.ArrayList;
-
-public class HomeActivity extends AppCompatActivity implements GridRowAdapter.GridRowClickListener {
-
-    private static final String TAG = "HomeActivity";
-    private RecyclerView recyclerView;
-    private ActivityHomeBinding binding;
-    private ArrayList<GridItem> gridItemList = new ArrayList<GridItem>();
-    private GridRowAdapter mAdapter;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_home);
-        Header header = new Header();
-        binding.setHeader(header);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_home)
+        binding.setHeader(Header())
 
         // init the bhajans list
-        loadBhajans();
-        initRecyclerView();
+        loadBhajans()
+        initRecyclerView()
     }
 
-    private void loadBhajans() {
-        gridItemList.add(new GridItem("Bhajans"));
-        gridItemList.add(new GridItem("Pooja"));
-        gridItemList.add(new GridItem("Articles"));
-        gridItemList.add(new GridItem("Events"));
-        gridItemList.add(new GridItem("Donate"));
-        gridItemList.add(new GridItem("About"));
+    private fun loadBhajans() {
+        gridItemList.add(GridItem("Bhajans"))
+        gridItemList.add(GridItem("Pooja"))
+        gridItemList.add(GridItem("Articles"))
+        gridItemList.add(GridItem("Events"))
+        gridItemList.add(GridItem("Donate"))
+        gridItemList.add(GridItem("About"))
     }
 
-    private void initRecyclerView() {
-        recyclerView = binding.recyclerView;
-
-        // this style is for grid 2x2
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-
-        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(), true));
-
-        mAdapter = new GridRowAdapter(gridItemList, this);
-        recyclerView.setAdapter(mAdapter);
+    private fun initRecyclerView() {
+        with(binding) {
+            // this style is for grid 2x2
+            recyclerView.layoutManager = GridLayoutManager(this@HomeActivity, 2)
+            recyclerView.addItemDecoration(GridSpacingItemDecoration(2, dpToPx(), true))
+            mAdapter = GridRowAdapter(gridItemList, this@HomeActivity)
+            recyclerView.adapter = mAdapter
+        }
     }
 
-    @Override
-    public void onGridRowItemClicked(GridItem gridItem) {
-        Log.d(TAG, "GridItem item clicked = "+ gridItem.getName());
-        switch (gridItem.getName()){
-            case "Bhajans":
-                Intent bhajanIntent = new Intent(this, BhajansActivity.class);
-                this.startActivity(bhajanIntent);
-                break;
-            case "Pooja":
-                Intent poojaIntent = new Intent(this, PoojaActivity.class);
-                this.startActivity(poojaIntent);
-                break;
-            case "Articles":
-                Intent articlesIntent = new Intent(this, ArticlesActivity.class);
-                articlesIntent.putExtra("CATEGORY", "Articles");
-                this.startActivity(articlesIntent);
-                break;
-            case "Events":
-                Intent eventsIntent = new Intent(this, EventsActivity.class);
-                this.startActivity(eventsIntent);
-                break;
-            case "About":
-                Intent aboutIntent = new Intent(this, AboutUsActivity.class);
-                this.startActivity(aboutIntent);
-                break;
-            case "Donate":
-                Intent donateIntent = new Intent(this, DonateActivity.class);
-                this.startActivity(donateIntent);
-                break;
+    override fun onGridRowItemClicked(gridItem: GridItem?) {
+        AppLog.d(TAG, "GridItem item clicked = " + gridItem?.name)
+        when (gridItem?.name) {
+            "Bhajans" -> {
+                val bhajanIntent = Intent(this, BhajansActivity::class.java)
+                this.startActivity(bhajanIntent)
+            }
+            "Pooja" -> {
+                val poojaIntent = Intent(this, PoojaActivity::class.java)
+                this.startActivity(poojaIntent)
+            }
+            "Articles" -> {
+                val articlesIntent = Intent(this, ArticlesActivity::class.java)
+                articlesIntent.putExtra("CATEGORY", "Articles")
+                this.startActivity(articlesIntent)
+            }
+            "Events" -> {
+                val eventsIntent = Intent(this, EventsActivity::class.java)
+                this.startActivity(eventsIntent)
+            }
+            "About" -> {
+                val aboutIntent = Intent(this, AboutUsActivity::class.java)
+                this.startActivity(aboutIntent)
+            }
+            "Donate" -> {
+                val donateIntent = Intent(this, DonateActivity::class.java)
+                this.startActivity(donateIntent)
+            }
         }
     }
 
     /**
      * Converting dp to pixel
      */
-    private int dpToPx() {
-        Resources r = getResources();
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, r.getDisplayMetrics()));
+    private fun dpToPx(): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            4f,
+            resources.displayMetrics
+        ).roundToInt()
+    }
+
+    companion object {
+        private const val TAG = "HomeActivity"
     }
 }

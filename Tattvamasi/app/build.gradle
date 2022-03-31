@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     dataBinding {
@@ -15,8 +17,14 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField "String", "BUILD_VARIANT", "\"debug\""
+            buildConfigField "String", "PAY_PAL_URL", "\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4M73DVTGB3BNY\""
+        }
         release {
             minifyEnabled false
+            buildConfigField "String", "BUILD_VARIANT", "\"release\""
+            buildConfigField "String", "PAY_PAL_URL", "\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4M73DVTGB3BNY\""
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -36,7 +44,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-database'
 
     androidTestImplementation 'junit:junit:4.13.2'
+    implementation "androidx.core:core-ktx:1.7.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 // Firebase
 apply plugin: 'com.google.gms.google-services'
+repositories {
+    mavenCentral()
+}

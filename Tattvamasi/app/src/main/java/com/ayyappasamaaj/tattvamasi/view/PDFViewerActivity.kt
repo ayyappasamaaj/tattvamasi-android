@@ -1,58 +1,55 @@
-package com.ayyappasamaaj.tattvamasi.view;
+package com.ayyappasamaaj.tattvamasi.view
 
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.os.Bundle
+import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import com.ayyappasamaaj.tattvamasi.R
+import com.ayyappasamaaj.tattvamasi.databinding.ActivityPdfBinding
+import com.ayyappasamaaj.tattvamasi.model.Header
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
+class PDFViewerActivity : AppCompatActivity() {
 
-import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.databinding.ActivityPdfBinding;
-import com.ayyappasamaaj.tattvamasi.model.Header;
-
-public class PDFViewerActivity extends AppCompatActivity {
-
-    WebView mWebView;
-    private static final String TAG = "PDFViewerActivity";
-    private static final String REMOVE_TOOL_BAR = "javascript:(function() { " +
-                                                            "document.querySelector('[role=\"toolbar\"]').remove();" +
-                                                        "})()";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         // get the URL from intent
-        String linkTo = this.getIntent().getStringExtra("URL");
-        String title = this.getIntent().getStringExtra("TITLE");
-
+        val linkTo = this.intent.getStringExtra("URL")
+        val title = this.intent.getStringExtra("TITLE")
         // set the header
-        ActivityPdfBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_pdf);
-        Header header = new Header();
-        header.setTitle(title);
-        binding.setHeader(header);
+        val binding: ActivityPdfBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_pdf)
+        binding.setHeader(Header(title))
 
-        mWebView = findViewById(R.id.webview);
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.getSettings().setBuiltInZoomControls(true);
-        mWebView.getSettings().setDisplayZoomControls(false);
-        mWebView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return false;
+        with(binding.webview) {
+            settings.apply {
+                javaScriptEnabled = true
+                builtInZoomControls = true
+                displayZoomControls = false
             }
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                mWebView.loadUrl(REMOVE_TOOL_BAR);
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                    return false
+                }
+
+                override fun onPageFinished(view: WebView, url: String) {
+                    super.onPageFinished(view, url)
+                    loadUrl(REMOVE_TOOL_BAR)
+                }
             }
-        });
-        mWebView.loadUrl("https://docs.google.com/gview?embedded=true&url="+linkTo);
+            loadUrl("https://docs.google.com/gview?embedded=true&url=$linkTo")
+        }
     }
 
-    public void backClicked(View view) {
-        Log.d(TAG, "Back clicked");
-        this.finish();
+    fun backClicked(view: View?) {
+        finish()
+    }
+
+    companion object {
+        private const val TAG = "PDFViewerActivity"
+        private const val REMOVE_TOOL_BAR = "javascript:(function() { " +
+                "document.querySelector('[role=\"toolbar\"]').remove();" +
+                "})()"
     }
 }

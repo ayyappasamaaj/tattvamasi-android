@@ -2,8 +2,9 @@
     <string name="app_name">Tattvamasi</string>
 
     <string name="title_activity_bhajans">BhajansActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-
     <string name="title_activity_splash">SplashActivity</string>
+
+    <string name="desc_bhajanas">Bhajanas</string>
+    <string name="desc_article">select article</string>
+
 </resources>

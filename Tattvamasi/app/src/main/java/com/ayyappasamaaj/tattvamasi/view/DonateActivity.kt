@@ -1,40 +1,40 @@
-package com.ayyappasamaaj.tattvamasi.view;
+package com.ayyappasamaaj.tattvamasi.view
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import com.ayyappasamaaj.tattvamasi.BuildConfig
+import com.ayyappasamaaj.tattvamasi.R
+import com.ayyappasamaaj.tattvamasi.databinding.ActivityDonateBinding
+import com.ayyappasamaaj.tattvamasi.model.Header
+import com.ayyappasamaaj.tattvamasi.util.AppLog
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-
-import com.ayyappasamaaj.tattvamasi.R;
-import com.ayyappasamaaj.tattvamasi.databinding.ActivityDonateBinding;
-import com.ayyappasamaaj.tattvamasi.model.Header;
-
-public class DonateActivity extends AppCompatActivity {
-
-    private static final String TAG = "DonateActivity";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_donate);
-        ActivityDonateBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_donate);
-        Header header = new Header();
-        header.setTitle("Donate");
-        binding.setHeader(header);
+class DonateActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val binding: ActivityDonateBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_donate)
+        binding.setHeader(Header("Donate"))
     }
 
-    public void backClicked(View view) {
-        Log.d(TAG, "Back clicked");
-        this.finish();
+    fun backClicked(view: View?) {
+        AppLog.d(TAG, "Back clicked")
+        finish()
     }
 
-    public void onDonateClicked(View view) {
-        Log.d(TAG, "Donate clicked");
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4M73DVTGB3BNY"));
-        startActivity(browserIntent);
+    fun onDonateClicked(view: View?) {
+        AppLog.d(TAG, "Donate clicked")
+        val browserIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(BuildConfig.PAY_PAL_URL)
+        )
+        startActivity(browserIntent)
+    }
+
+    companion object {
+        private const val TAG = "DonateActivity"
     }
 }

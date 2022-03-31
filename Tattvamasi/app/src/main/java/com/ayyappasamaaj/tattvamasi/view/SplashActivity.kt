@@ -1,23 +1,21 @@
-package com.ayyappasamaaj.tattvamasi.view;
+package com.ayyappasamaaj.tattvamasi.view
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
+import android.content.Intent
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import androidx.appcompat.app.AppCompatActivity
+import com.ayyappasamaaj.tattvamasi.R
 
-import androidx.appcompat.app.AppCompatActivity;
+class SplashActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_splash)
 
-import com.ayyappasamaaj.tattvamasi.R;
-
-public class SplashActivity extends AppCompatActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-
-        new Handler().postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
-            startActivity(intent);
-            finish();
-        }, 2000);
+        Handler(Looper.getMainLooper()).postDelayed({
+            val intent = Intent(this@SplashActivity, HomeActivity::class.java)
+            startActivity(intent)
+            finish()
+        }, 2000)
     }
 }
