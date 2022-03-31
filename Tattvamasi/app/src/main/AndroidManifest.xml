@@ -10,8 +10,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".view.HomeActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".view.BhajansActivity"
             android:screenOrientation="portrait" />
@@ -33,7 +32,8 @@
         <activity android:name=".view.PDFViewerActivity" />
         <activity
             android:name=".view.SplashActivity"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/FullscreenTheme"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -1,10 +1,10 @@
 package com.ayyappasamaaj.tattvamasi.adapter;
 
-import android.databinding.DataBindingUtil;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.databinding.ListRowItemBinding;
@@ -44,15 +44,13 @@ public class ListRowAdapter extends RecyclerView.Adapter<ListRowAdapter.MyViewHo
         return new MyViewHolder(binding);
     }
 
+
     @Override
-    public void onBindViewHolder(MyViewHolder holder, final int position) {
+    public void onBindViewHolder(MyViewHolder holder, int position) {
         holder.binding.setListItem(listItemList.get(position));
-        holder.binding.listItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null) {
-                    listener.onListRowItemClicked(listItemList.get(position));
-                }
+        holder.binding.listItem.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onListRowItemClicked(listItemList.get(holder.getAbsoluteAdapterPosition()));
             }
         });
     }

@@ -1,11 +1,11 @@
 package com.ayyappasamaaj.tattvamasi.adapter;
 
 import android.content.res.Resources;
-import android.databinding.DataBindingUtil;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.databinding.GridRowItemBinding;
@@ -51,12 +51,9 @@ public class GridRowAdapter extends RecyclerView.Adapter<GridRowAdapter.MyViewHo
         Resources res = layoutInflater.getContext().getResources();
         int resourceId = res.getIdentifier(gridItemList.get(position).getName().toLowerCase(), "drawable", layoutInflater.getContext().getPackageName());
         holder.binding.bhajanImage.setImageResource(resourceId);
-        holder.binding.bhajanImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null) {
-                    listener.onGridRowItemClicked(gridItemList.get(position));
-                }
+        holder.binding.bhajanImage.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onGridRowItemClicked(gridItemList.get(holder.getAbsoluteAdapterPosition()));
             }
         });
     }
@@ -65,6 +62,8 @@ public class GridRowAdapter extends RecyclerView.Adapter<GridRowAdapter.MyViewHo
     public int getItemCount() {
         return gridItemList.size();
     }
+
+
 
     public interface GridRowClickListener {
         void onGridRowItemClicked(GridItem gridItem);

@@ -1,12 +1,12 @@
 package com.ayyappasamaaj.tattvamasi.adapter;
 
-import android.databinding.DataBindingUtil;
-import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.ayyappasamaaj.tattvamasi.R;
 import com.ayyappasamaaj.tattvamasi.databinding.EventRowItemBinding;
@@ -54,12 +54,9 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         holder.binding.venue.setText(content);
 
-        holder.binding.venue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null) {
-                    listener.onVenueClicked(eventList.get(position));
-                }
+        holder.binding.venue.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onVenueClicked(eventList.get(holder.getAbsoluteAdapterPosition()));
             }
         });
     }

@@ -1,8 +1,8 @@
 package com.ayyappasamaaj.tattvamasi.model;
 
-import android.databinding.BindingAdapter;
-import android.support.annotation.NonNull;
 import android.view.View;
+import androidx.annotation.NonNull;
+import androidx.databinding.BindingAdapter;
 
 public class Header {
     private String title;

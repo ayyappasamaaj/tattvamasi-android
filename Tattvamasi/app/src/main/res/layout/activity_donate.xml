@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:bind="http://schemas.android.com/apk/res/android">
+
     <data>
         <variable
             name="header"
             type="com.ayyappasamaaj.tattvamasi.model.Header" />
     </data>
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,15 +17,15 @@
         <include
             android:id="@+id/header"
             layout="@layout/header"
-            bind:header="@{header}"/>
+            bind:header="@{header}" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="@color/colorBackground">
-            <ScrollView
-                xmlns:android="http://schemas.android.com/apk/res/android"
+            android:background="@color/colorBackground"
+            android:orientation="vertical">
+
+            <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -36,48 +37,48 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
-                        android:layout_margin="2dp"
-                        android:src="@drawable/donate_banner"/>
+                        android:contentDescription="@string/app_name"
+                        android:src="@drawable/donate_banner" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingTop="20dp"
                         android:text="Support Ayyappa Samaaj"
                         android:textColor="@color/colorText"
                         android:textSize="24dp"
-                        android:textStyle="bold"
-                        android:paddingTop="20dp"
-                        android:layout_gravity="center"/>
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
                         android:padding="20dp"
-                        android:text="Ayyappa Samaaj is a volunteer driven IRS recognized 501c(3) organization (Tax ID: # (EIN) 45-1061428)  that conducts events using funds that are donated to the organization by the general public. All your donations to Ayyappa Samaaj are tax deductible to the extent allowed by the IRS for 501(c)3 organizations."/>
+                        android:text="Ayyappa Samaaj is a volunteer driven IRS recognized 501c(3) organization (Tax ID: # (EIN) 45-1061428)  that conducts events using funds that are donated to the organization by the general public. All your donations to Ayyappa Samaaj are tax deductible to the extent allowed by the IRS for 501(c)3 organizations."
+                        android:textColor="@color/colorText"
+                        android:textSize="20sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
                         android:paddingLeft="20dp"
                         android:paddingRight="20dp"
-                        android:text="Ayyappa Samaaj,\nP.O. Box 2723, San Ramon,\nCA 94583"/>
+                        android:text="Ayyappa Samaaj,\nP.O. Box 2723, San Ramon,\nCA 94583"
+                        android:textColor="@color/colorText"
+                        android:textSize="20sp" />
 
-                    <android.support.v7.widget.AppCompatButton
+                    <androidx.appcompat.widget.AppCompatButton
                         android:layout_width="200dp"
                         android:layout_height="wrap_content"
-                        android:text="Donate Now"
-                        android:padding="10dp"
+                        android:layout_gravity="center"
                         android:layout_margin="5dp"
+                        android:background="@color/colorBackground"
+                        android:onClick="onDonateClicked"
+                        android:padding="10dp"
+                        android:text="Donate Now"
                         android:textColor="@color/colorText"
                         android:textSize="20sp"
-                        android:background="@color/colorBackground"
-                        android:layout_gravity="center"
-                        android:onClick="onDonateClicked"
-                        android:textStyle="italic"/>
+                        android:textStyle="italic" />
 
                     <ImageView
                         android:layout_width="112dp"
