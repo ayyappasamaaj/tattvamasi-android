@@ -1,6 +1,6 @@
 package com.ayyappasamaaj.tattvamasi.model
 
-class ParentListItem(name: String) {
+class PoojaListItem(name: String) {
     var name: String? = null
 
     init {

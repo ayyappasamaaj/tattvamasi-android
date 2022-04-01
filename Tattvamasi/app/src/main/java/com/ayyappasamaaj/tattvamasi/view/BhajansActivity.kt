@@ -22,17 +22,15 @@ class BhajansActivity : AppCompatActivity(), GridRowClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding: ActivityBhajansBinding =
-            DataBindingUtil.setContentView(this, R.layout.activity_bhajans)
-        binding.setHeader(Header("Bhajans"))
 
-        // init the bhajans list
-        initRecyclerView(binding)
-    }
+        DataBindingUtil.setContentView<ActivityBhajansBinding?>(this, R.layout.activity_bhajans)
+            .apply {
+                setHeader(Header("Bhajans"))
+                recyclerView.layoutManager = GridLayoutManager(this@BhajansActivity, 2)
+                recyclerView.adapter =
+                    GridRowAdapter(viewModel.bhajanItemsList, this@BhajansActivity)
+            }
 
-    private fun initRecyclerView(binding: ActivityBhajansBinding) {
-        binding.recyclerView.layoutManager = GridLayoutManager(this, 2)
-        binding.recyclerView.adapter = GridRowAdapter(viewModel.bhajanItemsList, this)
     }
 
     fun backClicked(view: View?) {

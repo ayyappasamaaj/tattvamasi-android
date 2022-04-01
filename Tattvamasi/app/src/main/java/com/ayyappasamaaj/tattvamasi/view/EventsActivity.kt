@@ -21,7 +21,6 @@ import com.ayyappasamaaj.tattvamasi.viewmodels.EventsViewModel
 class EventsActivity : AppCompatActivity(), EventsAdapterListener {
 
     private val eventsList = ArrayList<Event>()
-    private var mAdapter: EventsAdapter? = null
     private var progress: ProgressDialog? = null
 
     private val viewModel: EventsViewModel by viewModels()
@@ -42,12 +41,12 @@ class EventsActivity : AppCompatActivity(), EventsAdapterListener {
     private fun readEvents(binding: ActivityEventsBinding) {
         showLoader()
         viewModel.loadEvents()
-        viewModel.eventsLiveData.observe(this, Observer { results ->
+        viewModel.eventsLiveData.observe(this) { results ->
             dismissLoader()
             if (!results.isNullOrEmpty()) {
                 binding.recyclerView.adapter = EventsAdapter(eventsList, this)
             }
-        })
+        }
     }
 
     override fun onVenueClicked(event: Event?) {

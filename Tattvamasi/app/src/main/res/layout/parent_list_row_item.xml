@@ -6,7 +6,7 @@
 
         <variable
             name="listItem"
-            type="com.ayyappasamaaj.tattvamasi.model.ParentListItem" />
+            type="com.ayyappasamaaj.tattvamasi.model.PoojaListItem" />
     </data>
 
     <RelativeLayout xmlns:tools="http://schemas.android.com/tools"

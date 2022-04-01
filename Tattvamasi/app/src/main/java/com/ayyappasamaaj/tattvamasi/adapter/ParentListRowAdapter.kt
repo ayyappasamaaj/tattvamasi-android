@@ -7,10 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.databinding.ParentListRowItemBinding
-import com.ayyappasamaaj.tattvamasi.model.ParentListItem
+import com.ayyappasamaaj.tattvamasi.model.PoojaListItem
 
 class ParentListRowAdapter(
-    private val listItemList: List<ParentListItem>,
+    private val listItemList: List<PoojaListItem>,
     private val listener: ParentListRowClickListener?
 ) : RecyclerView.Adapter<ParentListRowAdapter.MyViewHolder>() {
 
@@ -35,7 +35,7 @@ class ParentListRowAdapter(
     }
 
     interface ParentListRowClickListener {
-        fun onListRowItemClicked(listItem: ParentListItem?)
+        fun onListRowItemClicked(listItem: PoojaListItem?)
     }
 
     inner class MyViewHolder(val binding: ParentListRowItemBinding) : ViewHolder(

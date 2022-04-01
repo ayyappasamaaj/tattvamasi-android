@@ -8,9 +8,12 @@
 
     <string name="bhajans">Bhajans</string>
     <string name="pooja">Pooja</string>
+    <string name="poojas">Poojas</string>
     <string name="articles">Articles</string>
     <string name="events">Events</string>
     <string name="donate">Donate</string>
     <string name="about">About</string>
+
+    <string name="loading_msg">Wait while loading…</string>
 
 </resources>
