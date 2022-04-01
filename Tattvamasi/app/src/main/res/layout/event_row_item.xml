@@ -1,113 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
+
         <variable
             name="event"
             type="com.ayyappasamaaj.tattvamasi.model.Event" />
     </data>
 
-    <androidx.cardview.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/card_view"
-        android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        card_view:cardCornerRadius="5dp"
-        android:layout_marginTop="8dp"
+        android:layout_gravity="center"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="8dp"
+        card_view:cardCornerRadius="5dp"
         card_view:cardElevation="5dp">
 
-    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBackground"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:id="@+id/datetime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{event.day}"
-                android:textColor="@color/colorText"
-                android:textSize="40sp"
-                android:textStyle="bold"
-                tools:text="22" />
-
-            <TextView
-                android:id="@+id/month"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLength="3"
-                android:text="@{event.month}"
-                android:textColor="@color/colorText"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                tools:text="JUNE" />
-
-            <TextView
-                android:id="@+id/time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{event.time}"
-                android:textColor="@color/colorText"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="9:00 AM PST" />
-
-        </LinearLayout>
-
-        <LinearLayout
+        <LinearLayout xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:background="@color/colorBackground"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/name"
+            <LinearLayout
+                android:id="@+id/datetime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{event.name}"
-                android:textColor="@color/colorText"
-                android:textSize="20sp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                tools:text="Event Name" />
+                android:layout_margin="10dp"
+                android:gravity="center"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/descp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="2dp"
-                android:ellipsize="end"
-                android:maxLines="3"
-                android:text="@{event.desc}"
-                android:textColor="@color/colorText"
-                android:textSize="12sp"
-                tools:text="Event Description: it is a description of the events" />
+                <TextView
+                    android:id="@+id/date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{event.day}"
+                    android:textColor="@color/colorText"
+                    android:textSize="40sp"
+                    android:textStyle="bold"
+                    tools:text="22" />
 
-            <TextView
-                android:id="@+id/venue"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/month"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLength="3"
+                    android:text="@{event.month}"
+                    android:textColor="@color/colorText"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="JUNE" />
+
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{event.time}"
+                    android:textColor="@color/colorText"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="9:00 AM PST" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:textColor="@color/colorText"
-                android:textSize="15sp"
-                tools:text="Venue" />
+                android:layout_margin="10dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/nameTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@{event.name}"
+                    android:textColor="@color/colorText"
+                    android:textSize="20sp"
+                    tools:text="Event Name" />
+
+                <TextView
+                    android:id="@+id/descTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="3"
+                    android:text="@{event.desc}"
+                    android:textColor="@color/colorText"
+                    android:textSize="12sp"
+                    tools:text="Event Description: it is a description of the events" />
+
+                <TextView
+                    android:id="@+id/venueTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="1dp"
+                    android:textColor="@color/colorText"
+                    android:textSize="15sp"
+                    tools:text="Venue" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
     </androidx.cardview.widget.CardView>
 </layout>

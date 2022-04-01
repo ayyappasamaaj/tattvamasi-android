@@ -3,7 +3,6 @@ package com.ayyappasamaaj.tattvamasi.adapter
 import android.text.SpannableString
 import android.text.style.UnderlineSpan
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -25,14 +24,16 @@ class EventsAdapter(
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.binding.event = eventList[position]
-        val content = SpannableString(eventList[position].venue)
-        content.setSpan(UnderlineSpan(), 0, content.length, 0)
-        holder.binding.venue.text = content
-        holder.binding.venue.setOnClickListener {
-            listener?.onVenueClicked(
-                eventList[holder.absoluteAdapterPosition]
-            )
+        with(holder.binding) {
+            event = eventList[position]
+            val content = SpannableString(eventList[position].venue)
+            content.setSpan(UnderlineSpan(), 0, content.length, 0)
+            venueTxt.text = content
+            venueTxt.setOnClickListener {
+                listener?.onVenueClicked(
+                    eventList[holder.absoluteAdapterPosition]
+                )
+            }
         }
     }
 

@@ -34,11 +34,6 @@ class ArticleAdapter(
         return listItemList.size
     }
 
-    fun updateData(listItemList: List<ListItem>) {
-        this.listItemList = listItemList
-        notifyDataSetChanged()
-    }
-
     interface ListRowClickListener {
         fun onListRowItemClicked(listItem: ListItem?)
     }

@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ayyappasamaaj.tattvamasi.R
-import com.ayyappasamaaj.tattvamasi.adapter.ParentListRowAdapter
-import com.ayyappasamaaj.tattvamasi.adapter.ParentListRowAdapter.ParentListRowClickListener
+import com.ayyappasamaaj.tattvamasi.adapter.PoojaListAdapter
+import com.ayyappasamaaj.tattvamasi.adapter.PoojaListAdapter.ParentListRowClickListener
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityPoojaBinding
 import com.ayyappasamaaj.tattvamasi.model.Header
 import com.ayyappasamaaj.tattvamasi.model.PoojaListItem
@@ -26,17 +26,19 @@ class PoojaActivity : AppCompatActivity(), ParentListRowClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         progress = ProgressDialog(this)
-        DataBindingUtil.setContentView<ActivityPoojaBinding?>(this, R.layout.activity_pooja).apply {
-            setHeader(Header(getString(R.string.poojas)))
-            recyclerView.layoutManager = LinearLayoutManager(this@PoojaActivity)
-            recyclerView.addItemDecoration(SimpleDividerItemDecoration(this@PoojaActivity))
-        }
+        val binding: ActivityPoojaBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_pooja)
+
+        binding.setHeader(Header(getString(R.string.poojas)))
+        binding.recyclerView.layoutManager = LinearLayoutManager(this@PoojaActivity)
+        binding.recyclerView.addItemDecoration(SimpleDividerItemDecoration(this@PoojaActivity))
+
         showLoader()
         viewModel.loadPoojaData("pooja_categories")
         viewModel.poojaLiveData.observe(this) { result ->
             dismissLoader()
             if (!result.isNullOrEmpty()) {
-                ParentListRowAdapter(result, this@PoojaActivity)
+                binding.recyclerView.adapter = PoojaListAdapter(result, this@PoojaActivity)
             }
         }
     }

@@ -9,10 +9,10 @@ import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.databinding.ParentListRowItemBinding
 import com.ayyappasamaaj.tattvamasi.model.PoojaListItem
 
-class ParentListRowAdapter(
+class PoojaListAdapter(
     private val listItemList: List<PoojaListItem>,
     private val listener: ParentListRowClickListener?
-) : RecyclerView.Adapter<ParentListRowAdapter.MyViewHolder>() {
+) : RecyclerView.Adapter<PoojaListAdapter.MyViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val binding: ParentListRowItemBinding = DataBindingUtil.inflate(
