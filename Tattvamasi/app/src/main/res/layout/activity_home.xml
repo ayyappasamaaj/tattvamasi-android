@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:bind="http://schemas.android.com/apk/res/android">
+
     <data>
+
         <variable
             name="header"
             type="com.ayyappasamaaj.tattvamasi.model.Header" />
     </data>
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,123 +18,7 @@
         <include
             android:id="@+id/header"
             layout="@layout/header"
-            bind:header="@{header}"/>
-
-        <!--<android.support.constraint.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorBackground">
-
-            <ImageView
-                android:id="@+id/bhajans"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/round_outline"
-                android:clickable="true"
-                android:onClick="OnBhajanClick"
-                android:padding="20dp"
-                app:layout_constraintBottom_toTopOf="@+id/articles"
-                app:layout_constraintEnd_toStartOf="@+id/pooja"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@mipmap/bhajans" />
-
-            <ImageView
-                android:id="@+id/pooja"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginRight="24dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/round_outline"
-                android:clickable="true"
-                android:onClick="OnPoojaClick"
-                android:padding="20dp"
-                app:layout_constraintBottom_toTopOf="@+id/events"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/bhajans"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@mipmap/pooja" />
-
-            <ImageView
-                android:id="@+id/articles"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/round_outline"
-                android:clickable="true"
-                android:onClick="OnArticlesClick"
-                android:padding="20dp"
-                app:layout_constraintBottom_toTopOf="@+id/aboutus"
-                app:layout_constraintEnd_toStartOf="@+id/events"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/bhajans"
-                app:srcCompat="@mipmap/articles" />
-
-            <ImageView
-                android:id="@+id/events"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginRight="24dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/round_outline"
-                android:clickable="true"
-                android:onClick="OnEventsClick"
-                android:padding="20dp"
-                app:layout_constraintBottom_toTopOf="@+id/donate"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/articles"
-                app:layout_constraintTop_toBottomOf="@+id/pooja"
-                app:srcCompat="@mipmap/events" />
-
-            <ImageView
-                android:id="@+id/aboutus"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_marginBottom="16dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/round_outline"
-                android:clickable="true"
-                android:onClick="OnAboutUsClick"
-                android:padding="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/donate"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/articles"
-                app:srcCompat="@mipmap/about" />
-
-            <ImageView
-                android:id="@+id/donate"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_marginBottom="16dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginRight="24dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/round_outline"
-                android:clickable="true"
-                android:onClick="OnDonateClick"
-                android:padding="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/aboutus"
-                app:layout_constraintTop_toBottomOf="@+id/events"
-                app:srcCompat="@mipmap/donate" />
-        </android.support.constraint.ConstraintLayout>-->
+            bind:header="@{header}" />
 
         <LinearLayout
             android:layout_width="match_parent"

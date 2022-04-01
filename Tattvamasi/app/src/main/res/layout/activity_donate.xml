@@ -2,6 +2,7 @@
 <layout xmlns:bind="http://schemas.android.com/apk/res/android">
 
     <data>
+
         <variable
             name="header"
             type="com.ayyappasamaaj.tattvamasi.model.Header" />
@@ -37,6 +38,9 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
+                        android:layout_marginTop="-3dp"
+                        android:layout_marginLeft="1dp"
+                        android:layout_marginRight="1dp"
                         android:contentDescription="@string/app_name"
                         android:src="@drawable/donate_banner" />
 
@@ -45,44 +49,46 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:paddingTop="20dp"
-                        android:text="Support Ayyappa Samaaj"
+                        android:text="@string/support_ayyappa_samaaj"
                         android:textColor="@color/colorText"
-                        android:textSize="24dp"
+                        android:textSize="@dimen/header_size"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:padding="20dp"
-                        android:text="Ayyappa Samaaj is a volunteer driven IRS recognized 501c(3) organization (Tax ID: # (EIN) 45-1061428)  that conducts events using funds that are donated to the organization by the general public. All your donations to Ayyappa Samaaj are tax deductible to the extent allowed by the IRS for 501(c)3 organizations."
+                        android:padding="@dimen/desc_size"
+                        android:text="@string/donation_text"
                         android:textColor="@color/colorText"
-                        android:textSize="20sp" />
+                        android:textSize="@dimen/desc_size" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:text="Ayyappa Samaaj,\nP.O. Box 2723, San Ramon,\nCA 94583"
+                        android:paddingRight="@dimen/desc_size"
+                        android:text="@string/donation_address"
                         android:textColor="@color/colorText"
-                        android:textSize="20sp" />
+                        android:textSize="@dimen/desc_size" />
 
                     <androidx.appcompat.widget.AppCompatButton
-                        android:layout_width="200dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_margin="5dp"
                         android:background="@color/colorBackground"
                         android:onClick="onDonateClicked"
                         android:padding="10dp"
-                        android:text="Donate Now"
+                        android:layout_marginLeft="30dp"
+                        android:layout_marginRight="30dp"
+                        android:layout_marginTop="40dp"
+                        android:text="@string/donation_now"
                         android:textColor="@color/colorText"
                         android:textSize="20sp"
                         android:textStyle="italic" />
 
                     <ImageView
-                        android:layout_width="112dp"
-                        android:layout_height="26dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
                         android:src="@drawable/paypal" />

@@ -30,7 +30,7 @@
             android:maxLines="1"
             android:text="@{listItem.itemTitle}"
             android:textColor="@color/colorText"
-            android:textSize="20sp"
+            android:textSize="@dimen/row_item_size"
             tools:text="Article Name" />
 
         <ImageView
