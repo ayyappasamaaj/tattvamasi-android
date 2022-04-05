@@ -19,4 +19,9 @@ object ViewUtils {
             displayMetrics
         ).roundToInt()
     }
+
+    fun dpToPx(dp: Float): Int {
+        return (dp * Resources.getSystem().displayMetrics.density).toInt()
+    }
+
 }

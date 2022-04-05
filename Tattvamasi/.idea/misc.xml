@@ -17,6 +17,8 @@
         <entry key="app/src/main/res/layout/grid_row_item.xml" value="0.23802083333333332" />
         <entry key="app/src/main/res/layout/header.xml" value="0.25" />
         <entry key="app/src/main/res/layout/list_row_item.xml" value="0.23802083333333332" />
+        <entry key="app/src/main/res/layout/list_row_stickey.xml" value="0.23802083333333332" />
+        <entry key="app/src/main/res/layout/list_row_sticky.xml" value="0.23802083333333332" />
         <entry key="app/src/main/res/layout/parent_list_row_item.xml" value="0.23802083333333332" />
       </map>
     </option>

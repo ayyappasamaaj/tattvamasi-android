@@ -11,6 +11,7 @@ import com.ayyappasamaaj.tattvamasi.databinding.ActivityPdfBinding
 import com.ayyappasamaaj.tattvamasi.model.Header
 
 class PDFViewerActivity : AppCompatActivity() {
+    lateinit var binding: ActivityPdfBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,10 +19,16 @@ class PDFViewerActivity : AppCompatActivity() {
         val linkTo = this.intent.getStringExtra("URL")
         val title = this.intent.getStringExtra("TITLE")
         // set the header
-        val binding: ActivityPdfBinding =
-            DataBindingUtil.setContentView(this, R.layout.activity_pdf)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_pdf)
         binding.setHeader(Header(title))
 
+        if (savedInstanceState == null) {
+            setupWebView(binding)
+            binding.webview.loadUrl("https://docs.google.com/gview?embedded=true&url=$linkTo")
+        }
+    }
+
+    private fun setupWebView(binding: ActivityPdfBinding) {
         with(binding.webview) {
             settings.apply {
                 javaScriptEnabled = true
@@ -38,8 +45,18 @@ class PDFViewerActivity : AppCompatActivity() {
                     loadUrl(REMOVE_TOOL_BAR)
                 }
             }
-            loadUrl("https://docs.google.com/gview?embedded=true&url=$linkTo")
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("isScreenRotated", true)
+        binding.webview.saveState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        binding.webview.restoreState(savedInstanceState)
     }
 
     fun backClicked(view: View?) {

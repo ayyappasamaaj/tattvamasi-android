@@ -8,13 +8,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.adapter.ArticleAdapter
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityArticlesBinding
 import com.ayyappasamaaj.tattvamasi.model.Header
 import com.ayyappasamaaj.tattvamasi.model.ListItem
 import com.ayyappasamaaj.tattvamasi.util.AppLog
-import com.ayyappasamaaj.tattvamasi.util.SimpleDividerItemDecoration
+import com.ayyappasamaaj.tattvamasi.util.StickyHeaderItemDecoration
 import com.ayyappasamaaj.tattvamasi.viewmodels.ArticleViewModel
 
 class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListener {
@@ -23,6 +24,8 @@ class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListene
     private var parentCategory = ""
     private var progress: ProgressDialog? = null
 
+    private lateinit var viewAdapter: RecyclerView.Adapter<*>
+
     private val viewModel: ArticleViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +33,7 @@ class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListene
         progress = ProgressDialog(this)
         category = intent.getStringExtra("CATEGORY").toString()
         parentCategory = intent.getStringExtra("PARENT-CATEGORY").toString()
+        viewAdapter = ArticleAdapter(this)
 
         // binding the view
         val binding: ActivityArticlesBinding =
@@ -42,20 +46,23 @@ class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListene
 
         // read the articles from firebase
         viewModel.loadArticles(category.lowercase(), parentCategory)
-        observeArticleData(binding)
+        observeArticleData()
     }
 
     private fun initRecyclerView(binding: ActivityArticlesBinding) {
         binding.recyclerView.layoutManager = LinearLayoutManager(applicationContext)
-        binding.recyclerView.addItemDecoration(SimpleDividerItemDecoration(this))
+        binding.recyclerView.apply {
+            addItemDecoration(StickyHeaderItemDecoration(viewAdapter as ArticleAdapter))
+            adapter = viewAdapter
+        }
     }
 
-    private fun observeArticleData(binding: ActivityArticlesBinding) {
+    private fun observeArticleData() {
         showLoader()
         viewModel.articleListLiveData.observe(this) { result ->
             dismissLoader()
             if (!result.isNullOrEmpty()) {
-                binding.recyclerView.adapter = ArticleAdapter(result, this)
+                (viewAdapter as ArticleAdapter).updateData(result)
             }
         }
     }

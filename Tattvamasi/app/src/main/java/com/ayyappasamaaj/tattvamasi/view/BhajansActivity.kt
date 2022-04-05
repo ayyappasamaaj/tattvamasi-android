@@ -26,7 +26,7 @@ class BhajansActivity : AppCompatActivity(), GridRowClickListener {
         DataBindingUtil.setContentView<ActivityBhajansBinding?>(this, R.layout.activity_bhajans)
             .apply {
                 setHeader(Header("Bhajans"))
-                recyclerView.layoutManager = GridLayoutManager(this@BhajansActivity, 2)
+                recyclerView.layoutManager = GridLayoutManager(this@BhajansActivity, 3)
                 recyclerView.adapter =
                     GridRowAdapter(viewModel.bhajanItemsList, this@BhajansActivity)
             }

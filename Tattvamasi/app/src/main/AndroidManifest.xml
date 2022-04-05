@@ -39,7 +39,10 @@
         <activity
             android:name=".view.DonateActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".view.PDFViewerActivity" />
+        <activity
+            android:name=".view.PDFViewerActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="fullSensor" />
 
     </application>
 

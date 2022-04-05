@@ -7,6 +7,7 @@ import com.ayyappasamaaj.tattvamasi.model.ListItem
 import com.ayyappasamaaj.tattvamasi.util.AppLog
 import com.google.firebase.database.*
 
+
 /**
  * Created by Gangadhar Kondati on 31,March,2022
  */
@@ -23,20 +24,21 @@ class ArticleViewModel : ViewModel() {
             database.getReference("$parentCategory/$category")
         }
         val articlesList: ArrayList<ListItem> = ArrayList()
+
         // get the list of events
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val innerList: ArrayList<ListItem> = ArrayList()
                 for (postSnapshot in dataSnapshot.children) {
-                    val listItem = postSnapshot.getValue(ListItem::class.java)
-                    if (parentCategory.equals("pooja", ignoreCase = true)) {
-                        val name = listItem?.itemTitle
-                        val lang = listItem?.language
-                        listItem?.itemTitle = "$name ($lang)"
+                    postSnapshot.getValue(ListItem::class.java)?.let {
+                        innerList.add(it)
                     }
-                    listItem?.let { articlesList.add(it) }
-                    AppLog.d(TAG, "ListItem Name = " + listItem?.itemTitle)
-                    AppLog.d(TAG, "ListItem URL = " + listItem?.fileUrl)
-                    AppLog.d(TAG, "size = " + articlesList.size)
+                }
+                innerList.groupBy {
+                    it.language
+                }.map {
+                    articlesList.add(ListItem(header = true, itemTitle = it.key))
+                    articlesList.addAll(it.value)
                 }
                 _articleListLiveData.value = articlesList
             }
