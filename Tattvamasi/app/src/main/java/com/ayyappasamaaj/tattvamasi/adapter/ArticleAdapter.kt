@@ -3,6 +3,8 @@ package com.ayyappasamaaj.tattvamasi.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
@@ -15,9 +17,11 @@ const val TYPE_ITEM = 1
 
 class ArticleAdapter(private val listener: ListRowClickListener?) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(),
+    Filterable,
     StickyHeaderItemDecoration.StickyHeaderInterface {
 
     private var listItemList: List<ListItem> = emptyList()
+    private var listItemFilteredList: List<ListItem> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_HEADER) {
@@ -34,33 +38,34 @@ class ArticleAdapter(private val listener: ListRowClickListener?) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val listItem = listItemList[position]
+        val listItem = listItemFilteredList[position]
         if (holder is MyViewHolder) {
             holder.nameTxt.text = listItem.itemTitle
             holder.listItemView.setOnClickListener {
                 listener?.onListRowItemClicked(
-                    listItemList[holder.absoluteAdapterPosition]
+                    listItemFilteredList[holder.absoluteAdapterPosition]
                 )
             }
         } else if (holder is HeaderViewHolder) {
-            holder.headerTxt.text = listItem.itemTitle
+            holder.headerTxt.text = listItem.headerTitle
         }
     }
 
     override fun getItemCount(): Int {
-        return listItemList.size
+        return listItemFilteredList.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (listItemList[position].header) {
+        return if (listItemFilteredList[position].header) {
             TYPE_HEADER
         } else {
             TYPE_ITEM
         }
     }
 
-    fun updateData(listItemList: List<ListItem>) {
-        this.listItemList = listItemList
+    fun updateData(list: List<ListItem>) {
+        listItemList = list
+        listItemFilteredList = listItemList
         notifyDataSetChanged()
     }
 
@@ -78,12 +83,12 @@ class ArticleAdapter(private val listener: ListRowClickListener?) :
     }
 
     override fun isHeader(itemPosition: Int): Boolean {
-        return listItemList[itemPosition].header
+        return listItemFilteredList[itemPosition].header
     }
 
     override fun bindHeaderData(header: View, headerPosition: Int) {
         ((header as ConstraintLayout).getChildAt(0) as TextView).text =
-            listItemList[headerPosition].itemTitle
+            listItemFilteredList[headerPosition].headerTitle
     }
 
     override fun getHeaderLayout(headerPosition: Int): Int {
@@ -101,6 +106,40 @@ class ArticleAdapter(private val listener: ListRowClickListener?) :
             position -= 1
         } while (position >= 0)
         return headerPosition
+    }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val articlesList: ArrayList<ListItem> = ArrayList()
+                val charString = constraint?.toString() ?: ""
+                if (charString.isEmpty()) {
+                    listItemFilteredList = listItemList
+                } else {
+                    listItemList.filter {
+                        it.itemTitle.lowercase().contains(charString.lowercase())
+                    }.groupBy {
+                        it.language
+                    }.map {
+                        articlesList.add(ListItem(header = true, headerTitle = it.key))
+                        articlesList.addAll(it.value)
+                    }
+                }
+                if (articlesList.isNotEmpty()) {
+                    listItemFilteredList = articlesList
+                }
+                return FilterResults().apply { values = listItemFilteredList }
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                listItemFilteredList = if (results?.values == null) {
+                    ArrayList()
+                } else {
+                    results.values as ArrayList<ListItem>
+                }
+                notifyDataSetChanged()
+            }
+        }
     }
 
 }

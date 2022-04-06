@@ -23,8 +23,8 @@ class ArticleViewModel : ViewModel() {
         } else {
             database.getReference("$parentCategory/$category")
         }
-        val articlesList: ArrayList<ListItem> = ArrayList()
 
+        val articlesList: ArrayList<ListItem> = ArrayList()
         // get the list of events
         databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -37,7 +37,7 @@ class ArticleViewModel : ViewModel() {
                 innerList.groupBy {
                     it.language
                 }.map {
-                    articlesList.add(ListItem(header = true, itemTitle = it.key))
+                    articlesList.add(ListItem(header = true, headerTitle = it.key))
                     articlesList.addAll(it.value)
                 }
                 _articleListLiveData.value = articlesList

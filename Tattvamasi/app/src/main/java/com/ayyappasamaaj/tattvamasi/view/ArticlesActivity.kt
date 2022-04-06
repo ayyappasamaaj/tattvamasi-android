@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +19,9 @@ import com.ayyappasamaaj.tattvamasi.util.AppLog
 import com.ayyappasamaaj.tattvamasi.util.StickyHeaderItemDecoration
 import com.ayyappasamaaj.tattvamasi.viewmodels.ArticleViewModel
 
-class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListener {
+class ArticlesActivity : AppCompatActivity(),
+    ArticleAdapter.ListRowClickListener,
+    SearchView.OnQueryTextListener {
 
     private var category = "Articles"
     private var parentCategory = ""
@@ -55,6 +58,7 @@ class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListene
             addItemDecoration(StickyHeaderItemDecoration(viewAdapter as ArticleAdapter))
             adapter = viewAdapter
         }
+        binding.searchView.setOnQueryTextListener(this)
     }
 
     private fun observeArticleData() {
@@ -91,6 +95,16 @@ class ArticlesActivity : AppCompatActivity(), ArticleAdapter.ListRowClickListene
     private fun dismissLoader() {
         // To dismiss the dialog
         progress?.dismiss()
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        (viewAdapter as ArticleAdapter).filter.filter(query)
+        return false
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        (viewAdapter as ArticleAdapter).filter.filter(newText)
+        return false
     }
 
     companion object {
