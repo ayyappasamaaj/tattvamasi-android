@@ -9,6 +9,6 @@
         <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
 
         <item name="android:windowSplashScreenBackground">@color/colorPrimary</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/transparent_splash</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@color/colorPrimary</item>
     </style>
 </resources>

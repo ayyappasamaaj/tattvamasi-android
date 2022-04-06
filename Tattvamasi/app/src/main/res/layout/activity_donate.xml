@@ -60,6 +60,7 @@
                         android:padding="@dimen/desc_size"
                         android:text="@string/donation_text"
                         android:textColor="@color/colorText"
+                        android:fontFamily="sans-serif-medium"
                         android:textSize="@dimen/desc_size" />
 
                     <TextView
@@ -69,6 +70,7 @@
                         android:paddingRight="@dimen/desc_size"
                         android:text="@string/donation_address"
                         android:textColor="@color/colorText"
+                        android:fontFamily="sans-serif-medium"
                         android:textSize="@dimen/desc_size" />
 
                     <androidx.appcompat.widget.AppCompatButton
@@ -90,7 +92,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="20dp"
                         android:layout_gravity="center"
-                        android:layout_margin="5dp"
+                        android:layout_margin="10dp"
                         android:src="@drawable/paypal" />
 
                 </LinearLayout>
