@@ -15,7 +15,7 @@
         tools:context="com.ayyappasamaaj.tattvamasi.view.HomeActivity">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/backImageView"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_centerVertical="true"
@@ -40,10 +40,12 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:gravity="center"
             android:maxLines="1"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:text="@{header.title}"
+            android:layout_marginLeft="70dp"
             android:textColor="@color/colorTitle"
             android:textSize="22sp"
             android:textStyle="bold"
