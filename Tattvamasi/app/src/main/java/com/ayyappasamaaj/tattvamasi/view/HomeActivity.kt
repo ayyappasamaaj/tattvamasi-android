@@ -13,8 +13,7 @@ import com.ayyappasamaaj.tattvamasi.databinding.ActivityHomeBinding
 import com.ayyappasamaaj.tattvamasi.model.GridItem
 import com.ayyappasamaaj.tattvamasi.model.Header
 import com.ayyappasamaaj.tattvamasi.util.AppLog
-import com.ayyappasamaaj.tattvamasi.util.GridSpacingItemDecoration
-import com.ayyappasamaaj.tattvamasi.util.ViewUtils.dpToPx
+import com.ayyappasamaaj.tattvamasi.util.GridItemDecoration
 import com.ayyappasamaaj.tattvamasi.viewmodels.AppViewModel
 
 class HomeActivity : AppCompatActivity(), GridRowClickListener {
@@ -34,7 +33,7 @@ class HomeActivity : AppCompatActivity(), GridRowClickListener {
         with(binding) {
             // this style is for grid 2x2
             recyclerView.layoutManager = GridLayoutManager(this@HomeActivity, 2)
-            val itemDecoration = GridSpacingItemDecoration(2, resources.dpToPx(), true)
+            val itemDecoration = GridItemDecoration(this@HomeActivity, R.dimen.item_offset)
             recyclerView.addItemDecoration(itemDecoration)
             recyclerView.adapter = GridRowAdapter(viewModel.bhajansList, this@HomeActivity)
         }

@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/cardview_outline.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/line_divider.xml" value="0.157" />
         <entry key="app/src/main/res/layout/activity_about_us.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_articles.xml" value="0.16018518518518518" />
         <entry key="app/src/main/res/layout/activity_bhajans.xml" value="0.16018518518518518" />
@@ -20,6 +21,8 @@
         <entry key="app/src/main/res/layout/list_row_stickey.xml" value="0.23802083333333332" />
         <entry key="app/src/main/res/layout/list_row_sticky.xml" value="0.23802083333333332" />
         <entry key="app/src/main/res/layout/parent_list_row_item.xml" value="0.23802083333333332" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/app-icon.xml" value="0.157" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/app_icon.xml" value="0.157" />
       </map>
     </option>
   </component>

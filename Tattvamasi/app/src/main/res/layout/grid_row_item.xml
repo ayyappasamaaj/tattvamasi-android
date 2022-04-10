@@ -12,10 +12,7 @@
         android:id="@+id/cardView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="10dp"
+        android:layout_margin="10dp"
         card_view:cardBackgroundColor="@color/colorBackground"
         card_view:cardCornerRadius="20dp"
         card_view:cardElevation="7dp">

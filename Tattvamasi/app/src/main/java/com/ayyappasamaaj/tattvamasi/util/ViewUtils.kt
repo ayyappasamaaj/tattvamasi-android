@@ -1,6 +1,7 @@
 package com.ayyappasamaaj.tattvamasi.util
 
 import android.content.res.Resources
+import android.content.res.Resources.getSystem
 import android.util.TypedValue
 import kotlin.math.roundToInt
 
@@ -12,16 +13,16 @@ object ViewUtils {
     /**
      * Converting dp to pixel
      */
-    fun Resources.dpToPx(): Int {
+    fun Resources.dpToPx(dp: Float): Int {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            4f,
+            dp,
             displayMetrics
         ).roundToInt()
     }
 
     fun dpToPx(dp: Float): Int {
-        return (dp * Resources.getSystem().displayMetrics.density).toInt()
+        return (dp * getSystem().displayMetrics.density).toInt()
     }
 
 }
