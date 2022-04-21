@@ -3,6 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('/Users/satya/Documents/GitHub/certs/Android/AyyappaSamaaj/android.jks')
+            storePassword '18!Padikal18000'
+            keyAlias 'aysa'
+            keyPassword '18!Padikal'
+        }
+    }
     dataBinding {
         enabled = true
     }
@@ -12,8 +20,8 @@ android {
         applicationId "com.ayyappasamaaj.tattvamasi"
         minSdkVersion 16
         targetSdkVersion 31
-        versionCode 3
-        versionName "2.1"
+        versionCode 4
+        versionName "3.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
