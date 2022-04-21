@@ -2,8 +2,33 @@
     <string name="app_name">Tattvamasi</string>
 
     <string name="title_activity_bhajans">BhajansActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-
     <string name="title_activity_splash">SplashActivity</string>
+
+    <string name="desc_article">select article</string>
+
+    <string name="bhajans">Bhajans</string>
+    <string name="pooja">Pooja</string>
+    <string name="poojas">Poojas</string>
+    <string name="articles">Articles</string>
+    <string name="events">Events</string>
+    <string name="donate">Donate</string>
+    <string name="about">About</string>
+
+    <string name="loading_msg">Wait while loading…</string>
+    <string name="donation_text">Ayyappa Samaaj is a volunteer driven IRS recognized 501c(3) organization (Tax ID: # (EIN) 45–1061428)  that conducts events using funds that are donated to the organization by the general public. All your donations to Ayyappa Samaaj are tax deductible to the extent allowed by the IRS for 501©3 organizations.</string>
+    <string name="donation_address">Ayyappa Samaaj,\nP.O. Box 2723, San Ramon,\nCA 94583</string>
+    <string name="donation_now">Donate Now</string>
+    <string name="support_ayyappa_samaaj">Support Ayyappa Samaaj</string>
+
+    <string name="about_us_desc">Ayyappa Samaaj is a registered 501©(3) Non-Profit (Tax ID: # (EIN) 45-1061428) that was formed with the following purpose:
+        \n\n<li>Ayyappa Samaaj is a registered 501(c)(3) Non-Profit (Tax ID: # (EIN) 45-1061428) that was formed with the following purpose:</li>
+        \n\n<li>To propagate and perpetuate the religious aspects of the worship of Lord Ayyappa</li>
+        \n\n<li>To promote the awareness of Lord Ayyappa and deities associated with Lord Ayyappa to the community</li>
+        \n\n<li>To publish electronic and print publications to promote the awareness of Lord Ayyappa and associated deities to the community</li>
+        \n\n<li>To organize spiritual events as well as religious events that are associated with the worship of Lord Ayyappa and associated deities</li>
+        \n\n<li>To promote the construction of a permanent shrine for Lord Ayyappa and deities associated with Lord Ayyappa in one of the temples in the San Francisco Bay Area or adjoining locations, and</li>
+        \n\n<li>Provide assistance to other communities (local and worldwide) in the area of human, religious and community assistance services.</li>
+    </string>
+    <string name="no_events_to_display">No Events to display</string>
+    <string name="search_by_name">Search by name</string>
 </resources>

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:bind="http://schemas.android.com/apk/res/android">
+
     <data>
+
         <variable
             name="header"
             type="com.ayyappasamaaj.tattvamasi.model.Header" />
     </data>
+
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,15 +18,15 @@
         <include
             android:id="@+id/header"
             layout="@layout/header"
-            bind:header="@{header}"/>
+            bind:header="@{header}" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="@color/colorBackground">
-            <ScrollView
-                xmlns:android="http://schemas.android.com/apk/res/android"
+            android:background="@color/colorBackground"
+            android:orientation="vertical">
+
+            <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -36,87 +38,29 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="120dp"
-                        android:layout_margin="2dp"
-                        android:src="@drawable/aysa_banner"/>
+                        android:scaleType="fitXY"
+                        android:src="@drawable/aysa_banner" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:padding="20dp"
                         android:text="Our Mission"
                         android:textColor="@color/colorText"
-                        android:textSize="24dp"
-                        android:textStyle="bold"
-                        android:padding="20dp"
-                        android:layout_gravity="center"/>
+                        android:textSize="@dimen/header_size"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
+                        android:layout_marginBottom="20dp"
                         android:paddingLeft="20dp"
                         android:paddingRight="20dp"
-                        android:text="Ayyappa Samaaj is a registered 501(c)(3) Non-Profit (Tax ID: # (EIN) 45-1061428) that was formed with the following purpose:"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/about_us_desc"
                         android:textColor="@color/colorText"
-                        android:textSize="20sp"
-                        android:layout_margin="10dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:text="- To propagate and perpetuate the religious aspects of the worship of Lord Ayyappa"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
-                        android:layout_margin="10dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:text="- To promote the awareness of Lord Ayyappa and deities associated with Lord Ayyappa to the community"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
-                        android:layout_margin="10dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:text="- To publish electronic and print publications to promote the awareness of Lord Ayyappa and associated deities to the community"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
-                        android:layout_margin="10dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:text="- To organize spiritual events as well as religious events that are associated with the worship of Lord Ayyappa and associated deities"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
-                        android:layout_margin="10dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:text="- To promote the construction of a permanent shrine for Lord Ayyappa and deities associated with Lord Ayyappa in one of the temples in the San Francisco Bay Area or adjoining locations, and"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/colorText"
-                        android:textSize="20sp"
-                        android:layout_margin="10dp"
-                        android:paddingLeft="20dp"
-                        android:paddingRight="20dp"
-                        android:text="- Provide assistance to other communities (local and worldwide) in the area of human, religious and community assistance services."/>
+                        android:textSize="@dimen/desc_size" />
 
                 </LinearLayout>
             </ScrollView>

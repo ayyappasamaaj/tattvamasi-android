@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data>
         <variable
             name="header"
             type="com.ayyappasamaaj.tattvamasi.model.Header" />
     </data>
-    <LinearLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    <RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,40 +15,24 @@
         tools:context="com.ayyappasamaaj.tattvamasi.view.HomeActivity">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/backImageView"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:layout_centerVertical="true"
             android:layout_gravity="center_vertical|center_horizontal"
-            android:layout_marginStart="2dp"
-            android:layout_marginLeft="2dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_margin="5dp"
             android:onClick="backClicked"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/title"
-            app:layout_constraintHorizontal_bias="0.142"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.444"
             app:srcCompat="@drawable/back"
             app:visibleIf="@{header.isTitleRequired}" />
 
         <ImageView
             android:id="@+id/imageView2"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="8dp"
+            android:visibility="visible"
             app:srcCompat="@drawable/aysa_header"
             app:visibleIf="@{header.isLogoRequired}" />
 
@@ -57,25 +40,17 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
             android:gravity="center"
             android:maxLines="1"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:text="@{header.title}"
+            android:layout_marginLeft="70dp"
             android:textColor="@color/colorTitle"
-            android:textSize="26sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.503"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:visibleIf="@{header.isTitleRequired}" />
 
-    </LinearLayout>
+    </RelativeLayout>
 </layout>
 

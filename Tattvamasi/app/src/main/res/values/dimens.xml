@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="row_item_size">18sp</dimen>
+    <dimen name="header_size">20sp</dimen>
+    <dimen name="desc_size">17sp</dimen>
+    <dimen name="item_offset">20dp</dimen>
+</resources>
