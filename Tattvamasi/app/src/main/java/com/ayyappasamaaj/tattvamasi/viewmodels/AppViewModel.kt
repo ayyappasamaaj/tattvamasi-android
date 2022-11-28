@@ -8,6 +8,8 @@ import com.ayyappasamaaj.tattvamasi.model.GridItem
  */
 class AppViewModel: ViewModel() {
 
+    val privacyUrl = "https://www.ayyappasamaaj.org/privacy-policy/"
+
     val bhajanItemsList = ArrayList<GridItem>().apply {
         add(GridItem("Ganesha"))
         add(GridItem("Guru"))

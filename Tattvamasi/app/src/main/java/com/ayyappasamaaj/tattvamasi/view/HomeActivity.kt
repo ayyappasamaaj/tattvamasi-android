@@ -1,6 +1,7 @@
 package com.ayyappasamaaj.tattvamasi.view
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -30,12 +31,21 @@ class HomeActivity : AppCompatActivity(), GridRowClickListener {
     }
 
     private fun initRecyclerView(binding: ActivityHomeBinding) {
+        setPrivacyText(binding)
         with(binding) {
             // this style is for grid 2x2
             recyclerView.layoutManager = GridLayoutManager(this@HomeActivity, 2)
             val itemDecoration = GridItemDecoration(this@HomeActivity, R.dimen.item_offset)
             recyclerView.addItemDecoration(itemDecoration)
             recyclerView.adapter = GridRowAdapter(viewModel.bhajansList, this@HomeActivity)
+        }
+    }
+
+    private fun setPrivacyText(binding: ActivityHomeBinding) {
+        binding.privacyTextView.setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(viewModel.privacyUrl)
+            })
         }
     }
 
