@@ -31,4 +31,6 @@
     </string>
     <string name="no_events_to_display">No Events to display</string>
     <string name="search_by_name">Search by name</string>
+    <string name="privacy_policy"><u>Privacy Policy</u></string>
+
 </resources>

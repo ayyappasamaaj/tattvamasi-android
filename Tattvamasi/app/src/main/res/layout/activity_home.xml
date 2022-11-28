@@ -30,7 +30,21 @@
                 android:id="@+id/recycler_view"
                 android:clipToPadding="false"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_weight="1"
+                android:layout_height="0dp" />
+
+            <TextView
+                android:id="@+id/privacy_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:autoLink="all"
+                android:gravity="center_horizontal"
+                android:linksClickable="true"
+                android:text="@string/privacy_policy"
+                android:textColor="@color/blue"
+                android:textColorLink="@color/blue"
+                android:textSize="16sp"
+                 android:textStyle="italic"/>
 
         </LinearLayout>
     </LinearLayout>
