@@ -20,8 +20,8 @@ android {
         applicationId "com.ayyappasamaaj.tattvamasi"
         minSdkVersion 16
         targetSdkVersion 31
-        versionCode 4
-        versionName "3.0"
+        versionCode 31
+        versionName "3.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
