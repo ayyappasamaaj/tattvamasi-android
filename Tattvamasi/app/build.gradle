@@ -3,6 +3,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
     signingConfigs {
         release {
             storeFile file('/Users/satya/Documents/GitHub/certs/Android/AyyappaSamaaj/android.jks')
@@ -14,12 +19,12 @@ android {
     dataBinding {
         enabled = true
     }
-    compileSdkVersion 31
-    buildToolsVersion '31.0.0'
+
+    compileSdk 35
     defaultConfig {
         applicationId "com.ayyappasamaaj.tattvamasi"
-        minSdkVersion 16
-        targetSdkVersion 31
+        minSdkVersion 21
+        targetSdkVersion 35
         versionCode 31
         versionName "3.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -36,23 +41,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'com.ayyappasamaaj.tattvamasi'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation "androidx.appcompat:appcompat:1.4.1"
-    implementation "androidx.constraintlayout:constraintlayout:2.1.3"
-    implementation "androidx.recyclerview:recyclerview:1.2.1"
-    implementation "androidx.activity:activity-ktx:1.4.0"
-    implementation "androidx.core:core-ktx:1.7.0"
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.recyclerview:recyclerview:1.3.2"
+    implementation "androidx.activity:activity-ktx:1.9.0"
+    implementation "androidx.core:core-ktx:1.13.1"
 
     // CardView
     implementation "androidx.cardview:cardview:1.0.0"
 
     // Firebase
-    implementation platform('com.google.firebase:firebase-bom:28.3.0')
+    implementation platform('com.google.firebase:firebase-bom:33.1.1')
     implementation 'com.google.firebase:firebase-database'
 
     androidTestImplementation 'junit:junit:4.13.2'

@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ayyappasamaaj.tattvamasi.R
@@ -18,7 +17,7 @@ import com.ayyappasamaaj.tattvamasi.util.AppLog
 import com.ayyappasamaaj.tattvamasi.util.SimpleDividerItemDecoration
 import com.ayyappasamaaj.tattvamasi.viewmodels.PoojaViewModel
 
-class PoojaActivity : AppCompatActivity(), ParentListRowClickListener {
+class PoojaActivity : BaseActivity(), ParentListRowClickListener {
 
     private var progress: ProgressDialog? = null
     private val viewModel: PoojaViewModel by viewModels()

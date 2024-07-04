@@ -1,20 +1,22 @@
 package com.ayyappasamaaj.tattvamasi.view
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.databinding.ActivityPdfBinding
 import com.ayyappasamaaj.tattvamasi.model.Header
 
-class PDFViewerActivity : AppCompatActivity() {
+class PDFViewerActivity : BaseActivity() {
     lateinit var binding: ActivityPdfBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
+
         // get the URL from intent
         val linkTo = this.intent.getStringExtra("URL")
         val title = this.intent.getStringExtra("TITLE")

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.ayyappasamaaj.tattvamasi.BuildConfig
 import com.ayyappasamaaj.tattvamasi.R
@@ -12,7 +11,7 @@ import com.ayyappasamaaj.tattvamasi.databinding.ActivityDonateBinding
 import com.ayyappasamaaj.tattvamasi.model.Header
 import com.ayyappasamaaj.tattvamasi.util.AppLog
 
-class DonateActivity : AppCompatActivity() {
+class DonateActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding: ActivityDonateBinding =

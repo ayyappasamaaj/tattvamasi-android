@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ayyappasamaaj.tattvamasi.R
@@ -17,7 +16,7 @@ import com.ayyappasamaaj.tattvamasi.util.AppLog
 import com.ayyappasamaaj.tattvamasi.util.GridItemDecoration
 import com.ayyappasamaaj.tattvamasi.viewmodels.AppViewModel
 
-class HomeActivity : AppCompatActivity(), GridRowClickListener {
+class HomeActivity : BaseActivity(), GridRowClickListener {
 
     private val viewModel: AppViewModel by viewModels()
 

@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ayyappasamaaj.tattvamasi.R
@@ -18,7 +17,7 @@ import com.ayyappasamaaj.tattvamasi.model.Event
 import com.ayyappasamaaj.tattvamasi.model.Header
 import com.ayyappasamaaj.tattvamasi.viewmodels.EventsViewModel
 
-class EventsActivity : AppCompatActivity(), EventsAdapterListener {
+class EventsActivity : BaseActivity(), EventsAdapterListener {
 
     private val eventsList = ArrayList<Event>()
     private var progress: ProgressDialog? = null
