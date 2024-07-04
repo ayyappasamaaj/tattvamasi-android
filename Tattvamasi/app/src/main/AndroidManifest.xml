@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ayyappasamaaj.tattvamasi">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
@@ -20,25 +19,25 @@
 
         <activity
             android:name=".view.HomeActivity"
-            android:screenOrientation="portrait" />
+            />
         <activity
             android:name=".view.BhajansActivity"
-            android:screenOrientation="portrait" />
+            />
         <activity
             android:name=".view.PoojaActivity"
-            android:screenOrientation="portrait" />
+            />
         <activity
             android:name=".view.ArticlesActivity"
-            android:screenOrientation="portrait" />
+            />
         <activity
             android:name=".view.EventsActivity"
-            android:screenOrientation="portrait" />
+            />
         <activity
             android:name=".view.AboutUsActivity"
-            android:screenOrientation="portrait" />
+            />
         <activity
             android:name=".view.DonateActivity"
-            android:screenOrientation="portrait" />
+             />
         <activity
             android:name=".view.PDFViewerActivity"
             android:configChanges="orientation|screenSize"

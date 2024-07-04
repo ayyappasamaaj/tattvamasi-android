@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,7 +18,7 @@ import com.ayyappasamaaj.tattvamasi.util.AppLog
 import com.ayyappasamaaj.tattvamasi.util.StickyHeaderItemDecoration
 import com.ayyappasamaaj.tattvamasi.viewmodels.ArticleViewModel
 
-class ArticlesActivity : AppCompatActivity(),
+class ArticlesActivity : BaseActivity(),
     ArticleAdapter.ListRowClickListener,
     SearchView.OnQueryTextListener {
 
