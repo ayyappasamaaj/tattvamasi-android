@@ -17,31 +17,16 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".view.HomeActivity"
-            />
-        <activity
-            android:name=".view.BhajansActivity"
-            />
-        <activity
-            android:name=".view.PoojaActivity"
-            />
-        <activity
-            android:name=".view.ArticlesActivity"
-            />
-        <activity
-            android:name=".view.EventsActivity"
-            />
-        <activity
-            android:name=".view.AboutUsActivity"
-            />
-        <activity
-            android:name=".view.DonateActivity"
-             />
+        <activity android:name=".view.HomeActivity" />
+        <activity android:name=".view.BhajansActivity" />
+        <activity android:name=".view.PoojaActivity" />
+        <activity android:name=".view.ArticlesActivity" />
+        <activity android:name=".view.EventsActivity" />
+        <activity android:name=".view.AboutUsActivity" />
+        <activity android:name=".view.DonateActivity" />
         <activity
             android:name=".view.PDFViewerActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="fullSensor" />
+            android:configChanges="orientation|screenSize" />
 
     </application>
 
