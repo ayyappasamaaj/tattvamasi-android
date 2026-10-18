@@ -20,11 +20,12 @@ class EventsViewModel : ViewModel() {
 
     fun loadEvents() {
         val database = FirebaseDatabase.getInstance()
-        val eventsList = ArrayList<Event>()
         // get the list of events
         database.getReference("events").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // dismissLoader()
+                // A fresh list on every update, so events aren't added again each time the data changes
+                val eventsList = ArrayList<Event>()
                 for (postSnapshot in dataSnapshot.children) {
                     val event = postSnapshot.getValue(Event::class.java)
                     val eventTime = event?.date

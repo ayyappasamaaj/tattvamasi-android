@@ -19,7 +19,6 @@ import com.ayyappasamaaj.tattvamasi.viewmodels.EventsViewModel
 
 class EventsActivity : BaseActivity(), EventsAdapterListener {
 
-    private val eventsList = ArrayList<Event>()
     private var progress: ProgressDialog? = null
 
     private val viewModel: EventsViewModel by viewModels()
@@ -43,7 +42,8 @@ class EventsActivity : BaseActivity(), EventsAdapterListener {
         viewModel.eventsLiveData.observe(this) { results ->
             dismissLoader()
             if (!results.isNullOrEmpty()) {
-                binding.recyclerView.adapter = EventsAdapter(eventsList, this)
+                // Show the events that were loaded (this used to pass an empty list, so nothing appeared)
+                binding.recyclerView.adapter = EventsAdapter(results, this)
             } else {
                 Toast.makeText(this, getString(R.string.no_events_to_display), Toast.LENGTH_SHORT)
                     .show()
