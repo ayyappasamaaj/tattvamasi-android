@@ -7,8 +7,8 @@
     <string name="desc_article">select article</string>
 
     <string name="bhajans">Bhajans</string>
-    <string name="pooja">Pooja</string>
-    <string name="poojas">Poojas</string>
+    <string name="pooja">Puja</string>
+    <string name="poojas">Puja</string>
     <string name="articles">Articles</string>
     <string name="events">Events</string>
     <string name="donate">Donate</string>

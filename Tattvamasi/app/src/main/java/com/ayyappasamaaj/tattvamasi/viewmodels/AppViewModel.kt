@@ -24,7 +24,7 @@ class AppViewModel: ViewModel() {
 
     val bhajansList = ArrayList<GridItem>().apply {
         add(GridItem("Bhajans"))
-        add(GridItem("Pooja"))
+        add(GridItem("Puja"))
         add(GridItem("Articles"))
         add(GridItem("Events"))
         add(GridItem("Donate"))
