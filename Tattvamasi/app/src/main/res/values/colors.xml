@@ -9,4 +9,6 @@
 
     <color name="black_overlay">#66000000</color>
     <color name="blue">#1A95F6</color>
+    <!-- The website's page background (the redesign) -->
+    <color name="cream">#F6F2EA</color>
 </resources>

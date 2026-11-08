@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The redesigned app (Compose). The splash screen shows the app icon on the website's cream, then the
+         app's own theme takes over. -->
+    <style name="Theme.Tattvamasi" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/cream</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.Tattvamasi.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/cream</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/app_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.Tattvamasi</item>
+    </style>
+</resources>

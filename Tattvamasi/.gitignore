@@ -8,3 +8,8 @@
 /build
 /captures
 .externalNativeBuild
+
+# The release signing key details (see app/build.gradle); never commit them
+keystore.properties
+*.jks
+*.keystore
