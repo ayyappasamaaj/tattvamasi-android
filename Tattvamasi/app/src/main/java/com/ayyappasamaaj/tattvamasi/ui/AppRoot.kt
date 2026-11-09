@@ -53,10 +53,11 @@ import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.view.AboutUsActivity
 import com.ayyappasamaaj.tattvamasi.view.ArticlesActivity
-import com.ayyappasamaaj.tattvamasi.view.BhajansActivity
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
+import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
+import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
 
 /** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
  *  unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. */
@@ -73,6 +74,9 @@ fun AppRoot() {
     var current by rememberSaveable { mutableStateOf(Destination.Home) }
     LaunchedEffect(Unit) { EventsStore.start() }
     val events by EventsStore.state.collectAsState()
+    val appContext = LocalContext.current
+    LaunchedEffect(Unit) { PublicationsStore.start(appContext) }
+    val publications by PublicationsStore.state.collectAsState()
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -95,9 +99,7 @@ fun AppRoot() {
             when (current) {
                 Destination.Home -> HomeScreen(events) { current = it }
                 Destination.Events -> EventsScreen(events, EventsStore::refresh)
-                Destination.Publications -> ComingNext(
-                    "Publications", "Bhajans, shlokas and puja texts: the new screen comes in step 3.",
-                    BhajansActivity::class.java)
+                Destination.Publications -> PublicationsScreen(publications)
                 Destination.Sabarimala -> ComingNext(
                     "Sabarimala", "The guide, Traditional Path, Vratam, Virtual Q and House Puja: step 4.",
                     ArticlesActivity::class.java)
