@@ -25,11 +25,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +41,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
@@ -228,9 +233,57 @@ fun GuideBlocks(blocks: List<GuideBlock>) {
                             .clip(RoundedCornerShape(12.dp)).background(AppColors.card),  // white: some pictures have clear edges
                     )
                 }
+                block is GuideBlock.Checklist -> Checklist(block.items)
                 block is GuideBlock.Text -> RichText(block.html)
             }
             index += 1
+        }
+    }
+}
+
+/** A list to tick off as things are gathered; the ticks are kept on the phone until Clear all ticks. */
+@Composable
+private fun Checklist(items: List<CheckItem>) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) { GuideChecks.load(context) }
+    val ticked by GuideChecks.ticked.collectAsState()
+    val count = items.count { it.id in ticked }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        items.forEach { item ->
+            val checked = item.id in ticked
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (checked) AppColors.claySoft else AppColors.cream)
+                    .toggleable(value = checked, role = Role.Checkbox) { GuideChecks.toggle(context, item.id) }
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+            ) {
+                if (item.image.isNotEmpty()) {
+                    AsyncImage(
+                        model = item.image,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(10.dp)).background(AppColors.card),
+                    )
+                }
+                Text(item.text, style = MaterialTheme.typography.bodyLarge, color = AppColors.ink, modifier = Modifier.weight(1f))
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = null,  // the whole row toggles
+                    colors = CheckboxDefaults.colors(checkedColor = AppColors.clay, uncheckedColor = AppColors.muted),
+                )
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text("$count of ${items.size} ready", style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft,
+                modifier = Modifier.weight(1f).padding(start = 8.dp))
+            TextButton(onClick = { GuideChecks.clear(context, items.map { it.id }) }, enabled = count > 0) {
+                Text(if (count > 0) "Clear all ticks ($count)" else "Clear all ticks",
+                    color = if (count > 0) AppColors.clayDark else AppColors.muted)
+            }
         }
     }
 }

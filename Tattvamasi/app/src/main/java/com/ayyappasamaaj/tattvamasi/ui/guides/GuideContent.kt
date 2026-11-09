@@ -6,13 +6,18 @@ import org.json.JSONObject
 /*
  * The website's five pilgrimage guides, as its /guides/app.json sends them (website: pages/app_guides.py): each
  * guide's introduction, then its sections (the page's cards; cards inside cards are sub-sections), each with its
- * content as blocks in page order: text in the small HTML subset ui/text/RichText.kt reads, or a picture.
+ * content as blocks in page order: text in the small HTML subset ui/text/RichText.kt reads, a picture, or a list to
+ * tick off (House Puja's items).
  */
 
 sealed interface GuideBlock {
     data class Text(val html: String) : GuideBlock
     data class Picture(val url: String, val alt: String) : GuideBlock
+    data class Checklist(val items: List<CheckItem>) : GuideBlock
 }
+
+/** An item to tick off; [id] is the website's checkbox id (unique on the site), [image] its picture or "". */
+data class CheckItem(val id: String, val text: String, val image: String)
 
 /** A section of a guide; [id] is the website's #id for it (a link to ayyappasamaaj.org/vratam/#food opens "food"). */
 data class GuideSection(
@@ -48,7 +53,13 @@ data class GuideContent(
     /** Every picture in the guide, to keep for offline reading. */
     val pictures: List<String>
         get() = (intro + sections.flatMap { it.all() }.flatMap { it.blocks })
-            .filterIsInstance<GuideBlock.Picture>().map { it.url }
+            .flatMap { block ->
+                when (block) {
+                    is GuideBlock.Picture -> listOf(block.url)
+                    is GuideBlock.Checklist -> block.items.map { it.image }.filter { it.isNotEmpty() }
+                    is GuideBlock.Text -> emptyList()
+                }
+            }
 }
 
 private fun parseBlocks(list: JSONArray?): List<GuideBlock> =
@@ -57,6 +68,11 @@ private fun parseBlocks(list: JSONArray?): List<GuideBlock> =
         when {
             block.has("image") -> block.optString("image").takeIf { it.startsWith("https://") }
                 ?.let { GuideBlock.Picture(it, block.optString("alt")) }
+            block.has("checklist") -> block.optJSONArray("checklist")?.let { list ->
+                (0 until list.length()).mapNotNull { list.optJSONObject(it) }.map {
+                    CheckItem(it.optString("id"), it.optString("text"), it.optString("image").takeIf { url -> url.startsWith("https://") } ?: "")
+                }.filter { it.id.isNotBlank() && it.text.isNotBlank() }
+            }?.takeIf { it.isNotEmpty() }?.let { GuideBlock.Checklist(it) }
             block.optString("html").isNotBlank() -> GuideBlock.Text(block.optString("html"))
             else -> null
         }
