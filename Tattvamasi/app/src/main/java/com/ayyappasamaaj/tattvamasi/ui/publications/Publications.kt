@@ -1,8 +1,5 @@
 package com.ayyappasamaaj.tattvamasi.ui.publications
 
-import android.content.Context
-import android.content.res.AssetManager
-import com.ayyappasamaaj.tattvamasi.BuildConfig
 import com.ayyappasamaaj.tattvamasi.util.AppLog
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -11,8 +8,6 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.json.JSONArray
-import org.json.JSONObject
 import java.text.Normalizer
 
 /*
@@ -127,41 +122,18 @@ object PublicationsStore {
     val state: StateFlow<PublicationsState> = _state.asStateFlow()
     private var listening = false
 
-    fun start(context: Context) {
+    fun start() {
         if (listening) return
         listening = true
-        val assets = context.applicationContext.assets
         FirebaseDatabase.getInstance().getReference("publications").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                show(parsePublications(snapshot.value), assets)
+                _state.value = PublicationsState(parsePublications(snapshot.value), loaded = true)
             }
 
             override fun onCancelled(error: DatabaseError) {
                 AppLog.w("PublicationsStore", "publications: " + error.message)
-                show(emptyList(), assets)
+                _state.value = _state.value.copy(loaded = true)
             }
         })
-    }
-
-    /**
-     * Debug builds only: until the app can read `/publications` (the Firebase rules must allow it), show the copy
-     * of the website's data in src/debug/assets, as the iOS app's Debug builds do. Release builds have no such
-     * file, so they show the "couldn't be loaded" message instead.
-     */
-    private fun show(sections: List<PublicationSection>, assets: AssetManager) {
-        val shown = sections.ifEmpty {
-            if (!BuildConfig.DEBUG) emptyList()
-            else runCatching {
-                parsePublications(plainJson(JSONObject(assets.open("publications-sample.json").reader().readText())))
-            }.getOrDefault(emptyList())
-        }
-        _state.value = PublicationsState(shown, loaded = true)
-    }
-
-    private fun plainJson(x: Any?): Any? = when (x) {
-        is JSONObject -> x.keys().asSequence().associateWith { plainJson(x.get(it)) }
-        is JSONArray -> (0 until x.length()).map { plainJson(x.get(it)) }
-        JSONObject.NULL -> null
-        else -> x
     }
 }
