@@ -96,6 +96,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database'
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'  // reads the sample /publications in tests
     androidTestImplementation 'androidx.test:runner:1.6.2'
 }
 
