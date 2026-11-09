@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,6 +31,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,8 +54,9 @@ import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.view.AboutUsActivity
 import com.ayyappasamaaj.tattvamasi.view.ArticlesActivity
 import com.ayyappasamaaj.tattvamasi.view.BhajansActivity
-import com.ayyappasamaaj.tattvamasi.view.EventsActivity
-import com.ayyappasamaaj.tattvamasi.view.HomeActivity
+import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
+import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
+import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
 
 /** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
  *  unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. */
@@ -67,6 +71,8 @@ enum class Destination(val label: String, val icon: ImageVector) {
 @Composable
 fun AppRoot() {
     var current by rememberSaveable { mutableStateOf(Destination.Home) }
+    LaunchedEffect(Unit) { EventsStore.start() }
+    val events by EventsStore.state.collectAsState()
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -87,10 +93,8 @@ fun AppRoot() {
     ) {
         AppScreen {
             when (current) {
-                Destination.Home -> ComingNext(
-                    "Swamiye Saranam", "The new Home screen comes in the next step.", HomeActivity::class.java)
-                Destination.Events -> ComingNext(
-                    "Events", "The new Events screen comes in the next step.", EventsActivity::class.java)
+                Destination.Home -> HomeScreen(events) { current = it }
+                Destination.Events -> EventsScreen(events, EventsStore::refresh)
                 Destination.Publications -> ComingNext(
                     "Publications", "Bhajans, shlokas and puja texts: the new screen comes in step 3.",
                     BhajansActivity::class.java)
@@ -105,19 +109,20 @@ fun AppRoot() {
 }
 
 /** The website's banner: the Sabarimala picture behind the logo and the tagline, reaching up behind the
- *  status bar (the app draws edge to edge). */
+ *  status bar (the app draws edge to edge). A tablet gets the website's tablet header picture (2048px wide,
+ *  aligned right as on the website), which stays sharp at that width. */
 @Composable
 fun BannerHeader() {
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .background(AppColors.cream),
     ) {
         Image(
-            painter = painterResource(R.drawable.app_banner),
+            painter = painterResource(if (maxWidth >= 600.dp) R.drawable.app_banner_wide else R.drawable.app_banner),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            alignment = Alignment.BottomEnd,
+            alignment = if (maxWidth >= 600.dp) Alignment.CenterEnd else Alignment.BottomEnd,
             modifier = Modifier.matchParentSize(),
         )
         Column(
