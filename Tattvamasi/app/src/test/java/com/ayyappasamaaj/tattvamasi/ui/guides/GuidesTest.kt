@@ -26,6 +26,25 @@ class GuidesTest {
     }
 
     @Test
+    fun housePujaItemsAreAChecklist() {
+        val blocks = guides[4].sections.first { it.id == "checklist" }.blocks
+        val lists = blocks.filterIsInstance<GuideBlock.Checklist>()
+        assertEquals(1, lists.size)
+        val first = lists[0].items[0]
+        assertEquals(CheckItem("hp-turmeric-ganesha", "Turmeric to make Ganesha (new packet)",
+            "https://ayyappasamaaj.org/static/images/house-puja/turmeric-ganesha.webp"), first)
+        assertTrue(lists[0].items.size >= 20)
+        assertTrue(blocks.filterIsInstance<GuideBlock.Text>().none { "Clear all ticks" in it.html })
+        // An item without a usable id or name is left out; an unsafe picture becomes none
+        val one = parseGuides(
+            """{"version": 1, "guides": [{"slug": "x", "title": "X", "url": "https://ayyappasamaaj.org/x/", "intro": [],
+               "sections": [{"id": "s", "title": "S", "blocks": [{"checklist": [{"id": "a", "text": "A", "image": "http://x/a.webp"},
+               {"id": "", "text": "B", "image": ""}]}], "sections": []}]}]}""",
+        )!!.single()
+        assertEquals(listOf(GuideBlock.Checklist(listOf(CheckItem("a", "A", "")))), one.sections[0].blocks)
+    }
+
+    @Test
     fun skipsWhatItCantUse() {
         assertNull(parseGuides("""{"version": 2, "guides": []}"""))
         assertNull(parseGuides("<html>error</html>"))
