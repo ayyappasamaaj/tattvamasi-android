@@ -83,6 +83,7 @@ dependencies {
     // Firebase (the website publishes events and publications there)
     implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-messaging'  // push notifications from the website (topics)
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.json:json:20240303'  // reads the sample /publications in tests

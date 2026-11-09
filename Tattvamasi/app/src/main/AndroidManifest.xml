@@ -3,6 +3,8 @@
 
     <!-- Firebase, the website's pages, the board and the PDFs -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Notifications from the website (Android 13+ asks; the app asks the first time an event is opened) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -14,6 +16,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.Tattvamasi.Starting"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -21,6 +24,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Notifications that arrive while the app is open (notifications/AppMessagingService.kt) -->
+        <service
+            android:name=".notifications.AppMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- For notifications the system shows while the app is in the background -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="announcements" />
     </application>
 
 </manifest>

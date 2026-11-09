@@ -1,5 +1,10 @@
 package com.ayyappasamaaj.tattvamasi.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -45,7 +50,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.ayyappasamaaj.tattvamasi.R
+import com.ayyappasamaaj.tattvamasi.notifications.AppNotifications
+import com.ayyappasamaaj.tattvamasi.notifications.NotificationTarget
+import com.ayyappasamaaj.tattvamasi.notifications.notificationTarget
+import kotlinx.coroutines.delay
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.ui.about.AboutScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
@@ -92,6 +102,35 @@ fun AppRoot() {
             }
             target != null
         }
+    }
+
+    // A tapped notification: its event, guide or page (website: docs/app-notifications.md), once the events have
+    // loaded (an event's page needs them)
+    val tapped by AppNotifications.tapped.collectAsState()
+    LaunchedEffect(tapped, events, guides) {
+        val url = tapped ?: return@LaunchedEffect
+        if (!events.loaded && !events.failed) return@LaunchedEffect
+        when (val target = notificationTarget(url, events.events, guides)) {
+            is NotificationTarget.Event -> { openEvent = target.key; current = Destination.Events }
+            is NotificationTarget.Guide -> { openGuide = target.target.encode(); current = Destination.Sabarimala }
+            is NotificationTarget.Web -> openWebPage(context, target.url)
+            NotificationTarget.Events -> { openEvent = null; current = Destination.Events }
+            NotificationTarget.Home -> current = Destination.Home
+        }
+        AppNotifications.opened()
+    }
+
+    // Notifications: the system prompt (Android 13+) the first time an event is opened, once its screen shows;
+    // whatever the answer, the switches (all on) then take effect
+    val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        AppNotifications.asked(context)
+    }
+    LaunchedEffect(openEvent) {
+        if (openEvent == null || !AppNotifications.shouldAsk()) return@LaunchedEffect
+        delay(1200)
+        val needsPrompt = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        if (needsPrompt) askPermission.launch(Manifest.permission.POST_NOTIFICATIONS) else AppNotifications.asked(context)
     }
 
     CompositionLocalProvider(LocalLinkHandler provides openLink) {
