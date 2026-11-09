@@ -65,6 +65,7 @@ enum class Destination(val label: String, val icon: ImageVector) {
 @Composable
 fun AppRoot() {
     var current by rememberSaveable { mutableStateOf(Destination.Home) }
+    var openEvent by rememberSaveable { mutableStateOf<String?>(null) }  // AppEvent.key of the event shown
     LaunchedEffect(Unit) { EventsStore.start() }
     val events by EventsStore.state.collectAsState()
     LaunchedEffect(Unit) { PublicationsStore.start() }
@@ -75,7 +76,10 @@ fun AppRoot() {
             Destination.entries.forEach { destination ->
                 item(
                     selected = destination == current,
-                    onClick = { current = destination },
+                    onClick = {
+                        if (destination == Destination.Events && current == Destination.Events) openEvent = null
+                        current = destination
+                    },
                     icon = { Icon(destination.icon, contentDescription = null) },
                     // 12sp so "Publications" fits the narrowest phones' five-item bar
                     label = {
@@ -89,8 +93,14 @@ fun AppRoot() {
     ) {
         AppScreen {
             when (current) {
-                Destination.Home -> HomeScreen(events) { current = it }
-                Destination.Events -> EventsScreen(events, EventsStore::refresh)
+                Destination.Home -> HomeScreen(events, go = {
+                    if (it == Destination.Events) openEvent = null  // "See events": the list
+                    current = it
+                }, openEvent = { key ->
+                    openEvent = key
+                    current = Destination.Events
+                })
+                Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
                 Destination.Publications -> PublicationsScreen(publications)
                 Destination.Sabarimala -> SabarimalaScreen()
                 Destination.About -> AboutScreen()
