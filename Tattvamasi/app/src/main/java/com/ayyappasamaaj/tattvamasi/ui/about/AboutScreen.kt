@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Newspaper
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -255,6 +256,7 @@ private val contactLinks = listOf(
     ContactLink("Join the mailing list", Icons.Outlined.Newspaper, "https://ayyappasamaaj.org/mailing-list/"),
     ContactLink("Facebook", Icons.Outlined.Group, "https://www.facebook.com/ayyappa.samaaj.us"),
     ContactLink("YouTube", Icons.Outlined.SmartDisplay, "https://www.youtube.com/@AyyappasamaajOrg"),
+    ContactLink("Privacy policy", Icons.Outlined.PrivacyTip, "https://ayyappasamaaj.org/privacy-policy/"),
 )
 
 private const val EMAIL = "info@ayyappasamaaj.org"

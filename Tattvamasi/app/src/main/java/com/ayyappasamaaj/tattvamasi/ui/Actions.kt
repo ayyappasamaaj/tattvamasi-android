@@ -16,6 +16,18 @@ import java.net.URLEncoder
 /** The website's pages the app opens. */
 object WebPages {
     const val DONATE = "https://ayyappasamaaj.org/donate/"
+    const val PRIVACY = "https://ayyappasamaaj.org/privacy-policy/"
+}
+
+/**
+ * Opens a website page in the phone's browser app, outside the app. Used for Donate: giving happens on the
+ * website, and the app only links out to it (as the iOS app does in Safari, which the App Store requires of
+ * nonprofits it hasn't approved for in-app giving).
+ */
+fun openInBrowser(context: Context, url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).addCategory(Intent.CATEGORY_BROWSABLE)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    start(context, intent, "No browser to open the page")
 }
 
 /**
