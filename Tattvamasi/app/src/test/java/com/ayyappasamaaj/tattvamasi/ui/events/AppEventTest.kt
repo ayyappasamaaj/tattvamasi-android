@@ -110,4 +110,40 @@ class AppEventTest {
             calendarWebUrl(event),
         )
     }
+
+    @Test
+    fun readsThePictureTextAndRegistrationForTheEventScreen() {
+        val opens = Instant.parse("2026-11-01T16:00:00Z")
+        val closes = Instant.parse("2026-12-05T17:00:00Z")
+        val event = parseEvents(listOf(entry("Mandalam", "2026-11-14T07:00-08:00", "2026-12-26T20:00-08:00", mapOf(
+            "imageUrl" to "https://ayyappasamaaj.org/media/events/cover_images/m.png",
+            "details" to "<p>Swamiye Saranam</p>",
+            "registration" to mapOf("url" to "https://ayyappasamaaj.org/forms/mandalam-2026/",
+                "opensAt" to opens.epochSecond, "closesAt" to closes.epochSecond),
+        ))), now).single()
+
+        assertEquals("https://ayyappasamaaj.org/media/events/cover_images/m.png", event.imageUrl)
+        assertEquals("<p>Swamiye Saranam</p>", event.details)
+        val registration = event.registration!!
+        assertEquals("https://ayyappasamaaj.org/forms/mandalam-2026/", registration.url)
+        assertEquals(Registration.Status.OpensOn(opens), registration.status(Instant.parse("2026-10-30T00:00:00Z")))
+        assertEquals(Registration.Status.Open, registration.status(Instant.parse("2026-11-20T00:00:00Z")))
+        assertEquals(Registration.Status.Closed, registration.status(closes))
+        assertEquals("Sat, Dec 5, 9:00 AM", com.ayyappasamaaj.tattvamasi.ui.events.registrationTime(closes))
+        assertEquals("Saturday, November 14 to Saturday, December 26", dateLine(event))
+        assertEquals("${event.start.epochSecond}|Mandalam", event.key)
+    }
+
+    @Test
+    fun noRegistrationOrTimesAndOlderEntries() {
+        val plain = parseEvents(listOf(entry("Bhajan", "2026-11-14T07:00-08:00", "2026-11-14T13:00-08:00")), now).single()
+        assertNull(plain.registration)  // the website leaves it out when the event takes none
+        assertNull(plain.imageUrl)
+        assertEquals("", plain.details)
+        assertEquals("Saturday, November 14", dateLine(plain))
+        val open = parseEvents(listOf(entry("x", "2026-11-14T07:00-08:00", "2026-11-14T13:00-08:00", mapOf(
+            "registration" to mapOf("url" to "https://ayyappasamaaj.org/events/x/2026-11-14/register/", "opensAt" to 0L, "closesAt" to 0L),
+        ))), now).single().registration!!
+        assertEquals(Registration.Status.Open, open.status(Instant.parse("2027-01-01T00:00:00Z")))
+    }
 }

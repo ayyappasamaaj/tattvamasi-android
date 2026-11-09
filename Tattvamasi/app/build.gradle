@@ -73,6 +73,9 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.9.3'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.browser:browser:1.8.0'  // Custom Tabs for the website's pages
+    // Pictures from the website (events' covers, the guides), cached on the device
+    implementation 'io.coil-kt.coil3:coil-compose:3.0.4'
+    implementation 'io.coil-kt.coil3:coil-network-okhttp:3.0.4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
     implementation "androidx.core:core-ktx:1.15.0"

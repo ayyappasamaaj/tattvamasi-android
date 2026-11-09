@@ -53,7 +53,7 @@ import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
 /** Home: the next event, then the app's sections and Donate. As on the iOS app (HomeView.swift). */
 @Composable
-fun HomeScreen(events: EventsState, go: (Destination) -> Unit) {
+fun HomeScreen(events: EventsState, go: (Destination) -> Unit, openEvent: (String) -> Unit = {}) {
     val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -70,7 +70,7 @@ fun HomeScreen(events: EventsState, go: (Destination) -> Unit) {
                     color = AppColors.ink,
                     modifier = Modifier.semantics { heading() },
                 )
-                NextEvent(events) { go(Destination.Events) }
+                NextEvent(events, seeEvents = { go(Destination.Events) }, open = openEvent)
                 Tiles(
                     listOf(
                         Tile("Publications", "Bhajans, shlokas and puja texts", Icons.AutoMirrored.Outlined.MenuBook) {
@@ -94,10 +94,10 @@ fun HomeScreen(events: EventsState, go: (Destination) -> Unit) {
 }
 
 @Composable
-private fun NextEvent(events: EventsState, seeEvents: () -> Unit) {
+private fun NextEvent(events: EventsState, seeEvents: () -> Unit, open: (String) -> Unit) {
     val event = events.nextEvent
     when {
-        event != null -> NextEventCard(event, seeEvents)
+        event != null -> NextEventCard(event, seeEvents) { open(event.key) }
         !events.loaded -> Box(Modifier.fillMaxWidth().heightIn(min = 100.dp), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = AppColors.clay)
         }
@@ -106,11 +106,13 @@ private fun NextEvent(events: EventsState, seeEvents: () -> Unit) {
 
 /** The dark green card with the next event. */
 @Composable
-private fun NextEventCard(event: AppEvent, seeEvents: () -> Unit) {
+private fun NextEventCard(event: AppEvent, seeEvents: () -> Unit, open: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .clickable(onClickLabel = "Event details", onClick = open)
             .background(AppColors.forest, RoundedCornerShape(18.dp))
             .padding(18.dp),
     ) {

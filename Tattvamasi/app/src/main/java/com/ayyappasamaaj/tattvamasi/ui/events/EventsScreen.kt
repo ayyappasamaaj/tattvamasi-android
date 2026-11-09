@@ -2,7 +2,11 @@
 
 package com.ayyappasamaaj.tattvamasi.ui.events
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -50,17 +54,27 @@ import com.ayyappasamaaj.tattvamasi.ui.SectionLabel
 import com.ayyappasamaaj.tattvamasi.ui.addToCalendar
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.openDirections
-import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import kotlinx.coroutines.launch
 
 /**
- * Events: upcoming events by month, each with its page on the website (to register), Add to calendar and
- * Directions. Pull down to refresh. One column on a phone, two or more side by side on a tablet. As on the iOS
- * app (EventsView.swift).
+ * Events: upcoming events by month, each with Details (the app's own event screen), Add to calendar and
+ * Directions. Pull down to refresh. One column on a phone, two or more side by side on a tablet. [openKey] is the
+ * event shown (its AppEvent.key), or null for the list; Back returns to the list.
  */
 @Composable
-fun EventsScreen(state: EventsState, refresh: suspend () -> Unit) {
+fun EventsScreen(
+    state: EventsState,
+    refresh: suspend () -> Unit,
+    openKey: String? = null,
+    onOpen: (String?) -> Unit = {},
+) {
+    val open = openKey?.let { key -> state.events.firstOrNull { it.key == key } }
+    if (open != null) {
+        BackHandler { onOpen(null) }
+        EventScreen(open, onBack = { onOpen(null) })
+        return
+    }
     val scope = rememberCoroutineScope()
     var refreshing by remember { mutableStateOf(false) }
 
@@ -106,7 +120,7 @@ fun EventsScreen(state: EventsState, refresh: suspend () -> Unit) {
                         item(key = "month-" + month.title, span = { GridItemSpan(maxLineSpan) }) {
                             SectionLabel(month.title, Modifier.padding(top = 6.dp))
                         }
-                        items(month.events, key = { it.id + it.start }) { event -> EventCard(event) }
+                        items(month.events, key = { it.key }) { event -> EventCard(event) { onOpen(event.key) } }
                     }
                 }
                 item(span = { GridItemSpan(maxLineSpan) }) { AddressFooter() }
@@ -116,11 +130,15 @@ fun EventsScreen(state: EventsState, refresh: suspend () -> Unit) {
 }
 
 @Composable
-fun EventCard(event: AppEvent) {
+fun EventCard(event: AppEvent, openDetails: () -> Unit) {
     val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth().card(padding = 14.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClickLabel = "Event details", onClick = openDetails)
+            .card(padding = 14.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             DateBlock(event.start)
@@ -137,13 +155,11 @@ fun EventCard(event: AppEvent) {
         }
         // Side by side when they fit; they wrap onto more lines with large text.
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            event.pageUrl?.let { url ->
-                Button(
-                    onClick = { openWebPage(context, url) },
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest),
-                ) {
-                    Text("Event page", fontWeight = FontWeight(700))
-                }
+            Button(
+                onClick = openDetails,
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest),
+            ) {
+                Text("Details", fontWeight = FontWeight(700))
             }
             OutlinedButton(onClick = { addToCalendar(context, event) }) {
                 Icon(Icons.Outlined.EditCalendar, contentDescription = null, tint = AppColors.clay,

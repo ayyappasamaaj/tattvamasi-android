@@ -22,7 +22,16 @@ data class AppEvent(
     val pageUrl: String?,
     val latitude: Double?,
     val longitude: Double?,
+    /** The cover picture (absolute), or null. */
+    val imageUrl: String? = null,
+    /** The event's text in the website's small HTML subset (events/firebase.py app_html), or "". */
+    val details: String = "",
+    /** How to register, when the event takes registration. */
+    val registration: Registration? = null,
 ) {
+    /** Stays the same for this event date when the list changes (Firebase's list index doesn't). */
+    val key: String get() = "${start.epochSecond}|$name"
+
     /** The venue in a few words: "SVCC Temple" rather than the whole address. */
     val shortVenue: String
         get() = venue.split(",").first().trim().ifEmpty { venue }
@@ -30,6 +39,26 @@ data class AppEvent(
     /** The description, when it says more than the name. */
     val extraSummary: String?
         get() = summary.trim().takeUnless { it.isEmpty() || it.equals(name.trim(), ignoreCase = true) }
+}
+
+/**
+ * Where and when to register: the website's registration form (it stays on the website: sign-in, payment and
+ * emails). [opensAt] / [closesAt] are null when there's no such limit.
+ */
+data class Registration(val url: String, val opensAt: Instant?, val closesAt: Instant?) {
+    sealed interface Status {
+        data object Open : Status
+        data class OpensOn(val at: Instant) : Status
+        data object Closed : Status
+    }
+
+    /** Worked out from the times, since they change without the website publishing anything. Whether a form is
+     *  full shows on its page. */
+    fun status(now: Instant): Status = when {
+        opensAt != null && now.isBefore(opensAt) -> Status.OpensOn(opensAt)
+        closesAt != null && !now.isBefore(closesAt) -> Status.Closed
+        else -> Status.Open
+    }
 }
 
 /** Event dates are shown in the Bay Area's time, where the events are. */
@@ -73,6 +102,12 @@ fun parseEvents(value: Any?, now: Instant): List<AppEvent> {
             pageUrl = (item["registrationLink"] as? String)?.takeIf { it.startsWith("http") },
             latitude = (item["latitude"] as? Number)?.toDouble(),
             longitude = (item["longitude"] as? Number)?.toDouble(),
+            imageUrl = (item["imageUrl"] as? String)?.takeIf { it.startsWith("http") },
+            details = item["details"] as? String ?: "",
+            registration = (item["registration"] as? Map<*, *>)?.let { reg ->
+                fun time(key: String) = (reg[key] as? Number)?.toLong()?.takeIf { it > 0 }?.let(Instant::ofEpochSecond)
+                (reg["url"] as? String)?.takeIf { it.startsWith("http") }?.let { Registration(it, time("opensAt"), time("closesAt")) }
+            },
         )
     }.sortedBy { it.start }
 }
