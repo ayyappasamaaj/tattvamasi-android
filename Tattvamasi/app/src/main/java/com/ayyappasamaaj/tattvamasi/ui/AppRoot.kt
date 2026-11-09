@@ -1,18 +1,14 @@
 package com.ayyappasamaaj.tattvamasi.ui
 
-import android.app.Activity
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
@@ -23,8 +19,6 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Landscape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,13 +45,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
-import com.ayyappasamaaj.tattvamasi.view.AboutUsActivity
-import com.ayyappasamaaj.tattvamasi.view.ArticlesActivity
+import com.ayyappasamaaj.tattvamasi.ui.about.AboutScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
+import com.ayyappasamaaj.tattvamasi.ui.sabarimala.SabarimalaScreen
 
 /** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
  *  unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. */
@@ -100,11 +94,8 @@ fun AppRoot() {
                 Destination.Home -> HomeScreen(events) { current = it }
                 Destination.Events -> EventsScreen(events, EventsStore::refresh)
                 Destination.Publications -> PublicationsScreen(publications)
-                Destination.Sabarimala -> ComingNext(
-                    "Sabarimala", "The guide, Traditional Path, Vratam, Virtual Q and House Puja: step 4.",
-                    ArticlesActivity::class.java)
-                Destination.About -> ComingNext(
-                    "About us", "About us, our Board and Contact: step 4.", AboutUsActivity::class.java)
+                Destination.Sabarimala -> SabarimalaScreen()
+                Destination.About -> AboutScreen()
             }
         }
     }
@@ -170,33 +161,6 @@ fun AppScreen(content: @Composable () -> Unit) {
                 .padding(padding),
         ) {
             content()
-        }
-    }
-}
-
-/** Shown in a section whose new screen comes in a later step, with a button to the app's current screen. */
-@Composable
-fun ComingNext(title: String, note: String, legacy: Class<out Activity>) {
-    val context = LocalContext.current
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-    ) {
-        Text(
-            title,
-            style = MaterialTheme.typography.headlineMedium,
-            color = AppColors.ink,
-            modifier = Modifier.semantics { heading() },
-        )
-        Text(note, style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
-        Spacer(Modifier.height(8.dp))
-        Button(
-            onClick = { context.startActivity(Intent(context, legacy)) },
-            colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest),
-        ) {
-            Text("Open the current screen")
         }
     }
 }
