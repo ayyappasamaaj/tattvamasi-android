@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -68,8 +67,7 @@ fun AppRoot() {
     var current by rememberSaveable { mutableStateOf(Destination.Home) }
     LaunchedEffect(Unit) { EventsStore.start() }
     val events by EventsStore.state.collectAsState()
-    val appContext = LocalContext.current
-    LaunchedEffect(Unit) { PublicationsStore.start(appContext) }
+    LaunchedEffect(Unit) { PublicationsStore.start() }
     val publications by PublicationsStore.state.collectAsState()
 
     NavigationSuiteScaffold(

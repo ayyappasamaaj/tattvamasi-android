@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#8F0003</color>
-    <color name="colorPrimaryDark">#8F0010</color>
-    <color name="colorBackground">#F8F4EB</color>
-    <color name="colorAccent">#8F0003</color>
-    <color name="colorTitle">#ffd803</color>
-    <color name="colorText">#8F0010</color>
-
-    <color name="black_overlay">#66000000</color>
-    <color name="blue">#1A95F6</color>
-    <!-- The website's page background (the redesign) -->
+    <!-- The website's page background: the window and the splash screen behind the icon -->
     <color name="cream">#F6F2EA</color>
 </resources>
