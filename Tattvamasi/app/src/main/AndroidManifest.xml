@@ -7,15 +7,22 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- The redesigned app (Compose). The old screens below stay until the new ones replace them. -->
         <activity
-            android:name=".view.SplashActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/Theme.Tattvamasi.Starting"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".view.SplashActivity"
+            android:exported="false"
+            android:theme="@style/FullscreenTheme" />
 
         <activity android:name=".view.HomeActivity" />
         <activity android:name=".view.BhajansActivity" />

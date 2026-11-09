@@ -1,34 +1,44 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+// The release signing key's details live outside git: Tattvamasi/keystore.properties (git-ignored) with
+// storeFile, storePassword, keyAlias and keyPassword, or the same names as environment variables
+// (TATTVAMASI_STORE_FILE, ...). Without them, release builds are left unsigned.
+def keystoreProperties = new Properties()
+def keystoreFile = rootProject.file('keystore.properties')
+if (keystoreFile.exists()) {
+    keystoreFile.withInputStream { keystoreProperties.load(it) }
+}
+def signingValue = { String name, String env -> keystoreProperties.getProperty(name) ?: System.getenv(env) }
+def releaseStoreFile = signingValue('storeFile', 'TATTVAMASI_STORE_FILE')
 
 android {
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+    namespace 'com.ayyappasamaaj.tattvamasi'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.ayyappasamaaj.tattvamasi"
+        // Android 8 and up (the redesign, Nov 2026): Compose, adaptive layouts and variable fonts
+        minSdk 26
+        targetSdk 35
+        versionCode 33
+        versionName "3.3"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
         release {
-            storeFile file('/Users/satya/Documents/GitHub/certs/Android/AyyappaSamaaj/android.jks')
-            storePassword '18!Padikal18000'
-            keyAlias 'aysa'
-            keyPassword '18!Padikal'
+            if (releaseStoreFile) {
+                storeFile file(releaseStoreFile)
+                storePassword signingValue('storePassword', 'TATTVAMASI_STORE_PASSWORD')
+                keyAlias signingValue('keyAlias', 'TATTVAMASI_KEY_ALIAS')
+                keyPassword signingValue('keyPassword', 'TATTVAMASI_KEY_PASSWORD')
+            }
         }
     }
-    dataBinding {
-        enabled = true
-    }
 
-    compileSdk 35
-    defaultConfig {
-        applicationId "com.ayyappasamaaj.tattvamasi"
-        minSdkVersion 21
-        targetSdkVersion 35
-        versionCode 33
-        versionName "3.3"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
     buildTypes {
         debug {
             buildConfigField "String", "BUILD_VARIANT", "\"debug\""
@@ -38,35 +48,54 @@ android {
             minifyEnabled false
             buildConfigField "String", "BUILD_VARIANT", "\"release\""
             buildConfigField "String", "PAY_PAL_URL", "\"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4M73DVTGB3BNY\""
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (releaseStoreFile) {
+                signingConfig signingConfigs.release
+            }
         }
     }
-    namespace 'com.ayyappasamaaj.tattvamasi'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig true
+        dataBinding true  // the old screens, until the new ones replace them
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    // The new screens: Jetpack Compose with Material 3 and its adaptive navigation
+    implementation platform('androidx.compose:compose-bom:2024.12.01')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material3:material3-adaptive-navigation-suite'
+    implementation 'androidx.compose.material:material-icons-extended'
+    implementation 'androidx.activity:activity-compose:1.9.3'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
 
+    implementation "androidx.core:core-ktx:1.15.0"
+
+    // The old screens
     implementation "androidx.appcompat:appcompat:1.7.0"
-    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.constraintlayout:constraintlayout:2.2.0"
     implementation "androidx.recyclerview:recyclerview:1.3.2"
-    implementation "androidx.activity:activity-ktx:1.9.0"
-    implementation "androidx.core:core-ktx:1.13.1"
-
-    // CardView
     implementation "androidx.cardview:cardview:1.0.0"
 
-    // Firebase
-    implementation platform('com.google.firebase:firebase-bom:33.1.1')
+    // Firebase (the website publishes events and publications there)
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-database'
 
-    androidTestImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
 }
 
-// Firebase
 apply plugin: 'com.google.gms.google-services'
-repositories {
-    mavenCentral()
-}
