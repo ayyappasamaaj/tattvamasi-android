@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.view.AboutUsActivity
@@ -74,7 +75,11 @@ fun AppRoot() {
                     selected = destination == current,
                     onClick = { current = destination },
                     icon = { Icon(destination.icon, contentDescription = null) },
-                    label = { Text(destination.label, maxLines = 1) },
+                    // 12sp so "Publications" fits the narrowest phones' five-item bar
+                    label = {
+                        Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                             style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp))
+                    },
                 )
             }
         },
