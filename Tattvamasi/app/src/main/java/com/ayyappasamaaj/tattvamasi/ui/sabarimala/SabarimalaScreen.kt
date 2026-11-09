@@ -2,6 +2,7 @@
 
 package com.ayyappasamaaj.tattvamasi.ui.sabarimala
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,33 +46,49 @@ import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuideContent
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuideScreen
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
-/** One of the website's pilgrimage guides. */
-data class Guide(val title: String, val note: String, val image: Int?, val path: String) {
+/** One of the website's pilgrimage guides, as a card: [slug] is its slug in /guides/app.json. */
+data class Guide(val slug: String, val title: String, val note: String, val image: Int?, val path: String) {
     val url: String get() = "https://ayyappasamaaj.org/$path"
 }
 
 /** The guides after the main Sabarimala guide, as on the iOS app and the website. */
 val guides = listOf(
-    Guide("Traditional Path", "The Periya Paatha, the long route Lord Ayyappa took",
+    Guide("traditional-path", "Traditional Path", "The Periya Paatha, the long route Lord Ayyappa took",
         R.drawable.guide_traditional_path, "traditional-path/"),
-    Guide("Vratam", "The vow for the pilgrimage: what to do and not do", R.drawable.guide_vratam, "vratam/"),
-    Guide("Virtual Q", "Book your Sannidhanam darshan slot, step by step", null, "sabarimala-virtual-q/"),
-    Guide("House Puja", "Host an Ayyappa Puja and Bhajan at home", R.drawable.guide_house_puja, "house-puja-bhajan/"),
+    Guide("vratam", "Vratam", "The vow for the pilgrimage: what to do and not do", R.drawable.guide_vratam, "vratam/"),
+    Guide("virtual-q", "Virtual Q", "Book your Sannidhanam darshan slot, step by step", null, "sabarimala-virtual-q/"),
+    Guide("house-puja", "House Puja", "Host an Ayyappa Puja and Bhajan at home", R.drawable.guide_house_puja, "house-puja-bhajan/"),
 )
 
 private val shrines = listOf("Kulathupuzha", "Aryankavu", "Achankovil", "Erumeli", "Sabarimala")
 
 /**
- * Sabarimala: the website's pilgrimage guides. Each card opens the guide on ayyappasamaaj.org in a Custom Tab,
- * so the text is always the website's current version. As on the iOS app (SabarimalaView.swift). Two columns of
- * guides on a tablet.
+ * Sabarimala: the website's pilgrimage guides, read in the app (ui/guides): each card opens its guide's screen.
+ * [open] is the guide shown (and the section to go to), or null for the cards; Back returns to the cards. A guide
+ * the app has no copy of opens on ayyappasamaaj.org instead. Two columns of guides on a tablet.
  */
 @Composable
-fun SabarimalaScreen() {
+fun SabarimalaScreen(
+    content: List<GuideContent>,
+    open: GuideTarget? = null,
+    onOpen: (GuideTarget?) -> Unit = {},
+) {
     val context = LocalContext.current
+    val shown = open?.let { target -> content.firstOrNull { it.slug == target.slug } }
+    if (shown != null) {
+        BackHandler { onOpen(null) }
+        GuideScreen(shown, open.section, onBack = { onOpen(null) }, onShown = { onOpen(GuideTarget(shown.slug)) })
+        return
+    }
+    fun show(slug: String, url: String) {
+        if (content.any { it.slug == slug }) onOpen(GuideTarget(slug)) else openWebPage(context, url)
+    }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(340.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -81,9 +98,9 @@ fun SabarimalaScreen() {
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) { ScreenTitle("Sabarimala") }
         item(span = { GridItemSpan(maxLineSpan) }) {
-            MainGuide { openWebPage(context, "https://ayyappasamaaj.org/sabarimala/") }
+            MainGuide { show("sabarimala", "https://ayyappasamaaj.org/sabarimala/") }
         }
-        items(guides, key = { it.path }) { guide -> GuideRow(guide) { openWebPage(context, guide.url) } }
+        items(guides, key = { it.path }) { guide -> GuideRow(guide) { show(guide.slug, guide.url) } }
         item(span = { GridItemSpan(maxLineSpan) }) { AddressFooter() }
     }
 }

@@ -88,7 +88,7 @@ fun DateBlock(date: Instant, size: Dp = 56.dp) {
 @Composable
 fun AddressFooter() {
     Text(
-        "Ayyappa Samaaj · A Virtual Organization\n1106 Corvallis Dr, San Jose, CA 95120",
+        "Ayyappa Samaaj · A Virtual Organization\nSan Jose, CA 95120",
         style = MaterialTheme.typography.bodySmall,
         color = AppColors.muted,
         textAlign = TextAlign.Center,

@@ -25,10 +25,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -47,10 +50,14 @@ import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.ui.about.AboutScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuidesStore
+import com.ayyappasamaaj.tattvamasi.ui.guides.guideTarget
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
 import com.ayyappasamaaj.tattvamasi.ui.sabarimala.SabarimalaScreen
+import com.ayyappasamaaj.tattvamasi.ui.text.LocalLinkHandler
 
 /** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
  *  unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. */
@@ -70,40 +77,61 @@ fun AppRoot() {
     val events by EventsStore.state.collectAsState()
     LaunchedEffect(Unit) { PublicationsStore.start() }
     val publications by PublicationsStore.state.collectAsState()
+    var openGuide by rememberSaveable { mutableStateOf<String?>(null) }  // GuideTarget.encode() of the guide shown
+    val context = LocalContext.current
+    LaunchedEffect(Unit) { GuidesStore.start(context) }
+    val guides by GuidesStore.state.collectAsState()
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            Destination.entries.forEach { destination ->
-                item(
-                    selected = destination == current,
-                    onClick = {
-                        if (destination == Destination.Events && current == Destination.Events) openEvent = null
-                        current = destination
-                    },
-                    icon = { Icon(destination.icon, contentDescription = null) },
-                    // 12sp so "Publications" fits the narrowest phones' five-item bar
-                    label = {
-                        Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                             style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp))
-                    },
-                )
+    // A link to one of the guides (in an event's text, or in another guide) opens the guide in the app
+    val openLink: (String) -> Boolean = remember(guides) {
+        { url ->
+            val target = guideTarget(url, guides)
+            if (target != null) {
+                openGuide = target.encode()
+                current = Destination.Sabarimala
             }
-        },
-        containerColor = AppColors.cream,
-    ) {
-        AppScreen {
-            when (current) {
-                Destination.Home -> HomeScreen(events, go = {
-                    if (it == Destination.Events) openEvent = null  // "See events": the list
-                    current = it
-                }, openEvent = { key ->
-                    openEvent = key
-                    current = Destination.Events
-                })
-                Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
-                Destination.Publications -> PublicationsScreen(publications)
-                Destination.Sabarimala -> SabarimalaScreen()
-                Destination.About -> AboutScreen()
+            target != null
+        }
+    }
+
+    CompositionLocalProvider(LocalLinkHandler provides openLink) {
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                Destination.entries.forEach { destination ->
+                    item(
+                        selected = destination == current,
+                        onClick = {
+                            if (destination == Destination.Events && current == Destination.Events) openEvent = null
+                            if (destination == Destination.Sabarimala && current == Destination.Sabarimala) openGuide = null
+                            current = destination
+                        },
+                        icon = { Icon(destination.icon, contentDescription = null) },
+                        // 12sp so "Publications" fits the narrowest phones' five-item bar
+                        label = {
+                            Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp))
+                        },
+                    )
+                }
+            },
+            containerColor = AppColors.cream,
+        ) {
+            AppScreen {
+                when (current) {
+                    Destination.Home -> HomeScreen(events, go = {
+                        if (it == Destination.Events) openEvent = null  // "See events": the list
+                        current = it
+                    }, openEvent = { key ->
+                        openEvent = key
+                        current = Destination.Events
+                    })
+                    Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
+                    Destination.Publications -> PublicationsScreen(publications)
+                    Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode)) {
+                        openGuide = it?.encode()
+                    }
+                    Destination.About -> AboutScreen()
+                }
             }
         }
     }

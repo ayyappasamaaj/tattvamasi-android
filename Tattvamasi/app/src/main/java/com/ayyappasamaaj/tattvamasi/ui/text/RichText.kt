@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
@@ -145,11 +146,18 @@ fun parseRichText(html: String): List<TextBlock> {
     return blocks
 }
 
-/** The runs as Compose text: styles, and links that open in the in-app browser. */
+/**
+ * Opens a link inside the app when it can (a link to one of the guides opens the guide's screen); returns false
+ * for any other page, which then opens in the in-app browser. Provided by AppRoot.
+ */
+val LocalLinkHandler = staticCompositionLocalOf<(String) -> Boolean> { { false } }
+
+/** The runs as Compose text: styles, and links that open in the app or the in-app browser. */
 @Composable
 private fun annotated(runs: List<Run>): AnnotatedString {
     val context = LocalContext.current
-    return remember(runs) {
+    val handler = LocalLinkHandler.current
+    return remember(runs, handler) {
         buildAnnotatedString {
             for (run in runs) {
                 val style = SpanStyle(
@@ -161,7 +169,7 @@ private fun annotated(runs: List<Run>): AnnotatedString {
                     val url = run.link
                     withLink(LinkAnnotation.Clickable(url, TextLinkStyles(SpanStyle(
                         color = AppColors.clayDark, textDecoration = TextDecoration.Underline))) {
-                        openWebPage(context, url)
+                        if (!handler(url)) openWebPage(context, url)
                     }) { withStyle(style) { append(run.text) } }
                 } else {
                     withStyle(style) { append(run.text) }
