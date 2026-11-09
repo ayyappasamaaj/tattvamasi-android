@@ -54,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ayyappasamaaj.tattvamasi.notifications.NotificationsCard
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
@@ -301,4 +302,5 @@ private fun Contact() {
             }
         }
     }
+    NotificationsCard()
 }

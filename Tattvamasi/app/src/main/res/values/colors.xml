@@ -2,4 +2,6 @@
 <resources>
     <!-- The website's page background: the window and the splash screen behind the icon -->
     <color name="cream">#F6F2EA</color>
+    <!-- The notifications' accent (the website's clay, AppColors.clay) -->
+    <color name="notification">#B4410F</color>
 </resources>
