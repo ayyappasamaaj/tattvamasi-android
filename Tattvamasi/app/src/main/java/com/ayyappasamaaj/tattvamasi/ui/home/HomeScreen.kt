@@ -48,7 +48,7 @@ import com.ayyappasamaaj.tattvamasi.ui.WebPages
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.events.AppEvent
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsState
-import com.ayyappasamaaj.tattvamasi.ui.openWebPage
+import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
 /** Home: the next event, then the app's sections and Donate. As on the iOS app (HomeView.swift). */
@@ -83,7 +83,7 @@ fun HomeScreen(events: EventsState, go: (Destination) -> Unit, openEvent: (Strin
                             go(Destination.About)
                         },
                         Tile("Donate", "Support Lord Ayyappa's seva; tax-deductible", Icons.Outlined.FavoriteBorder) {
-                            openWebPage(context, WebPages.DONATE)
+                            openInBrowser(context, WebPages.DONATE)
                         },
                     ),
                 )
