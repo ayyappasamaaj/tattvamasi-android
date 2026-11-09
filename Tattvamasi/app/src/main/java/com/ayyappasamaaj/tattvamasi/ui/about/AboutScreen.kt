@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Drafts
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.SmartDisplay
@@ -42,11 +43,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -187,16 +190,60 @@ private fun OurBoard() {
                 }
             }
         }
-        Text(
-            "Earlier years' boards on ayyappasamaaj.org",
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight(600),
-                textDecoration = TextDecoration.Underline),
-            color = AppColors.clayDark,
-            modifier = Modifier
-                .padding(vertical = 4.dp)
-                .clickable(role = Role.Button) { openWebPage(context, "https://ayyappasamaaj.org/board/") }
-                .padding(vertical = 8.dp),
-        )
+        if (board.earlier.isEmpty()) {
+            // Until the website's list loads: the earlier boards are on the website
+            Text(
+                "Earlier years' boards on ayyappasamaaj.org",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight(600),
+                    textDecoration = TextDecoration.Underline),
+                color = AppColors.clayDark,
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .clickable(role = Role.Button) { openWebPage(context, "https://ayyappasamaaj.org/board/") }
+                    .padding(vertical = 8.dp),
+            )
+        }
+    }
+    if (board.earlier.isNotEmpty()) {
+        Column(Modifier.fillMaxWidth().card(16.dp)) {
+            Text("Earlier boards", style = MaterialTheme.typography.titleLarge, color = AppColors.ink,
+                modifier = Modifier.padding(vertical = 8.dp).semantics { heading() })
+            board.earlier.forEachIndexed { index, year ->
+                if (index > 0) HorizontalDivider(color = AppColors.line)
+                EarlierYear(year)
+            }
+        }
+    }
+}
+
+/** An earlier year's board: the year (tap to open or close), then its members. */
+@Composable
+private fun EarlierYear(board: Board) {
+    var open by rememberSaveable(board.year) { mutableStateOf(false) }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 52.dp)
+            .clickable(role = Role.Button, onClickLabel = if (open) "Close" else "Open") { open = !open }
+            .semantics(mergeDescendants = true) { stateDescription = if (open) "Expanded" else "Collapsed" },
+    ) {
+        Text("${board.year} board", style = MaterialTheme.typography.titleMedium, color = AppColors.ink,
+            modifier = Modifier.weight(1f))
+        Icon(Icons.Outlined.ExpandMore, contentDescription = null, tint = AppColors.clay,
+            modifier = Modifier.rotate(if (open) 180f else 0f))
+    }
+    if (open) {
+        Column(Modifier.padding(bottom = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            board.members.forEach { member ->
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.semantics(mergeDescendants = true) {}) {
+                    Text(member.name, style = MaterialTheme.typography.bodyLarge, color = AppColors.ink,
+                        modifier = Modifier.weight(1f))
+                    Text(member.role, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                        color = AppColors.muted, modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+        }
     }
 }
 

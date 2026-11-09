@@ -14,7 +14,8 @@ data class BoardMember(val name: String, val role: String) {
     val initials: String get() = name.split(" ").filter { it.isNotBlank() }.take(2).joinToString("") { it.take(1) }
 }
 
-data class Board(val year: Int, val members: List<BoardMember>)
+/** A year's board; [earlier] is the earlier years' boards, newest first (only on this year's). */
+data class Board(val year: Int, val members: List<BoardMember>, val earlier: List<Board> = emptyList())
 
 /** Shown until the website's list loads (or if it can't be reached): the 2026 board, as in the iOS app. */
 val builtInBoard = Board(
@@ -35,14 +36,25 @@ val builtInBoard = Board(
     ),
 )
 
-/** The website's /board/app.json ({"year": 2026, "members": [{"name", "role"}]}), or null if it isn't usable. */
-fun parseBoard(json: String): Board? = runCatching {
-    val root = JSONObject(json)
-    val list = root.getJSONArray("members")
-    val members = (0 until list.length()).map { list.getJSONObject(it) }
+private fun parseYear(root: JSONObject): Board? {
+    val list = root.optJSONArray("members") ?: return null
+    val members = (0 until list.length()).mapNotNull { list.optJSONObject(it) }
         .map { BoardMember(it.optString("name"), it.optString("role")) }
         .filter { it.name.isNotBlank() }
-    Board(root.getInt("year"), members).takeIf { members.isNotEmpty() }
+    return Board(root.getInt("year"), members).takeIf { members.isNotEmpty() }
+}
+
+/**
+ * The website's /board/app.json ({"year": 2026, "members": [{"name", "role"}], "earlier": [{"year", "members"}]}),
+ * or null if it isn't usable.
+ */
+fun parseBoard(json: String): Board? = runCatching {
+    val root = JSONObject(json)
+    val earlier = root.optJSONArray("earlier")
+    val years = (0 until (earlier?.length() ?: 0)).mapNotNull { index ->
+        earlier!!.optJSONObject(index)?.let { runCatching { parseYear(it) }.getOrNull() }
+    }.sortedByDescending { it.year }
+    parseYear(root)?.copy(earlier = years)
 }.getOrNull()
 
 /** This year's board from the website (ayyappasamaaj.org/board/app.json), loaded once per app run. */
