@@ -32,14 +32,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.DateBlock
 import com.ayyappasamaaj.tattvamasi.ui.Destination
@@ -51,9 +54,14 @@ import com.ayyappasamaaj.tattvamasi.ui.events.EventsState
 import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
-/** Home: the next event, then the app's sections and Donate. As on the iOS app (HomeView.swift). */
+/** Home: the next event, the Sahasranama Yatra, then the app's sections and Donate. As on the iOS app (HomeView.swift). */
 @Composable
-fun HomeScreen(events: EventsState, go: (Destination) -> Unit, openEvent: (String) -> Unit = {}) {
+fun HomeScreen(
+    events: EventsState,
+    go: (Destination) -> Unit,
+    openEvent: (String) -> Unit = {},
+    openYatra: () -> Unit = {},
+) {
     val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -71,6 +79,12 @@ fun HomeScreen(events: EventsState, go: (Destination) -> Unit, openEvent: (Strin
                     modifier = Modifier.semantics { heading() },
                 )
                 NextEvent(events, seeEvents = { go(Destination.Events) }, open = openEvent)
+                // The Sahasranama Yatra: across the whole width, above the sections
+                TileCard(
+                    Tile("Sahasranama Yatra", "Chant the 1000 names of Sri Dharma Shastha through the 41 days of Vratam",
+                        painter = painterResource(R.drawable.ic_yatra_lamp), onClick = openYatra),
+                    Modifier.fillMaxWidth(),
+                )
                 Tiles(
                     listOf(
                         Tile("Publications", "Bhajans, shlokas and puja texts", Icons.AutoMirrored.Outlined.MenuBook) {
@@ -140,7 +154,13 @@ private fun NextEventCard(event: AppEvent, seeEvents: () -> Unit, open: () -> Un
     }
 }
 
-private data class Tile(val title: String, val note: String, val icon: ImageVector, val onClick: () -> Unit)
+private data class Tile(
+    val title: String,
+    val note: String,
+    val icon: ImageVector? = null,
+    val painter: Painter? = null,
+    val onClick: () -> Unit,
+)
 
 /** The section tiles: two across on a phone, more on a tablet (each at least 160dp wide). */
 @Composable
@@ -175,7 +195,8 @@ private fun TileCard(tile: Tile, modifier: Modifier) {
             Modifier.size(40.dp).background(AppColors.claySoft, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(tile.icon, contentDescription = null, tint = AppColors.clay)
+            tile.icon?.let { Icon(it, contentDescription = null, tint = AppColors.clay) }
+            tile.painter?.let { Icon(it, contentDescription = null, tint = AppColors.clay) }
         }
         Text(tile.title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp), color = AppColors.ink)
         Text(tile.note, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = AppColors.muted)

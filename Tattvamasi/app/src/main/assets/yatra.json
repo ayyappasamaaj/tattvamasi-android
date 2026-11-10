@@ -1,0 +1,57 @@
+{
+ "version": 1,
+ "title": "Sahasranama Yatra",
+ "url": "https://ayyappasamaaj.org/interactive/sahasranama-yatra/",
+ "listed": true,
+ "mandala_puja_date": "",
+ "credit": "Translation support: Pandit Umashankar Dixit and Pandit Thejus Dixit.",
+ "verses_per_day": 4,
+ "stages": [
+  "Erumeli",
+  "Kaalaketti",
+  "Azhutha",
+  "Karimala",
+  "Pamba",
+  "Neelimala",
+  "Sabaripeedam",
+  "Saramkuthi",
+  "Pathinettam Padi",
+  "Sannidhanam"
+ ],
+ "name_of_day": {
+  "11": 298,
+  "12": 313
+ },
+ "reflections": {
+  "11": {
+   "carry": "Before a hard moment today, pause and say “Swamiye Saranam.” Notice what you no longer need to carry alone."
+  },
+  "12": {
+   "carry": "Some poisons are not in snakes but in words and worry. Today, chant this name for whatever is weighing on you."
+  }
+ },
+ "teasers": {
+  "12": "The name of the one who frees you from poison"
+ },
+ "closing_name": 1002,
+ "data": {
+  "url": "https://ayyappasamaaj.org/interactive/stotrams/dharma-shastha-sahasranamam.json?v=10823.2",
+  "version": "10823.2"
+ },
+ "languages": [
+  {
+   "code": "ta",
+   "name": "தமிழ்",
+   "english": "Tamil",
+   "script": "Taml",
+   "url": "https://ayyappasamaaj.org/interactive/stotrams/dharma-shastha-sahasranamam.ta.json?v=10823.2"
+  },
+  {
+   "code": "ml",
+   "name": "മലയാളം",
+   "english": "Malayalam",
+   "script": "Mlym",
+   "url": "https://ayyappasamaaj.org/interactive/stotrams/dharma-shastha-sahasranamam.ml.json?v=10823.2"
+  }
+ ]
+}

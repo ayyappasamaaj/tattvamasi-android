@@ -68,6 +68,7 @@ import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
 import com.ayyappasamaaj.tattvamasi.ui.sabarimala.SabarimalaScreen
 import com.ayyappasamaaj.tattvamasi.ui.text.LocalLinkHandler
+import com.ayyappasamaaj.tattvamasi.ui.yatra.YatraScreen
 
 /** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
  *  unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. */
@@ -91,6 +92,11 @@ fun AppRoot() {
     val context = LocalContext.current
     LaunchedEffect(Unit) { GuidesStore.start(context) }
     val guides by GuidesStore.state.collectAsState()
+    var yatraOpen by rememberSaveable { mutableStateOf(false) }  // the Sahasranama Yatra, under Publications
+    val openYatra = {
+        yatraOpen = true
+        current = Destination.Publications
+    }
 
     // A link to one of the guides (in an event's text, or in another guide) opens the guide in the app
     val openLink: (String) -> Boolean = remember(guides) {
@@ -142,6 +148,7 @@ fun AppRoot() {
                         onClick = {
                             if (destination == Destination.Events && current == Destination.Events) openEvent = null
                             if (destination == Destination.Sabarimala && current == Destination.Sabarimala) openGuide = null
+                            if (destination == Destination.Publications && current == Destination.Publications) yatraOpen = false
                             current = destination
                         },
                         icon = { Icon(destination.icon, contentDescription = null) },
@@ -155,6 +162,11 @@ fun AppRoot() {
             },
             containerColor = AppColors.cream,
         ) {
+            // The yatra has its own bar at the top, in place of the banner
+            if (current == Destination.Publications && yatraOpen) {
+                YatraScreen(onClose = { yatraOpen = false })
+                return@NavigationSuiteScaffold
+            }
             AppScreen {
                 when (current) {
                     Destination.Home -> HomeScreen(events, go = {
@@ -163,9 +175,9 @@ fun AppRoot() {
                     }, openEvent = { key ->
                         openEvent = key
                         current = Destination.Events
-                    })
+                    }, openYatra = openYatra)
                     Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
-                    Destination.Publications -> PublicationsScreen(publications)
+                    Destination.Publications -> PublicationsScreen(publications, openYatra)
                     Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode)) {
                         openGuide = it?.encode()
                     }
