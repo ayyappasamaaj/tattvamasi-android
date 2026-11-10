@@ -27,6 +27,10 @@ class YatraTest {
         assertEquals(1002, feed.closingName)
         assertTrue(feed.data.url.startsWith("https://ayyappasamaaj.org/"))
         assertEquals(listOf("ta", "ml"), feed.languages.map { it.code })
+        // Still being reviewed: listed greyed out, never chosen
+        assertEquals(listOf("Telugu", "Kannada"), feed.comingLanguages.map { it.english })
+        assertEquals(emptyList<ComingLanguage>(), parseYatraFeed(File("src/main/assets/yatra.json").readText()
+            .replace("\"languages_coming\"", "\"x\""))!!.comingLanguages)
         assertNull(parseYatraFeed("""{"version": 2}"""))
         assertNull(parseYatraFeed("not json"))
     }

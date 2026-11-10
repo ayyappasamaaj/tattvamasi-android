@@ -265,7 +265,8 @@ private fun TopBar(back: String, onBack: () -> Unit, state: YatraState, onHowTo:
 @Composable
 private fun ScriptMenu(state: YatraState) {
     val languages = state.yatra?.feed?.languages.orEmpty()
-    if (languages.isEmpty()) return
+    val coming = state.yatra?.feed?.comingLanguages.orEmpty()
+    if (languages.isEmpty() && coming.isEmpty()) return
     var open by remember { mutableStateOf(false) }
     Box {
         TextButton(onClick = { open = true }, modifier = Modifier.semantics { contentDescription = "Script for the verses and names" }) {
@@ -284,6 +285,15 @@ private fun ScriptMenu(state: YatraState) {
                         open = false
                         if (code != state.script) YatraStore.chooseScript(code)
                     },
+                )
+            }
+            // Still being reviewed: listed greyed out, as on the website, and can't be chosen
+            coming.forEach { language ->
+                DropdownMenuItem(
+                    text = { Text("${language.name} · ${language.english} (Coming Soon)", fontFamily = ScriptFont) },
+                    leadingIcon = { Spacer(Modifier.size(24.dp)) },
+                    enabled = false,
+                    onClick = {},
                 )
             }
         }

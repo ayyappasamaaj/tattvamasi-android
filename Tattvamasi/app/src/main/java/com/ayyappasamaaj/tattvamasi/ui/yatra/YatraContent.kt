@@ -30,12 +30,16 @@ data class YatraFeed(
     val closingName: Int,
     val data: DataLink,
     val languages: List<YatraLanguage>,
+    val comingLanguages: List<ComingLanguage> = emptyList(),
 )
 
 data class Reflection(val about: String, val carry: String)
 
 /** Where a version of the stotram's data is. */
 data class DataLink(val url: String, val version: String)
+
+/** A language still being reviewed: listed greyed out, "(Coming Soon)", and not chosen. */
+data class ComingLanguage(val code: String, val name: String, val english: String)
 
 /** A script the verses and names can be shown in besides Devanagari ("ta": Tamil). */
 data class YatraLanguage(val code: String, val name: String, val english: String, val url: String)
@@ -128,6 +132,10 @@ fun parseYatraFeed(text: String): YatraFeed? = runCatching {
             val url = l.optString("url")
             if (code.isBlank() || !url.startsWith("http")) null
             else YatraLanguage(code, l.optString("name"), l.optString("english"), url)
+        },
+        comingLanguages = root.optJSONArray("languages_coming").objects().mapNotNull { l ->
+            val english = l.optString("english")
+            if (english.isBlank()) null else ComingLanguage(l.optString("code"), l.optString("name", english), english)
         },
     )
 }.getOrNull()

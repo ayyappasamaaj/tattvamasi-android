@@ -53,5 +53,17 @@
    "script": "Mlym",
    "url": "https://ayyappasamaaj.org/interactive/stotrams/dharma-shastha-sahasranamam.ml.json?v=10823.2"
   }
+ ],
+ "languages_coming": [
+  {
+   "code": "te",
+   "name": "తెలుగు",
+   "english": "Telugu"
+  },
+  {
+   "code": "kn",
+   "name": "ಕನ್ನಡ",
+   "english": "Kannada"
+  }
  ]
 }
