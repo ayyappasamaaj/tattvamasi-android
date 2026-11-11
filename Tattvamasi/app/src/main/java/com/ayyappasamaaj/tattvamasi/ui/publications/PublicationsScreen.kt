@@ -87,7 +87,7 @@ import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
  * tablet the tiles stay on the left and the category shows on the right, like the iPad's split view.
  */
 @Composable
-fun PublicationsScreen(state: PublicationsState) {
+fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}) {
     var selectedSlug by rememberSaveable { mutableStateOf<String?>(null) }
     var reading by remember { mutableStateOf<ReadingItem?>(null) }
     val selected = state.sections.flatMap { s -> s.categories.map { s to it } }.firstOrNull { it.second.slug == selectedSlug }
@@ -99,7 +99,7 @@ fun PublicationsScreen(state: PublicationsState) {
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(340.dp).fillMaxHeight()) {
                     PublicationsHome(state, selectedSlug = shown?.second?.slug, onCategory = { selectedSlug = it.slug },
-                        onRead = open, minTile = 96)
+                        onRead = open, minTile = 96, openYatra = openYatra)
                 }
                 VerticalDivider(color = AppColors.line)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
@@ -113,7 +113,7 @@ fun PublicationsScreen(state: PublicationsState) {
             CategoryContent(selected.first, selected.second, onRead = open, onBack = { selectedSlug = null })
         } else {
             PublicationsHome(state, selectedSlug = null, onCategory = { selectedSlug = it.slug }, onRead = open,
-                minTile = 100)
+                minTile = 100, openYatra = openYatra)
         }
     }
 
@@ -128,6 +128,7 @@ private fun PublicationsHome(
     onCategory: (PublicationCategory) -> Unit,
     onRead: (ReadingItem) -> Unit,
     minTile: Int,
+    openYatra: () -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     LazyVerticalGrid(
@@ -180,7 +181,33 @@ private fun PublicationsHome(
                 }
             }
         }
+        if (query.isBlank()) item(span = full) { YatraCard(openYatra) }
         item(span = full) { AddressFooter() }
+    }
+}
+
+/** The Sahasranama Yatra, after the publications (it's the Sahasranamam, chanted a day at a time). */
+@Composable
+private fun YatraCard(open: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = open)
+            .background(AppColors.forest, RoundedCornerShape(16.dp))
+            .padding(16.dp),
+    ) {
+        Icon(painterResource(R.drawable.ic_yatra_lamp), contentDescription = null, tint = AppColors.saffron,
+            modifier = Modifier.size(32.dp))
+        Column(Modifier.weight(1f)) {
+            Text("Sahasranama Yatra", style = MaterialTheme.typography.titleLarge, color = AppColors.cream)
+            Text("Chant the Sri Dharma Shastha Sahasranamam four verses a day through the 41 days of Vratam, with the " +
+                "meaning of every name.", style = MaterialTheme.typography.bodyMedium, color = AppColors.cream.copy(alpha = 0.85f))
+        }
+        Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null, tint = AppColors.saffron)
     }
 }
 
