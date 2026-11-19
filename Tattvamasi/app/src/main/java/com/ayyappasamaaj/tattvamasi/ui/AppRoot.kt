@@ -92,6 +92,7 @@ fun AppRoot() {
     val context = LocalContext.current
     LaunchedEffect(Unit) { GuidesStore.start(context) }
     val guides by GuidesStore.state.collectAsState()
+    val openingDates by GuidesStore.dates.collectAsState()
     var yatraOpen by rememberSaveable { mutableStateOf(false) }  // the Sahasranama Yatra, under Publications
     val openYatra = {
         yatraOpen = true
@@ -178,7 +179,7 @@ fun AppRoot() {
                     }, openYatra = openYatra)
                     Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
                     Destination.Publications -> PublicationsScreen(publications, openYatra)
-                    Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode)) {
+                    Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode), openingDates) {
                         openGuide = it?.encode()
                     }
                     Destination.About -> AboutScreen()

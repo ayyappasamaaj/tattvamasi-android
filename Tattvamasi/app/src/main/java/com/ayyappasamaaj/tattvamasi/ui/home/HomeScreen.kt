@@ -90,7 +90,7 @@ fun HomeScreen(
                         Tile("Publications", "Bhajans, shlokas and puja texts", Icons.AutoMirrored.Outlined.MenuBook) {
                             go(Destination.Publications)
                         },
-                        Tile("Sabarimala", "Guide, Vratam, Virtual Q and more", Icons.Outlined.Landscape) {
+                        Tile("Sabarimala", "Guide, opening dates, Vratam, Virtual Q", Icons.Outlined.Landscape) {
                             go(Destination.Sabarimala)
                         },
                         Tile("About us", "Who we are, our Board, contact", Icons.Outlined.Info) {

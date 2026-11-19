@@ -27,7 +27,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.EditCalendar
 import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,18 +54,33 @@ import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
-/** One of the website's pilgrimage guides, as a card: [slug] is its slug in /guides/app.json. */
-data class Guide(val slug: String, val title: String, val note: String, val image: Int?, val path: String) {
+/**
+ * One of the website's pilgrimage guides, as a card: [slug] is its slug in /guides/app.json, [title] its agreed short
+ * name (the website's menus and guide links use the same), [icon] what shows when it has no picture.
+ */
+data class Guide(
+    val slug: String,
+    val title: String,
+    val note: String,
+    val image: Int?,
+    val path: String,
+    val icon: ImageVector = Icons.Outlined.QrCode2,
+) {
     val url: String get() = "https://ayyappasamaaj.org/$path"
 }
 
-/** The guides after the main Sabarimala guide, as on the iOS app and the website. */
+/** The Sabarimala Opening Dates card's slug: a screen of its own, from the opening dates beside the guides. */
+const val OPENING_DATES = "opening-dates"
+
+/** The guides after the main Sabarimala guide, as on the iOS app and the website, with the website's names. */
 val guides = listOf(
     Guide("traditional-path", "Traditional Path", "The Periya Paatha, the long route Lord Ayyappa took",
         R.drawable.guide_traditional_path, "traditional-path/"),
-    Guide("vratam", "Vratam", "The vow for the pilgrimage: what to do and not do", R.drawable.guide_vratam, "vratam/"),
-    Guide("virtual-q", "Virtual Q", "Book your Sannidhanam darshan slot, step by step", null, "sabarimala-virtual-q/"),
-    Guide("house-puja", "House Puja", "Host an Ayyappa Puja and Bhajan at home", R.drawable.guide_house_puja, "house-puja-bhajan/"),
+    Guide(OPENING_DATES, "Sabarimala Opening Dates", "When the temple is open this year, and how busy it gets",
+        null, "sabarimala-opening-dates/", Icons.Outlined.EditCalendar),
+    Guide("vratam", "Observing the Vratam", "The vow for the pilgrimage: what to do and not do", R.drawable.guide_vratam, "vratam/"),
+    Guide("virtual-q", "Sabarimala Virtual Q", "Book your Sannidhanam darshan slot, step by step", null, "sabarimala-virtual-q/"),
+    Guide("house-puja", "House Puja and Bhajan", "Host an Ayyappa Puja and Bhajan at home", R.drawable.guide_house_puja, "house-puja-bhajan/"),
 )
 
 private val shrines = listOf("Kulathupuzha", "Aryankavu", "Achankovil", "Erumeli", "Sabarimala")
@@ -71,15 +88,22 @@ private val shrines = listOf("Kulathupuzha", "Aryankavu", "Achankovil", "Erumeli
 /**
  * Sabarimala: the website's pilgrimage guides, read in the app (ui/guides): each card opens its guide's screen.
  * [open] is the guide shown (and the section to go to), or null for the cards; Back returns to the cards. A guide
- * the app has no copy of opens on ayyappasamaaj.org instead. Two columns of guides on a tablet.
+ * the app has no copy of opens on ayyappasamaaj.org instead. Two columns of guides on a tablet. The Opening Dates card
+ * opens its own screen from [dates] (the website's page if the app has none yet).
  */
 @Composable
 fun SabarimalaScreen(
     content: List<GuideContent>,
     open: GuideTarget? = null,
+    dates: OpeningDates? = null,
     onOpen: (GuideTarget?) -> Unit = {},
 ) {
     val context = LocalContext.current
+    if (open?.slug == OPENING_DATES && dates != null) {
+        BackHandler { onOpen(null) }
+        OpeningDatesScreen(dates, onBack = { onOpen(null) })
+        return
+    }
     val shown = open?.let { target -> content.firstOrNull { it.slug == target.slug } }
     if (shown != null) {
         BackHandler { onOpen(null) }
@@ -87,7 +111,8 @@ fun SabarimalaScreen(
         return
     }
     fun show(slug: String, url: String) {
-        if (content.any { it.slug == slug }) onOpen(GuideTarget(slug)) else openWebPage(context, url)
+        val inApp = if (slug == OPENING_DATES) dates != null else content.any { it.slug == slug }
+        if (inApp) onOpen(GuideTarget(slug)) else openWebPage(context, url)
     }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(340.dp),
@@ -129,7 +154,7 @@ private fun MainGuide(onClick: () -> Unit) {
             )
         }
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Sabarimala guide", style = MaterialTheme.typography.titleLarge, color = AppColors.ink)
+            Text("Sabarimala Guide", style = MaterialTheme.typography.titleLarge, color = AppColors.ink)
             Text(
                 "The five shrines of the Western Ghats, from the child at Kulathupuzha to the Yogi on the Hill.",
                 style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft,
@@ -177,7 +202,7 @@ private fun GuideRow(guide: Guide, onClick: () -> Unit) {
                 Image(painterResource(guide.image), contentDescription = null, contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize())
             } else {
-                Icon(Icons.Outlined.QrCode2, contentDescription = null, tint = AppColors.saffron,
+                Icon(guide.icon, contentDescription = null, tint = AppColors.saffron,
                     modifier = Modifier.size(32.dp))
             }
         }

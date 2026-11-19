@@ -4,6 +4,8 @@ import android.content.Context
 import coil3.SingletonImageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
+import com.ayyappasamaaj.tattvamasi.ui.sabarimala.OpeningDates
+import com.ayyappasamaaj.tattvamasi.ui.sabarimala.parseOpeningDates
 import com.ayyappasamaaj.tattvamasi.util.AppLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +22,8 @@ import java.net.URL
  * The pilgrimage guides, kept for offline reading (on the pilgrimage there's often no signal): the last copy
  * from the website is saved on the phone, and the app ships with a copy (assets/guides.json) for a first start
  * without a connection. Once per app run it checks the website for a newer copy, and keeps every guide's
- * pictures (about 3 MB) in the image cache so they show offline too.
+ * pictures (about 3 MB) in the image cache so they show offline too. The Sabarimala opening dates come in the same
+ * file ([dates]; null in a copy from before Nov 19, 2026).
  */
 object GuidesStore {
     private const val TAG = "GuidesStore"
@@ -29,6 +32,8 @@ object GuidesStore {
 
     private val _state = MutableStateFlow<List<GuideContent>>(emptyList())
     val state: StateFlow<List<GuideContent>> = _state.asStateFlow()
+    private val _dates = MutableStateFlow<OpeningDates?>(null)
+    val dates: StateFlow<OpeningDates?> = _dates.asStateFlow()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var started = false
 
@@ -38,14 +43,17 @@ object GuidesStore {
         val app = context.applicationContext
         scope.launch {
             val saved = File(app.filesDir, FILE)
-            val local = runCatching { saved.readText() }.getOrNull()?.let(::parseGuides)
-                ?: runCatching { app.assets.open(FILE).reader().readText() }.getOrNull()?.let(::parseGuides)
+            val bundled = runCatching { app.assets.open(FILE).reader().readText() }.getOrNull()
+            val savedText = runCatching { saved.readText() }.getOrNull()
+            val local = savedText?.let(::parseGuides) ?: bundled?.let(::parseGuides)
             if (local != null) _state.value = local
+            _dates.value = savedText?.let(::parseOpeningDates) ?: bundled?.let(::parseOpeningDates)
 
             val text = runCatching { download() }.onFailure { AppLog.w(TAG, "guides: " + it.message) }.getOrNull()
             val fresh = text?.let(::parseGuides)
             if (fresh != null) {
                 _state.value = fresh
+                parseOpeningDates(text)?.let { _dates.value = it }
                 runCatching { saved.writeText(text) }.onFailure { AppLog.w(TAG, "save: " + it.message) }
             }
             keepPictures(app, _state.value)

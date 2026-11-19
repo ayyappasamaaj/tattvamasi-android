@@ -105,7 +105,7 @@ fun GuideScreen(guide: GuideContent, section: String?, onBack: () -> Unit, onSho
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = {
                         val send = Intent(Intent.ACTION_SEND).setType("text/plain")
-                            .putExtra(Intent.EXTRA_SUBJECT, guide.title).putExtra(Intent.EXTRA_TEXT, "${guide.title}\n${guide.url}")
+                            .putExtra(Intent.EXTRA_SUBJECT, guide.name).putExtra(Intent.EXTRA_TEXT, "${guide.name}\n${guide.url}")
                         context.startActivity(Intent.createChooser(send, "Share"))
                     }) { Icon(Icons.Outlined.Share, contentDescription = "Share", tint = AppColors.ink) }
                 }
