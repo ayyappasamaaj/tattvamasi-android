@@ -33,6 +33,8 @@ data class GuideSection(
 data class GuideContent(
     val slug: String,
     val title: String,
+    /** The guide's agreed short name, as the website's menus show it ("Traditional Path"); [title] is its heading. */
+    val name: String = title,
     val url: String,
     val intro: List<GuideBlock>,
     val sections: List<GuideSection>,
@@ -98,6 +100,7 @@ fun parseGuides(json: String): List<GuideContent>? = runCatching {
         GuideContent(
             slug = it.getString("slug"),
             title = it.optString("title"),
+            name = it.optString("name").ifBlank { it.optString("title") },
             url = it.optString("url"),
             intro = parseBlocks(it.optJSONArray("intro")),
             sections = parseSections(it.optJSONArray("sections")),
