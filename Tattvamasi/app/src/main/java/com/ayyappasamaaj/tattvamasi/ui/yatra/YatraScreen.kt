@@ -162,10 +162,54 @@ fun YatraScreen(onClose: () -> Unit) {
         state.message?.let { toast(context, it); YatraStore.clearMessage() }
     }
 
+    // The name the player chose to show (its card is opened), and a day not yet open shown for it (the player isn't
+    // held to the day-by-day pace)
+    var focusName by rememberSaveable { mutableStateOf<Int?>(null) }
+    var peekDay by rememberSaveable { mutableStateOf<Int?>(null) }
+
     fun openDay(day: Int) {
         val y = yatra ?: return
         viewText = View.Day(day).encode()
         step = y.firstStep(day, progress)
+        focusName = null
+        peekDay = null
+    }
+
+    /** Shows name [n]'s card: its verse on its day, with the name chosen. */
+    // (it reads the yatra from the store: it runs from the player's changes, after the screen was drawn)
+    fun showName(n: Int) {
+        val current = YatraStore.state.value
+        val y = current.yatra ?: return
+        val verse = y.verseOfName(n) ?: return
+        val day = (verse - 1) / y.feed.versesPerDay + 1
+        if (day > y.verseDays) return
+        val index = y.steps(day).indexOfFirst { it is Step.VerseStep && it.verse == verse }
+        if (index < 0) return
+        viewText = View.Day(day).encode()
+        step = index
+        focusName = n
+        peekDay = if (y.isOpen(day, current.progress, LocalDate.now())) null else day
+    }
+
+    // The player bar's Previous, Next and # (and Start from name): the page shows that name, wherever it is
+    // (only changes count: opening the Yatra doesn't jump to what was chosen or played before)
+    val listen by NamavaliPlayer.state.collectAsState()
+    var seenChosen by remember { mutableIntStateOf(listen.chosen) }
+    var seenName by remember { mutableStateOf(listen.n) }
+    LaunchedEffect(listen.chosen) {
+        if (listen.chosen == seenChosen) return@LaunchedEffect
+        seenChosen = listen.chosen
+        listen.n?.let(::showName)
+    }
+    // Play all on its own follows the chanting while a verse is on screen; elsewhere it leaves the page alone
+    LaunchedEffect(listen.n) {
+        if (listen.n == seenName) return@LaunchedEffect
+        seenName = listen.n
+        val y = YatraStore.state.value.yatra ?: return@LaunchedEffect
+        val n = listen.n ?: return@LaunchedEffect
+        val current = view as? View.Day ?: return@LaunchedEffect
+        if (!listen.all || current.day > y.verseDays) return@LaunchedEffect
+        if (y.steps(current.day).getOrNull(step) is Step.VerseStep) showName(n)
     }
 
     BackHandler {
@@ -204,7 +248,8 @@ fun YatraScreen(onClose: () -> Unit) {
                     viewText = "path"
                 }
                 view is View.Day -> DayView(yatra, progress, today, view.day.coerceIn(1, yatra.finalDay), step,
-                    onStep = { step = it }, onPath = { viewText = "path" }, onDay = ::openDay)
+                    onStep = { step = it; focusName = null }, onPath = { viewText = "path" }, onDay = ::openDay,
+                    focusName = focusName, peek = peekDay == view.day)
                 else -> PathView(yatra, progress, today, onDay = ::openDay, onChangeStart = { viewText = "start" },
                     onStartOver = {
                         YatraStore.update { Progress() }

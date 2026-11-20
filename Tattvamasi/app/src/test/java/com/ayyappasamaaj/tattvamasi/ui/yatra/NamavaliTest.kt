@@ -40,4 +40,16 @@ class NamavaliTest {
     fun theSpeedsAreTheWebsites() {
         assertEquals(listOf(0.75f, 1f, 1.25f, 1.5f, 2f), NamavaliPlayer.SPEEDS)
     }
+
+    @Test
+    fun reciteWithMeGivesTheListenerTheNamesOwnLength() {
+        // A 1.45 s clip has 1.0 s of name (0.45 s of built-in silence), plus a half-second breath
+        assertEquals(1300L, NamavaliPlayer.reciteMs(1450, "standard"))
+        assertEquals(1500L, NamavaliPlayer.reciteMs(1450, "long"))
+        assertEquals(1100L, NamavaliPlayer.reciteMs(1450, "short"))
+        // Unknown length: as if 2.5 s of name
+        assertEquals(2500L, NamavaliPlayer.reciteMs(0, "standard"))
+        assertEquals(listOf("", "standard", "long", "short"), NamavaliPlayer.RECITES)
+        assertEquals("Off", NamavaliPlayer.RECITE_WORD[""])
+    }
 }
