@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Directions
 import androidx.compose.material.icons.outlined.EditCalendar
@@ -32,6 +34,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -39,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,7 +66,8 @@ import kotlinx.coroutines.launch
 /**
  * Events: upcoming events by month, each with Details (the app's own event screen), Add to calendar and
  * Directions. Pull down to refresh. One column on a phone, two or more side by side on a tablet. [openKey] is the
- * event shown (its AppEvent.key), or null for the list; Back returns to the list.
+ * event shown (its AppEvent.key), or null for the list; Back returns to the list. List / Calendar at the top
+ * switches to the Calendar (CalendarView.kt): the events with the website's house bhajans and other dates.
  */
 @Composable
 fun EventsScreen(
@@ -77,6 +84,7 @@ fun EventsScreen(
     }
     val scope = rememberCoroutineScope()
     var refreshing by remember { mutableStateOf(false) }
+    var calendar by rememberSaveable { mutableStateOf(false) }
 
     PullToRefreshBox(
         isRefreshing = refreshing,
@@ -88,6 +96,20 @@ fun EventsScreen(
         },
         modifier = Modifier.fillMaxSize(),
     ) {
+        if (calendar) {
+            Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    ScreenTitle("Events")
+                    ListOrCalendar(calendar) { calendar = it }
+                    CalendarView(state.events) { key -> onOpen(key) }
+                    AddressFooter()
+                }
+            }
+            return@PullToRefreshBox
+        }
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(340.dp),
@@ -97,6 +119,7 @@ fun EventsScreen(
                 modifier = Modifier.widthIn(max = 1100.dp).fillMaxSize(),
             ) {
                 item(span = { GridItemSpan(maxLineSpan) }) { ScreenTitle("Events") }
+                item(span = { GridItemSpan(maxLineSpan) }) { ListOrCalendar(calendar) { calendar = it } }
                 when {
                     !state.loaded -> item(span = { GridItemSpan(maxLineSpan) }) {
                         Box(Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
@@ -171,6 +194,28 @@ fun EventCard(event: AppEvent, openDetails: () -> Unit) {
                     modifier = Modifier.size(18.dp))
                 Text("Directions", color = AppColors.ink, modifier = Modifier.padding(start = 6.dp))
             }
+        }
+    }
+}
+
+/** List / Calendar, at the top of Events. */
+@Composable
+private fun ListOrCalendar(calendar: Boolean, choose: (Boolean) -> Unit) {
+    SingleChoiceSegmentedButtonRow(Modifier.widthIn(max = 420.dp).fillMaxWidth()) {
+        listOf(false to "List", true to "Calendar").forEachIndexed { index, (value, label) ->
+            SegmentedButton(
+                selected = calendar == value,
+                onClick = { choose(value) },
+                shape = SegmentedButtonDefaults.itemShape(index, 2),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = AppColors.claySoft,
+                    activeContentColor = AppColors.ink,
+                    activeBorderColor = AppColors.lineStrong,
+                    inactiveContainerColor = AppColors.card,
+                    inactiveContentColor = AppColors.ink,
+                    inactiveBorderColor = AppColors.lineStrong,
+                ),
+            ) { Text(label, fontWeight = FontWeight(600)) }
         }
     }
 }
