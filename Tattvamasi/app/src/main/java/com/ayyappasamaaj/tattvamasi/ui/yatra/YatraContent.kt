@@ -65,6 +65,8 @@ data class Name(
     val m: String,
     val meaningReviewed: Boolean = true,
     val altReading: String = "",
+    /** The name's recording, chanted as "Om … namaḥ" (a full https address), or "" if it has none. */
+    val au: String = "",
 )
 
 /** The script the data is in: null is Devanagari. */
@@ -172,6 +174,13 @@ fun parseYatraData(text: String): YatraData? = runCatching {
             m = e.optString("m"),
             meaningReviewed = e.optBoolean("mok", true),
             altReading = e.optString("a"),
+            au = e.optString("au").let { au ->
+                when {
+                    au.startsWith("https://") -> au
+                    au.startsWith("/") -> "https://ayyappasamaaj.org$au"
+                    else -> ""
+                }
+            },
         )
     }.filter { it.n > 0 && it.d.isNotBlank() }.associateBy { it.n }
     if (verses.isEmpty() || names.isEmpty()) return null

@@ -69,6 +69,7 @@ import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
 import com.ayyappasamaaj.tattvamasi.ui.sabarimala.SabarimalaScreen
 import com.ayyappasamaaj.tattvamasi.ui.text.LocalLinkHandler
+import com.ayyappasamaaj.tattvamasi.ui.yatra.PlayerBar
 import com.ayyappasamaaj.tattvamasi.ui.yatra.YatraScreen
 
 /** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
@@ -245,6 +246,7 @@ fun AppScreen(content: @Composable () -> Unit) {
         containerColor = AppColors.cream,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),  // the banner takes the status bar; the bar or rail the rest
         topBar = { BannerHeader() },
+        bottomBar = { PlayerBar() },  // the Namavali player, while it's in use (ui/yatra/PlayerBar.kt)
     ) { padding ->
         Box(
             Modifier

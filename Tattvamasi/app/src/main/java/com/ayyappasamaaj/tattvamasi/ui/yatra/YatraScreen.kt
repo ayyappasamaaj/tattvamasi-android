@@ -213,6 +213,7 @@ fun YatraScreen(onClose: () -> Unit) {
                     })
             }
         }
+        PlayerBar()
     }
 
     // The welcome: on the first visit, and from "How it works"
@@ -405,6 +406,7 @@ private fun PathView(
         modifier = Modifier.fillMaxSize(),
     ) {
         item(span = full) { TodayCard(yatra, progress, today) { onDay(current) } }
+        item(span = full) { ListenCard(yatra) }
         item(span = full) {
             Column(Modifier.padding(top = 8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
