@@ -62,6 +62,7 @@ import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuidesStore
+import com.ayyappasamaaj.tattvamasi.ui.home.SlidesStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.guideTarget
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
@@ -91,6 +92,8 @@ fun AppRoot() {
     var openGuide by rememberSaveable { mutableStateOf<String?>(null) }  // GuideTarget.encode() of the guide shown
     val context = LocalContext.current
     LaunchedEffect(Unit) { GuidesStore.start(context) }
+    LaunchedEffect(Unit) { SlidesStore.start(context) }
+    val slides by SlidesStore.state.collectAsState()
     val guides by GuidesStore.state.collectAsState()
     val openingDates by GuidesStore.dates.collectAsState()
     var yatraOpen by rememberSaveable { mutableStateOf(false) }  // the Sahasranama Yatra, under Publications
@@ -176,7 +179,7 @@ fun AppRoot() {
                     }, openEvent = { key ->
                         openEvent = key
                         current = Destination.Events
-                    }, openYatra = openYatra)
+                    }, openYatra = openYatra, slides = slides)
                     Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
                     Destination.Publications -> PublicationsScreen(publications, openYatra)
                     Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode), openingDates) {
