@@ -90,6 +90,8 @@ internal fun DayView(
     onStep: (Int) -> Unit,
     onPath: () -> Unit,
     onDay: (Int) -> Unit,
+    focusName: Int? = null,
+    peek: Boolean = false,
 ) {
     val date = yatra.dateOf(day, progress, today)
     Column(Modifier.fillMaxSize()) {
@@ -99,7 +101,7 @@ internal fun DayView(
             Text(shortDate(date), style = MaterialTheme.typography.bodySmall, color = AppColors.muted)
         }
         when {
-            !yatra.isOpen(day, progress, today) -> Centered {
+            !yatra.isOpen(day, progress, today) && !peek -> Centered {
                 Text("Day $day opens on ${shortDate(date)}", style = MaterialTheme.typography.headlineSmall,
                     color = AppColors.ink, textAlign = TextAlign.Center)
                 Text("One day at a time.", style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
@@ -112,7 +114,8 @@ internal fun DayView(
                 val i = stepIndex.coerceIn(0, steps.size - 1)
                 Stepper(yatra, progress, day, steps, i, onStep)
                 HorizontalDivider(color = AppColors.line)
-                var selectedName by rememberSaveable(day, i) { mutableStateOf<Int?>(null) }
+                var selectedName by rememberSaveable(day, i) { mutableStateOf(focusName) }
+                LaunchedEffect(focusName) { if (focusName != null) selectedName = focusName }
                 Box(Modifier.weight(1f).fillMaxWidth()) {
                     when (val step = steps[i]) {
                         is Step.VerseStep -> VerseStep(yatra, day, i, step.verse, step.verse in progress.chanted, selectedName) { selectedName = it }

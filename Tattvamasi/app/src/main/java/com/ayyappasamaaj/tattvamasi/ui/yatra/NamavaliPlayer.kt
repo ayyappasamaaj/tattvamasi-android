@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -46,6 +47,13 @@ data class ListenState(
     val speed: Float = 1f,
     /** A message for the listener ("The Namavali is complete."), once. */
     val message: String? = null,
+    /** Recite with me: "" (off), "standard", "long" or "short". */
+    val recite: String = "",
+    /** The listener's turn after a name (Recite with me): how long, and when it began (elapsedRealtime), or null. */
+    val turnMs: Long? = null,
+    val turnStart: Long = 0L,
+    /** Counts the listener's own choices of a name (Previous, Next, Start from name): the Yatra screen shows it. */
+    val chosen: Int = 0,
 )
 
 // Holds the application's context (not an activity's) and the players, for the app's whole run: no leak
@@ -60,6 +68,30 @@ object NamavaliPlayer {
     private const val PREFS = "namavali-player"
     private const val KEY_AT = "listen-at"
     private const val KEY_SPEED = "speed"
+    private const val KEY_RECITE = "recite"
+
+    /*
+     * Recite with me (as the website's, #642 and #646): after each name, a pause for the listener to say it back, the
+     * tanpura still playing. The pause is the name's own length (its clip at normal speed, less the clip's built-in
+     * silence) times the chosen length, plus a breath; it doesn't follow the speed. Off, Standard, Long, Short.
+     */
+    val RECITES = listOf("", "standard", "long", "short")
+    val RECITE_WORD = mapOf("" to "Off", "standard" to "Standard", "long" to "Long", "short" to "Short")
+    private val RECITE_FACTOR = mapOf("standard" to 0.8, "long" to 1.0, "short" to 0.6)
+    private val RECITE_TOAST = mapOf(
+        "" to "Recite with me is off.",
+        "standard" to "Recite with me: after each name, a pause to say it back.",
+        "long" to "Recite with me: a longer pause after each name.",
+        "short" to "Recite with me: a shorter pause after each name.",
+    )
+    private const val CLIP_SILENCE_S = 0.45
+    private const val RECITE_BREATH_MS = 500L
+
+    /** The listener's turn after a name of [durationMs] (at normal speed) with [recite] on. */
+    fun reciteMs(durationMs: Long, recite: String): Long {
+        val spoken = if (durationMs > 0) maxOf(0.5, durationMs / 1000.0 - CLIP_SILENCE_S) else 2.5
+        return (spoken * (RECITE_FACTOR[recite] ?: 1.0) * 1000).toLong() + RECITE_BREATH_MS
+    }
 
     private val _state = MutableStateFlow(ListenState())
     val state: StateFlow<ListenState> = _state.asStateFlow()
@@ -78,7 +110,8 @@ object NamavaliPlayer {
         if (::app.isInitialized) return
         app = context.applicationContext
         val saved = prefs.getFloat(KEY_SPEED, 1f)
-        _state.update { it.copy(speed = if (saved in SPEEDS) saved else 1f) }
+        val recite = prefs.getString(KEY_RECITE, "") ?: ""
+        _state.update { it.copy(speed = if (saved in SPEEDS) saved else 1f, recite = if (recite in RECITES) recite else "") }
     }
 
     /** Where listening stopped (a name's number), or null. */
@@ -97,6 +130,7 @@ object NamavaliPlayer {
                 true,  // pauses for a call or another app's sound
             )
             .setHandleAudioBecomingNoisy(true)  // earphones unplugged: pause
+            .setWakeMode(C.WAKE_MODE_NETWORK)  // keeps the phone awake to stream, and through the pauses between names
             .build()
         player.addListener(listener)
         voice = player
@@ -105,6 +139,7 @@ object NamavaliPlayer {
 
     private fun tanpura(): ExoPlayer = drone ?: ExoPlayer.Builder(app)
         .setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MUSIC).build(), false)
+        .setWakeMode(C.WAKE_MODE_LOCAL)
         .build().also { player ->
             player.setMediaItem(MediaItem.fromUri(RawResourceDataSource.buildRawResourceUri(R.raw.tanpura_c)))
             player.repeatMode = Player.REPEAT_MODE_ALL
@@ -134,7 +169,7 @@ object NamavaliPlayer {
      * Plays name [n]: on its own, or with [all] the names from it onwards over the tanpura. [recorded] is every name with a
      * recording, in order (its number, its clip's address, a title for the lock screen).
      */
-    fun play(context: Context, recorded: List<Triple<Int, String, String>>, n: Int, all: Boolean) {
+    fun play(context: Context, recorded: List<Triple<Int, String, String>>, n: Int, all: Boolean, chosen: Boolean = false) {
         val player = voice(context)
         connect()
         cancelGap()
@@ -149,7 +184,10 @@ object NamavaliPlayer {
         player.prepare()
         player.play()
         droneOn(all)
-        _state.update { it.copy(n = items[if (all) start else 0].mediaId.toInt(), all = all, playing = true, shown = true) }
+        _state.update {
+            it.copy(n = items[if (all) start else 0].mediaId.toInt(), all = all, playing = true, shown = true, turnMs = null,
+                chosen = if (chosen) it.chosen + 1 else it.chosen)
+        }
         if (all) remember(_state.value.n)
     }
 
@@ -163,7 +201,7 @@ object NamavaliPlayer {
         cancelGap()
         voice?.pause()
         droneOn(false)
-        _state.update { it.copy(playing = false) }
+        _state.update { it.copy(playing = false, turnMs = null) }
     }
 
     fun next(context: Context, recorded: List<Triple<Int, String, String>>) = step(context, recorded, +1)
@@ -172,7 +210,29 @@ object NamavaliPlayer {
     private fun step(context: Context, recorded: List<Triple<Int, String, String>>, by: Int) {
         val at = recorded.indexOfFirst { it.first == _state.value.n }
         val to = recorded.getOrNull(at + by) ?: return
-        play(context, recorded, to.first, all = true)
+        play(context, recorded, to.first, all = true, chosen = true)
+    }
+
+    /**
+     * Start from name: [typed] is what the listener typed. That name if it's recorded, else the next one that is; a
+     * message (returned) for a name not recorded yet, for none after it, or for a number outside the names.
+     */
+    fun startFrom(context: Context, recorded: List<Triple<Int, String, String>>, names: Set<Int>, typed: String): String? {
+        val n = typed.trim().toIntOrNull()
+        val first = names.minOrNull() ?: 1
+        val last = names.maxOrNull() ?: 1002
+        if (n == null || n !in first..last || n !in names) return "Please enter a name number from $first to ${"%,d".format(last)}."
+        val at = recorded.firstOrNull { it.first >= n } ?: return "Name ${"%,d".format(n)} and the names after it are still being recorded."
+        play(context, recorded, at.first, all = true, chosen = true)
+        return if (at.first != n) "Name ${"%,d".format(n)} isn’t recorded yet; starting at name ${"%,d".format(at.first)}." else null
+    }
+
+    /** The bar's Recite with me button: the next of Off, Standard, Long, Short; returns what it now does. */
+    fun cycleRecite(): String {
+        val next = RECITES[(RECITES.indexOf(_state.value.recite).coerceAtLeast(0) + 1) % RECITES.size]
+        prefs.edit().putString(KEY_RECITE, next).apply()
+        _state.update { it.copy(recite = next) }
+        return RECITE_TOAST[next] ?: ""
     }
 
     fun cycleSpeed() {
@@ -188,7 +248,7 @@ object NamavaliPlayer {
         voice?.stop()
         voice?.clearMediaItems()
         droneOn(false)
-        _state.update { it.copy(playing = false, shown = false, all = false) }
+        _state.update { it.copy(playing = false, shown = false, all = false, turnMs = null) }
     }
 
     fun clearMessage() = _state.update { it.copy(message = null) }
@@ -205,7 +265,12 @@ object NamavaliPlayer {
     private val listener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             val n = mediaItem?.mediaId?.toIntOrNull() ?: return
-            _state.update { it.copy(n = n) }
+            // Next or previous from the lock screen or earphones during a pause: that name now, not after the pause
+            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK && gap != null) {
+                cancelGap()
+                voice?.play()
+            }
+            _state.update { it.copy(n = n, turnMs = null) }
             if (_state.value.all) remember(n)
         }
 
@@ -215,15 +280,24 @@ object NamavaliPlayer {
                 // The end of a name in Play all: a short pause, then the next (the tanpura goes on)
                 !playWhenReady && reason == Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM && _state.value.all -> {
                     if (player.hasNextMediaItem()) {
-                        val wait = (NAME_GAP_MS / _state.value.speed).toLong()
-                        gap = Runnable { gap = null; player.seekToNextMediaItem(); player.play() }.also { handler.postDelayed(it, wait) }
+                        val recite = _state.value.recite
+                        // Recite with me: the listener's turn (the name's own length, not the speed's); else a short pause
+                        val wait = if (recite.isNotEmpty()) reciteMs(player.duration, recite)
+                        else (NAME_GAP_MS / _state.value.speed).toLong()
+                        if (recite.isNotEmpty()) _state.update { it.copy(turnMs = wait, turnStart = SystemClock.elapsedRealtime()) }
+                        gap = Runnable {
+                            gap = null
+                            _state.update { it.copy(turnMs = null) }
+                            player.seekToNextMediaItem()
+                            player.play()
+                        }.also { handler.postDelayed(it, wait) }
                     } else finish(player)
                 }
                 // Paused or played from the lock screen, earphones, a call: the tanpura follows
                 reason != Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
                     if (!playWhenReady) cancelGap()
                     droneOn(playWhenReady && _state.value.all)
-                    _state.update { it.copy(playing = playWhenReady) }
+                    _state.update { it.copy(playing = playWhenReady, turnMs = if (playWhenReady) it.turnMs else null) }
                 }
             }
         }
