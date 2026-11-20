@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- The redesigned app (Compose). The splash screen shows the app icon on the website's cream, then the
          app's own theme takes over. -->
     <style name="Theme.Tattvamasi" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/cream</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Light only: never let the system darken the app (dark mode's "force dark" / expanded dark theme) -->
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
     </style>
 
     <style name="Theme.Tattvamasi.Starting" parent="Theme.SplashScreen">
