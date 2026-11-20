@@ -54,15 +54,22 @@ import com.ayyappasamaaj.tattvamasi.ui.events.EventsState
 import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
-/** Home: the next event, the Sahasranama Yatra, then the app's sections and Donate. As on the iOS app (HomeView.swift). */
+/**
+ * Home: today's slides from the website (HomeSlides.kt), the next event, the Sahasranama Yatra, then the app's
+ * sections and Donate. As on the iOS app (HomeView.swift). A slide for an event the app has opens its event screen;
+ * any other opens its page.
+ */
 @Composable
 fun HomeScreen(
     events: EventsState,
     go: (Destination) -> Unit,
     openEvent: (String) -> Unit = {},
     openYatra: () -> Unit = {},
+    slides: List<HomeSlide> = emptyList(),
 ) {
     val context = LocalContext.current
+    val today = websiteToday()
+    val shown = slides.filter { it.showingOn(today) }
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
@@ -78,6 +85,13 @@ fun HomeScreen(
                     color = AppColors.ink,
                     modifier = Modifier.semantics { heading() },
                 )
+                HomeSlides(shown) { slide ->
+                    val event = events.events.firstOrNull { it.pageUrl != null && samePage(it.pageUrl, slide.link) }
+                    when {
+                        event != null -> openEvent(event.key)
+                        slide.link.isNotEmpty() -> openInBrowser(context, slide.link)
+                    }
+                }
                 NextEvent(events, seeEvents = { go(Destination.Events) }, open = openEvent)
                 // The Sahasranama Yatra: across the whole width, above the sections
                 TileCard(
@@ -201,4 +215,10 @@ private fun TileCard(tile: Tile, modifier: Modifier) {
         Text(tile.title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp), color = AppColors.ink)
         Text(tile.note, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = AppColors.muted)
     }
+}
+
+/** The same page on the website, whatever the trailing slash or http/https. */
+internal fun samePage(a: String, b: String): Boolean {
+    fun key(url: String) = url.lowercase().removePrefix("https://").removePrefix("http://").removePrefix("www.").trimEnd('/')
+    return key(a) == key(b)
 }
