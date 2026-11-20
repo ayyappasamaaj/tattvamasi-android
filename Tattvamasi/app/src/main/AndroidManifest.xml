@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Firebase, the website's pages, the board and the PDFs -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Notifications from the website (Android 13+ asks; the app asks the first time an event is opened) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- The Namavali player keeps chanting with the screen off or in another app (ui/yatra/NamavaliService.kt) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +28,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- The Namavali player: plays in the background, with the lock screen's and earphones' controls. Exported
+             so the system's media controls (and Bluetooth, Android Auto) can reach the media session, as Media3 asks -->
+        <service
+            android:name=".ui.yatra.NamavaliService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
 
         <!-- Notifications that arrive while the app is open (notifications/AppMessagingService.kt) -->
         <service

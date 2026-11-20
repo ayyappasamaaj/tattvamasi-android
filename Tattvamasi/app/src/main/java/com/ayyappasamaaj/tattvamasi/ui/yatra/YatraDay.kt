@@ -418,6 +418,7 @@ private fun Namavali(yatra: Yatra, day: Int, verseNumber: Int, names: List<Int>,
                 }, style = MaterialTheme.typography.bodySmall, color = AppColors.muted)
             }
             NameBlock(yatra, name)
+            ListenButtons(yatra, name)
             HorizontalDivider(color = AppColors.line, modifier = Modifier.padding(vertical = 4.dp))
             Text("How the name is built", style = MaterialTheme.typography.titleSmall, color = AppColors.ink)
             Roots(name)
