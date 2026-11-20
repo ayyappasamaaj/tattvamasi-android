@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.text.Normalizer
+import java.time.LocalDate
 
 /*
  * The website's Bhajans and Shlokas & Puja pages, from Firebase `/publications`, which the website publishes on
@@ -110,6 +111,77 @@ fun searchPublications(sections: List<PublicationSection>, query: String): List<
         }
     }
 }
+
+/** The reader's language for every text (the website's "Reading in"): its version in [preferred] if it has one, else
+ *  English, else its first. Null when that's the first anyway. */
+fun openingLanguage(text: PublicationText, preferred: String): String? {
+    val pick = text.versions.firstOrNull { it.language.equals(preferred, ignoreCase = true) }
+        ?: text.versions.firstOrNull { it.language.equals(ENGLISH, ignoreCase = true) }
+        ?: text.versions.firstOrNull()
+    return pick?.language
+}
+
+const val ENGLISH = "English"
+
+/** The languages to read in, English first, then by how many texts have them: (language, its own name). */
+fun readingLanguages(categories: List<PublicationCategory>): List<Pair<String, String>> {
+    val versions = categories.flatMap { it.texts }.flatMap { it.versions }
+    val counts = versions.groupingBy { it.language }.eachCount()
+    val labels = versions.associate { it.language to it.label }
+    return counts.keys.sortedWith(compareBy<String>({ !it.equals(ENGLISH, ignoreCase = true) }, { -counts.getValue(it) }, { it }))
+        .map { it to (labels[it] ?: it) }
+}
+
+/** The count line under a category's name, as on the website: "118 bhajans in 4 languages". */
+fun countLine(section: PublicationSection, category: PublicationCategory): String {
+    val languages = category.languages
+    return section.count(category.texts.size) + when (languages.size) {
+        0 -> ""
+        1 -> " in " + languages[0]
+        else -> " in ${languages.size} languages"
+    }
+}
+
+/** The title without a leading number: "06 Sabari Yatra Mala Wearing Mantra" -> "Sabari Yatra Mala Wearing Mantra". */
+fun plainTitle(title: String): String = title.replace(Regex("^\\d+\\.?\\s+"), "").ifEmpty { title }
+
+private fun titleKey(title: String) = plainTitle(title).split(Regex("\\s+")).filter { it.isNotEmpty() }.joinToString(" ").lowercase()
+
+/** "For Mandalam Season": the texts devotees look for most in the season, in this order, as on the website
+ *  (bhajans/views.py, MANDALAM_SHORTLIST); a title that isn't found is left out. */
+val MANDALAM_SHORTLIST = listOf(
+    "Sarana Ghosham",
+    "Periya Padhai Sarana Ghosham",
+    "Sabari Yatra Mala Wearing Mantra",
+    "Sri Hariharatmaja Ashtakam (Harivarasanam)",
+    "Hariharaputra Puja Vidhi",
+    "Ayyappa Sahasranamam",
+)
+
+/** The website shows the shortlist from October 1 to January 15 (its season guides' window). */
+fun inMandalamSeason(day: LocalDate): Boolean =
+    day.monthValue >= 10 || (day.monthValue == 1 && day.dayOfMonth <= 15)
+
+fun mandalamShortlist(sections: List<PublicationSection>): List<PublicationHit> {
+    val found = mutableMapOf<String, PublicationHit>()
+    sections.forEach { section ->
+        section.categories.forEach { category ->
+            category.texts.forEach { text -> found.putIfAbsent(titleKey(text.title), PublicationHit(category, text)) }
+        }
+    }
+    return MANDALAM_SHORTLIST.mapNotNull { found[titleKey(it)] }
+}
+
+/** Recent searches: the newest first, a repeat moved to the top (case ignored), five at most. */
+fun withRecent(recents: List<String>, query: String): List<String> {
+    val q = query.trim()
+    if (q.isEmpty()) return recents
+    return (listOf(q) + recents.filterNot { it.equals(q, ignoreCase = true) }).take(5)
+}
+
+/** Every category in order (Bhajans, then Shlokas & Puja), for previous / next. */
+fun allCategories(sections: List<PublicationSection>): List<Pair<PublicationSection, PublicationCategory>> =
+    sections.flatMap { s -> s.categories.map { s to it } }
 
 data class PublicationsState(
     val sections: List<PublicationSection> = emptyList(),

@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.ayyappasamaaj.tattvamasi.ui.publications
 
@@ -22,6 +22,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,7 +38,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,6 +62,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +72,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -80,6 +92,7 @@ import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
+import java.time.LocalDate
 
 /**
  * Publications: Bhajans, then Shlokas & Puja, as on the website, with one search for everything. A tile opens the
@@ -90,8 +103,14 @@ import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}) {
     var selectedSlug by rememberSaveable { mutableStateOf<String?>(null) }
     var reading by remember { mutableStateOf<ReadingItem?>(null) }
-    val selected = state.sections.flatMap { s -> s.categories.map { s to it } }.firstOrNull { it.second.slug == selectedSlug }
-    val open = { item: ReadingItem -> reading = item }
+    val context = LocalContext.current
+    LaunchedEffect(Unit) { ReadingPrefs.load(context) }
+    val preferred by ReadingPrefs.language.collectAsState()
+    val all = allCategories(state.sections)
+    val selected = all.firstOrNull { it.second.slug == selectedSlug }
+    // Every title opens in the "Reading in" language when it has it, else English (as on the website)
+    val open = { item: ReadingItem -> reading = item.copy(startLanguage = openingLanguage(item.text, preferred)) }
+    val choose = { category: PublicationCategory -> selectedSlug = category.slug }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         if (maxWidth >= 720.dp) {
@@ -104,13 +123,14 @@ fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}) {
                 VerticalDivider(color = AppColors.line)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     shown?.let { (section, category) ->
-                        CategoryContent(section, category, onRead = open, onBack = null)
+                        CategoryContent(section, category, all, onRead = open, onCategory = choose, onBack = null)
                     }
                 }
             }
         } else if (selected != null) {
             BackHandler { selectedSlug = null }
-            CategoryContent(selected.first, selected.second, onRead = open, onBack = { selectedSlug = null })
+            CategoryContent(selected.first, selected.second, all, onRead = open, onCategory = choose,
+                onBack = { selectedSlug = null })
         } else {
             PublicationsHome(state, selectedSlug = null, onCategory = { selectedSlug = it.slug }, onRead = open,
                 minTile = 100, openYatra = openYatra)
@@ -131,6 +151,12 @@ private fun PublicationsHome(
     openYatra: () -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
+    var focused by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val recents by ReadingPrefs.recents.collectAsState()
+    val preferred by ReadingPrefs.language.collectAsState()
+    val languages = readingLanguages(state.sections.flatMap { it.categories })
+    val shortlist = if (inMandalamSeason(LocalDate.now())) mandalamShortlist(state.sections) else emptyList()
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minTile.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -141,7 +167,19 @@ private fun PublicationsHome(
         val full: (androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope.() -> GridItemSpan) =
             { GridItemSpan(maxLineSpan) }
         item(span = full) { ScreenTitle("Publications") }
-        item(span = full) { SearchField("Search all bhajans and shlokas", query) { query = it } }
+        item(span = full) {
+            SearchField("Search all bhajans and shlokas", query, onFocus = { focused = it },
+                onSearch = { ReadingPrefs.addRecent(context, query) }) { query = it }
+        }
+        if (languages.size > 1) {
+            item(span = full) {
+                ReadingIn(languages, preferred) { ReadingPrefs.setLanguage(context, it) }
+            }
+        }
+        // Before anything is typed: this phone's recent searches (while the box has the cursor)
+        if (query.isBlank() && focused && recents.isNotEmpty()) {
+            item(span = full) { RecentSearches(recents) { query = it } }
+        }
         when {
             query.isNotBlank() -> {
                 val hits = searchPublications(state.sections, query)
@@ -154,6 +192,7 @@ private fun PublicationsHome(
                             hits.forEachIndexed { i, hit ->
                                 if (i > 0) HorizontalDivider(color = AppColors.line)
                                 TextRow(hit.text, detail = hit.category.name) {
+                                    ReadingPrefs.addRecent(context, query)  // a title opened from a search
                                     onRead(ReadingItem(hit.text, hit.category.name, null))
                                 }
                             }
@@ -171,7 +210,24 @@ private fun PublicationsHome(
                     style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft,
                     modifier = Modifier.fillMaxWidth().card())
             }
-            else -> state.sections.forEach { section ->
+            else -> {
+              if (shortlist.isNotEmpty()) {
+                item(key = "season", span = full) {
+                    Column(Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                        Text("For Mandalam Season", style = MaterialTheme.typography.titleLarge, color = AppColors.ink,
+                            modifier = Modifier.padding(bottom = 8.dp).semantics { heading() })
+                        Column(Modifier.fillMaxWidth().card(padding = 14.dp)) {
+                            shortlist.forEachIndexed { i, hit ->
+                                if (i > 0) HorizontalDivider(color = AppColors.line)
+                                TextRow(hit.text, detail = hit.category.name, title = plainTitle(hit.text.title)) {
+                                    onRead(ReadingItem(hit.text, hit.category.name, null))
+                                }
+                            }
+                        }
+                    }
+                }
+              }
+              state.sections.forEach { section ->
                 item(key = "section-" + section.key, span = full) {
                     Text(section.title, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                         modifier = Modifier.padding(top = 8.dp).semantics { heading() })
@@ -179,6 +235,7 @@ private fun PublicationsHome(
                 items(section.categories, key = { it.slug }) { category ->
                     CategoryTile(category, selected = category.slug == selectedSlug) { onCategory(category) }
                 }
+              }
             }
         }
         if (query.isBlank()) item(span = full) { YatraCard(openYatra) }
@@ -216,16 +273,23 @@ private fun YatraCard(open: () -> Unit) {
 private fun CategoryContent(
     section: PublicationSection,
     category: PublicationCategory,
+    all: List<Pair<PublicationSection, PublicationCategory>>,
     onRead: (ReadingItem) -> Unit,
+    onCategory: (PublicationCategory) -> Unit,
     onBack: (() -> Unit)?,
 ) {
     var query by rememberSaveable(category.slug) { mutableStateOf("") }
-    var language by rememberSaveable(category.slug) { mutableStateOf(ALL) }
-    val shown = category.texts.filter {
-        (language == ALL || language in it.languages) && titleMatches(it.title, query)
-    }
+    val context = LocalContext.current
+    val preferred by ReadingPrefs.language.collectAsState()
+    val shown = category.texts.filter { titleMatches(it.title, query) }
+    val at = all.indexOfFirst { it.second.slug == category.slug }
+    val previous = all.getOrNull(at - 1)?.takeIf { at > 0 }
+    val next = all.getOrNull(at + 1)?.takeIf { at >= 0 }
+    // Each category starts at its top (previous / next and the strip keep the same screen)
+    val listState = rememberSaveable(category.slug, saver = LazyListState.Saver) { LazyListState() }
 
     LazyColumn(
+        state = listState,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -236,6 +300,8 @@ private fun CategoryContent(
                     Text("Publications", color = AppColors.clayDark, modifier = Modifier.padding(start = 6.dp))
                 }
             }
+            // Phones: every category as a row of pictures, to switch without going back (the website's strip)
+            item { CategoryStrip(all, category.slug, onCategory) }
         }
         item {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -244,16 +310,17 @@ private fun CategoryContent(
                 Column {
                     Text(category.name, style = MaterialTheme.typography.headlineMedium.copy(fontSize = 30.sp),
                         color = AppColors.ink, modifier = Modifier.semantics { heading() })
-                    Text(section.count(category.texts.size), style = MaterialTheme.typography.bodyMedium,
+                    Text(countLine(section, category), style = MaterialTheme.typography.bodyMedium,
                         color = AppColors.muted)
                 }
             }
         }
         item { SearchField("Search ${category.name}", query) { query = it } }
-        if (category.languages.size > 1) {
+        val languages = readingLanguages(listOf(category))
+        if (languages.size > 1) {
             item {
                 Box(Modifier.padding(top = 12.dp)) {
-                    LanguageChoice(listOf(ALL) + category.languages, emptyMap(), language) { language = it }
+                    ReadingIn(languages, preferred) { ReadingPrefs.setLanguage(context, it) }
                 }
             }
         }
@@ -274,7 +341,7 @@ private fun CategoryContent(
             Column(Modifier.fillMaxWidth().background(AppColors.card, shape).padding(horizontal = 14.dp)) {
                 if (index > 0) HorizontalDivider(color = AppColors.line)
                 TextRow(text) {
-                    onRead(ReadingItem(text, category.name, language.takeUnless { it == ALL }))
+                    onRead(ReadingItem(text, category.name, null))
                 }
             }
         }
@@ -283,11 +350,142 @@ private fun CategoryContent(
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = AppColors.muted,
                 modifier = Modifier.padding(top = 12.dp))
         }
+        // After the last title, the natural next step: the previous or next category
+        if (previous != null || next != null) {
+            item {
+                Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    if (previous != null) {
+                        TextButton(onClick = { onCategory(previous.second) }) {
+                            Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, contentDescription = null, tint = AppColors.clayDark)
+                            Text(previous.second.name, color = AppColors.clayDark,
+                                modifier = Modifier.semantics { contentDescription = "Previous category: " + previous.second.name })
+                        }
+                    } else Spacer(Modifier)
+                    if (next != null) {
+                        TextButton(onClick = { onCategory(next.second) }) {
+                            Text(next.second.name, color = AppColors.clayDark,
+                                modifier = Modifier.semantics { contentDescription = "Next category: " + next.second.name })
+                            Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null, tint = AppColors.clayDark)
+                        }
+                    }
+                }
+            }
+        }
         item { AddressFooter() }
     }
 }
 
-private const val ALL = "All"
+/** A row of round category pictures that swipes sideways; the current one ringed and scrolled into view, and
+ *  Shlokas & Puja after a thin line. */
+@Composable
+private fun CategoryStrip(
+    all: List<Pair<PublicationSection, PublicationCategory>>,
+    current: String,
+    onCategory: (PublicationCategory) -> Unit,
+) {
+    val list = rememberLazyListState()
+    val at = all.indexOfFirst { it.second.slug == current }
+    LaunchedEffect(current) { if (at >= 0) list.animateScrollToItem(maxOf(0, at - 2)) }
+    LazyRow(
+        state = list,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+    ) {
+        all.forEachIndexed { i, (section, category) ->
+            if (i > 0 && all[i - 1].first.key != section.key) {
+                item(key = "line-" + section.key) {
+                    VerticalDivider(color = AppColors.lineStrong, modifier = Modifier.padding(top = 8.dp).heightIn(max = 48.dp))
+                }
+            }
+            item(key = category.slug) {
+                val on = category.slug == current
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .width(68.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(role = Role.Button, onClick = { onCategory(category) })
+                        .padding(vertical = 4.dp)
+                        .semantics(mergeDescendants = true) {
+                            contentDescription = category.name + if (on) ", current category" else ""
+                        },
+                ) {
+                    PublicationIcon(category, Modifier
+                        .size(52.dp)
+                        .border(if (on) 3.dp else 1.dp, if (on) AppColors.clay else AppColors.line, CircleShape)
+                        .padding(if (on) 3.dp else 1.dp)
+                        .clip(CircleShape), round = true)
+                    Text(category.name, style = MaterialTheme.typography.labelSmall,
+                        color = if (on) AppColors.clayDark else AppColors.inkSoft,
+                        fontWeight = if (on) FontWeight(700) else null,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+                }
+            }
+        }
+    }
+}
+
+/** "Reading in": the language every title opens in, kept on the phone (the website's Reading in list). */
+@Composable
+private fun ReadingIn(languages: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val current = languages.firstOrNull { it.first.equals(selected, ignoreCase = true) } ?: languages.first()
+    fun label(l: Pair<String, String>) = if (l.second == l.first) l.first else l.first + " · " + l.second
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it },
+        modifier = Modifier.padding(top = 10.dp)) {
+        OutlinedTextField(
+            value = label(current),
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            label = { Text("Reading in") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            shape = RoundedCornerShape(50),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = AppColors.card, unfocusedContainerColor = AppColors.card,
+                unfocusedBorderColor = AppColors.lineStrong, focusedBorderColor = AppColors.clay,
+                focusedLabelColor = AppColors.clayDark,
+            ),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            languages.forEach { language ->
+                DropdownMenuItem(
+                    text = { Text(label(language), fontWeight = if (language == current) FontWeight(700) else null) },
+                    onClick = { onSelect(language.first); expanded = false },
+                )
+            }
+        }
+    }
+}
+
+/** This phone's last five searches, as chips that search again. */
+@Composable
+private fun RecentSearches(recents: List<String>, onPick: (String) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(top = 4.dp)) {
+        Text("Recent searches", style = MaterialTheme.typography.labelLarge, color = AppColors.muted,
+            modifier = Modifier.padding(bottom = 6.dp))
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            recents.forEach { q ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(AppColors.card)
+                        .border(1.dp, AppColors.line, RoundedCornerShape(50))
+                        .clickable(role = Role.Button) { onPick(q) }
+                        .heightIn(min = 40.dp)
+                        .padding(horizontal = 12.dp),
+                ) {
+                    Icon(Icons.Outlined.History, contentDescription = null, tint = AppColors.muted, modifier = Modifier.size(16.dp))
+                    Text(q, style = MaterialTheme.typography.bodyMedium, color = AppColors.ink,
+                        modifier = Modifier.padding(start = 6.dp))
+                }
+            }
+        }
+    }
+}
 
 /** The app's own icon for each of the website's categories, as on the iOS app. */
 private val icons = mapOf(
@@ -313,9 +511,10 @@ private val icons = mapOf(
 fun hasIcon(slug: String) = slug.lowercase() in icons
 
 @Composable
-private fun PublicationIcon(category: PublicationCategory, modifier: Modifier) {
+private fun PublicationIcon(category: PublicationCategory, modifier: Modifier, round: Boolean = false) {
     val icon = icons[category.slug.lowercase()]
-    Box(modifier.clip(RoundedCornerShape(8.dp)).background(AppColors.claySoft), contentAlignment = Alignment.Center) {
+    Box(modifier.clip(if (round) CircleShape else RoundedCornerShape(8.dp)).background(AppColors.claySoft),
+        contentAlignment = Alignment.Center) {
         if (icon != null) {
             Image(painterResource(icon), contentDescription = null, modifier = Modifier.fillMaxSize())
         } else {
@@ -361,7 +560,7 @@ private fun FitText(text: String, style: TextStyle) {
 
 /** A title in a list, with its languages as small badges. */
 @Composable
-private fun TextRow(text: PublicationText, detail: String? = null, open: () -> Unit) {
+private fun TextRow(text: PublicationText, detail: String? = null, title: String = text.title, open: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -372,7 +571,7 @@ private fun TextRow(text: PublicationText, detail: String? = null, open: () -> U
             .padding(vertical = 8.dp),
     ) {
         Column(Modifier.weight(1f)) {
-            Text(text.title, style = MaterialTheme.typography.bodyLarge, color = AppColors.ink)
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = AppColors.ink)
             detail?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = AppColors.muted)
             }
@@ -391,7 +590,13 @@ private fun TextRow(text: PublicationText, detail: String? = null, open: () -> U
 }
 
 @Composable
-private fun SearchField(prompt: String, text: String, onChange: (String) -> Unit) {
+private fun SearchField(
+    prompt: String,
+    text: String,
+    onFocus: (Boolean) -> Unit = {},
+    onSearch: () -> Unit = {},
+    onChange: (String) -> Unit,
+) {
     val focus = LocalFocusManager.current
     OutlinedTextField(
         value = text,
@@ -408,13 +613,13 @@ private fun SearchField(prompt: String, text: String, onChange: (String) -> Unit
         singleLine = true,
         shape = RoundedCornerShape(50),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { focus.clearFocus() }),
+        keyboardActions = KeyboardActions(onSearch = { onSearch(); focus.clearFocus() }),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = AppColors.card, unfocusedContainerColor = AppColors.card,
             unfocusedBorderColor = AppColors.lineStrong, focusedBorderColor = AppColors.clay,
             cursorColor = AppColors.clay,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().onFocusChanged { onFocus(it.isFocused) },
     )
 }
 
