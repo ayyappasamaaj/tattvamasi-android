@@ -151,11 +151,11 @@ private fun NextEventCard(event: AppEvent, seeEvents: () -> Unit, open: () -> Un
                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, letterSpacing = 0.8.sp),
                 color = AppColors.saffron,
             )
-            Text(event.name, style = MaterialTheme.typography.titleLarge.copy(fontSize = 19.sp), color = AppColors.cream)
+            Text(event.name, style = MaterialTheme.typography.titleLarge.copy(fontSize = 19.sp), color = AppColors.onForest)
             Text(
                 "${event.timeText} · ${event.shortVenue}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                color = AppColors.cream.copy(alpha = 0.85f),
+                color = AppColors.onForest.copy(alpha = 0.85f),
             )
             Spacer(Modifier.height(6.dp))
             Button(

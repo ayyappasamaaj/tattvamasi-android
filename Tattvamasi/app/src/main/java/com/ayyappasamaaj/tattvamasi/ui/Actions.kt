@@ -8,9 +8,8 @@ import android.provider.CalendarContract
 import android.widget.Toast
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.ui.graphics.toArgb
 import com.ayyappasamaaj.tattvamasi.ui.events.AppEvent
-import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
+import com.ayyappasamaaj.tattvamasi.ui.theme.Appearance
 import java.net.URLEncoder
 
 /** The website's pages the app opens. */
@@ -36,12 +35,24 @@ fun openInBrowser(context: Context, url: String) {
  */
 fun openWebPage(context: Context, url: String) {
     val colors = CustomTabColorSchemeParams.Builder()
-        .setToolbarColor(AppColors.cream.toArgb())
-        .setNavigationBarColor(AppColors.cream.toArgb())
+        .setToolbarColor(0xFFF6F2EA.toInt())
+        .setNavigationBarColor(0xFFF6F2EA.toInt())
         .build()
+    // The website's dark page in dark mode (the tab follows the app's Appearance)
+    val darkColors = CustomTabColorSchemeParams.Builder()
+        .setToolbarColor(0xFF17140F.toInt())
+        .setNavigationBarColor(0xFF17140F.toInt())
+        .build()
+    val scheme = when (Appearance.choice) {
+        Appearance.Choice.SYSTEM -> CustomTabsIntent.COLOR_SCHEME_SYSTEM
+        Appearance.Choice.LIGHT -> CustomTabsIntent.COLOR_SCHEME_LIGHT
+        Appearance.Choice.DARK -> CustomTabsIntent.COLOR_SCHEME_DARK
+    }
     try {
         CustomTabsIntent.Builder()
             .setDefaultColorSchemeParams(colors)
+            .setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_DARK, darkColors)
+            .setColorScheme(scheme)
             .setShowTitle(true)
             .build()
             .launchUrl(context, Uri.parse(url))

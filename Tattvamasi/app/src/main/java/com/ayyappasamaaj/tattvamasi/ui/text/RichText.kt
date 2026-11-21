@@ -157,7 +157,8 @@ val LocalLinkHandler = staticCompositionLocalOf<(String) -> Boolean> { { false }
 private fun annotated(runs: List<Run>): AnnotatedString {
     val context = LocalContext.current
     val handler = LocalLinkHandler.current
-    return remember(runs, handler) {
+    val linkColor = AppColors.clayDark  // follows light or dark mode
+    return remember(runs, handler, linkColor) {
         buildAnnotatedString {
             for (run in runs) {
                 val style = SpanStyle(
@@ -168,7 +169,7 @@ private fun annotated(runs: List<Run>): AnnotatedString {
                 if (run.link != null) {
                     val url = run.link
                     withLink(LinkAnnotation.Clickable(url, TextLinkStyles(SpanStyle(
-                        color = AppColors.clayDark, textDecoration = TextDecoration.Underline))) {
+                        color = linkColor, textDecoration = TextDecoration.Underline))) {
                         if (!handler(url)) openWebPage(context, url)
                     }) { withStyle(style) { append(run.text) } }
                 } else {

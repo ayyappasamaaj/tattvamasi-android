@@ -62,6 +62,7 @@ import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
+import com.ayyappasamaaj.tattvamasi.ui.theme.AppearanceCard
 
 /** The tab's three parts. */
 enum class AboutPart(val title: String) { About("About us"), Board("Our Board"), Contact("Contact") }
@@ -278,7 +279,7 @@ private fun Contact() {
                     Toast.makeText(context, "No email app found. Write to $EMAIL", Toast.LENGTH_LONG).show()
                 }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest),
+            colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
         ) {
             Icon(Icons.Outlined.Email, contentDescription = null, modifier = Modifier.size(18.dp))
             Text(EMAIL, fontWeight = FontWeight(700), modifier = Modifier.padding(start = 8.dp))
@@ -305,4 +306,5 @@ private fun Contact() {
         }
     }
     NotificationsCard()
+    AppearanceCard()
 }

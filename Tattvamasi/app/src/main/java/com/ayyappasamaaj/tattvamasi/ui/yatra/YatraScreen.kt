@@ -58,6 +58,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -88,6 +89,7 @@ import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
+import com.ayyappasamaaj.tattvamasi.ui.theme.LocalDarkTheme
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -96,9 +98,10 @@ import java.util.Locale
 
 /** The yatra's own colors beside the app's: the gold of a finished day (the website's --gold). */
 internal object YatraColors {
-    val gold = Color(0xFF8A5A12)
-    val goldSoft = Color(0xFFF7EBD3)
-    val forestSoft = Color(0xFFE6EEE8)
+    // Dark mode: a lighter gold under dark text (AppColors.card), and dark tints for the soft ones
+    val gold: Color @Composable @ReadOnlyComposable get() = if (LocalDarkTheme.current) Color(0xFFD9A84E) else Color(0xFF8A5A12)
+    val goldSoft: Color @Composable @ReadOnlyComposable get() = if (LocalDarkTheme.current) Color(0xFF3A2E18) else Color(0xFFF7EBD3)
+    val forestSoft: Color @Composable @ReadOnlyComposable get() = if (LocalDarkTheme.current) Color(0xFF22342A) else Color(0xFFE6EEE8)
 }
 
 /** The verses and names, in Devanagari or a language's script: the phone's own fonts, which have every script. */
@@ -351,7 +354,7 @@ private fun ScriptMenu(state: YatraState) {
 internal fun PrimaryButton(text: String, modifier: Modifier = Modifier, lamp: Boolean = false, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest, contentColor = AppColors.cream),
+        colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
         modifier = modifier.heightIn(min = 52.dp),
     ) {
         if (lamp) {
@@ -538,16 +541,16 @@ private fun TodayCard(yatra: Yatra, progress: Progress, today: LocalDate, open: 
             else "Begins ${shortDate(yatra.dateOf(1, progress, today))} · Day 1",
             color = AppColors.saffron,
         )
-        Text(yatra.stageName(day), style = MaterialTheme.typography.headlineMedium, color = AppColors.cream,
+        Text(yatra.stageName(day), style = MaterialTheme.typography.headlineMedium, color = AppColors.onForest,
             modifier = Modifier.semantics { heading() })
-        Text(sub, style = MaterialTheme.typography.bodyMedium, color = AppColors.cream.copy(alpha = 0.85f))
+        Text(sub, style = MaterialTheme.typography.bodyMedium, color = AppColors.onForest.copy(alpha = 0.85f))
         if (verses.isNotEmpty()) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.clearAndSetSemantics {
                 contentDescription = "$chanted of ${verses.size} verses chanted"
             }) {
                 verses.forEach { v ->
                     Box(Modifier.width(36.dp).height(6.dp).background(
-                        if (v in progress.chanted) AppColors.saffron else AppColors.cream.copy(alpha = 0.25f),
+                        if (v in progress.chanted) AppColors.saffron else AppColors.onForest.copy(alpha = 0.25f),
                         RoundedCornerShape(3.dp)))
                 }
             }
@@ -754,6 +757,6 @@ private fun Intro(
 
 @Composable
 private fun Note(text: String) {
-    Text(text, style = MaterialTheme.typography.bodyMedium, color = AppColors.cream,
+    Text(text, style = MaterialTheme.typography.bodyMedium, color = AppColors.onForest,
         modifier = Modifier.fillMaxWidth().background(AppColors.forest, RoundedCornerShape(12.dp)).padding(12.dp))
 }

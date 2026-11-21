@@ -2,10 +2,15 @@
 
 package com.ayyappasamaaj.tattvamasi.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
@@ -16,20 +21,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.R
 
-/** The website's look (ayyappasamaaj.org): its colors, as on the iOS app. */
+/** True while the app is drawn dark: the phone's setting, or the reader's choice (Appearance). */
+internal val LocalDarkTheme = staticCompositionLocalOf { false }
+
+@Composable
+@ReadOnlyComposable
+private fun pick(light: Long, dark: Long) = Color(if (LocalDarkTheme.current) dark else light)
+
+/**
+ * The website's look (ayyappasamaaj.org): its colors, as on the iOS app. Each has a light and a dark value; the
+ * dark ones are the website's dark mode (approved Nov 20, 2026: https://claude.ai/artifact/B9qi6JgytFRXvu28HPeBV3,
+ * _base.scss's dark-colours), every text color 4.5:1 or better.
+ */
 object AppColors {
-    val cream = Color(0xFFF6F2EA)       // page background
-    val ink = Color(0xFF2A2620)         // text
-    val inkSoft = Color(0xFF4A4538)     // secondary text
-    val muted = Color(0xFF6B6457)       // captions
-    val forest = Color(0xFF1E2A22)      // dark green: main buttons, the next-event card
-    val clay = Color(0xFFB4410F)        // accent: selected tab, icons
-    val clayDark = Color(0xFF7C2D0B)    // links
-    val saffron = Color(0xFFF2A65A)     // on dark green
-    val claySoft = Color(0xFFFBEDE3)    // light accent background
-    val line = Color(0xFFE3DCCD)        // dividers
-    val lineStrong = Color(0xFFC9BFAE)  // field borders
-    val card = Color.White
+    val cream: Color @Composable @ReadOnlyComposable get() = pick(0xFFF6F2EA, 0xFF17140F)       // page background
+    val ink: Color @Composable @ReadOnlyComposable get() = pick(0xFF2A2620, 0xFFF1EBDF)         // text
+    val inkSoft: Color @Composable @ReadOnlyComposable get() = pick(0xFF4A4538, 0xFFD2C8B8)     // secondary text
+    val muted: Color @Composable @ReadOnlyComposable get() = pick(0xFF6B6457, 0xFFA89E8E)       // captions
+    val forest: Color @Composable @ReadOnlyComposable get() = pick(0xFF1E2A22, 0xFF22342A)      // dark green bands
+    val clay: Color @Composable @ReadOnlyComposable get() = pick(0xFFB4410F, 0xFFE8875A)        // accent
+    val clayDark: Color @Composable @ReadOnlyComposable get() = pick(0xFF7C2D0B, 0xFFF0A47A)    // links
+    val saffron = Color(0xFFF2A65A)                                                            // on dark green
+    val claySoft: Color @Composable @ReadOnlyComposable get() = pick(0xFFFBEDE3, 0xFF3A2418)    // light accent
+    val line: Color @Composable @ReadOnlyComposable get() = pick(0xFFE3DCCD, 0xFF3A342B)        // dividers
+    val lineStrong: Color @Composable @ReadOnlyComposable get() = pick(0xFFC9BFAE, 0xFF7A7060)  // field borders
+    // Cards; also the text on clay and gold (white, and dark on dark mode's lighter clay)
+    val card: Color @Composable @ReadOnlyComposable get() = pick(0xFFFFFFFF, 0xFF221E18)
+
+    /** Text on the dark green: cream in both modes (the page's cream turns dark) */
+    val onForest = Color(0xFFF6F2EA)
+    /** The dark green as text or a line on a page or card: light in dark mode */
+    val forestInk: Color @Composable @ReadOnlyComposable get() = pick(0xFF1E2A22, 0xFFF1EBDF)
+    /** Main buttons: the dark green with white text; saffron with dark text in dark mode, as on the website */
+    val button: Color @Composable @ReadOnlyComposable get() = pick(0xFF1E2A22, 0xFFF2A65A)
+    val onButton: Color @Composable @ReadOnlyComposable get() = pick(0xFFFFFFFF, 0xFF1B1712)
 }
 
 /**
@@ -52,22 +77,43 @@ object AppFonts {
     val body = FontFamily(sourceSans(400), sourceSans(600), sourceSans(700))
 }
 
-private val colors = lightColorScheme(
-    primary = AppColors.forest,
+private val lightColors = lightColorScheme(
+    primary = Color(0xFF1E2A22),
     onPrimary = Color.White,
-    secondary = AppColors.clay,
+    secondary = Color(0xFFB4410F),
     onSecondary = Color.White,
-    secondaryContainer = AppColors.claySoft,      // the selected item's pill in the navigation bar and rail
-    onSecondaryContainer = AppColors.clayDark,
-    tertiary = AppColors.saffron,
-    background = AppColors.cream,
-    onBackground = AppColors.ink,
-    surface = AppColors.cream,
-    onSurface = AppColors.ink,
-    onSurfaceVariant = AppColors.inkSoft,
-    surfaceContainer = Color.White,                // the navigation bar and rail
-    outline = AppColors.lineStrong,
-    outlineVariant = AppColors.line,
+    secondaryContainer = Color(0xFFFBEDE3),      // the selected item's pill in the navigation bar and rail
+    onSecondaryContainer = Color(0xFF7C2D0B),
+    tertiary = Color(0xFFF2A65A),
+    background = Color(0xFFF6F2EA),
+    onBackground = Color(0xFF2A2620),
+    surface = Color(0xFFF6F2EA),
+    onSurface = Color(0xFF2A2620),
+    onSurfaceVariant = Color(0xFF4A4538),
+    surfaceContainer = Color.White,              // the navigation bar and rail
+    outline = Color(0xFFC9BFAE),
+    outlineVariant = Color(0xFFE3DCCD),
+)
+
+// The same roles in the website's dark colors; main buttons (primary) turn saffron with dark text
+private val darkColors = darkColorScheme(
+    primary = Color(0xFFF2A65A),
+    onPrimary = Color(0xFF1B1712),
+    secondary = Color(0xFFE8875A),
+    onSecondary = Color(0xFF1B1712),
+    secondaryContainer = Color(0xFF3A2418),
+    onSecondaryContainer = Color(0xFFF0A47A),
+    tertiary = Color(0xFFF2A65A),
+    background = Color(0xFF17140F),
+    onBackground = Color(0xFFF1EBDF),
+    surface = Color(0xFF17140F),
+    onSurface = Color(0xFFF1EBDF),
+    onSurfaceVariant = Color(0xFFD2C8B8),
+    surfaceContainer = Color(0xFF221E18),
+    surfaceContainerHigh = Color(0xFF2C2720),
+    surfaceContainerHighest = Color(0xFF2C2720),
+    outline = Color(0xFF7A7060),
+    outlineVariant = Color(0xFF3A342B),
 )
 
 private fun heading(size: Int, weight: Int = 700) =
@@ -91,9 +137,20 @@ private val typography = Typography(
     labelSmall = body(11, 700),
 )
 
+/** Whether the app is dark now: the reader's choice under Contact (Appearance), else the phone's setting. */
+@Composable
+fun appIsDark(): Boolean = when (Appearance.choice) {
+    Appearance.Choice.SYSTEM -> isSystemInDarkTheme()
+    Appearance.Choice.LIGHT -> false
+    Appearance.Choice.DARK -> true
+}
+
 @Composable
 fun TattvamasiTheme(content: @Composable () -> Unit) {
     // The website's colors rather than the phone's wallpaper colors (Material You): the app is the
     // Samaaj's, and looks the same on every phone.
-    MaterialTheme(colorScheme = colors, typography = typography, content = content)
+    val dark = appIsDark()
+    CompositionLocalProvider(LocalDarkTheme provides dark) {
+        MaterialTheme(colorScheme = if (dark) darkColors else lightColors, typography = typography, content = content)
+    }
 }

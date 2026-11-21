@@ -82,7 +82,7 @@ fun NotificationsCard() {
                         )
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest),
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
             ) { Text("Allow notifications", fontWeight = FontWeight(700)) }
         }
         Topic.entries.forEachIndexed { index, topic ->

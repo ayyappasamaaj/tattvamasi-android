@@ -260,9 +260,9 @@ private fun YatraCard(open: () -> Unit) {
         Icon(painterResource(R.drawable.ic_yatra_lamp), contentDescription = null, tint = AppColors.saffron,
             modifier = Modifier.size(32.dp))
         Column(Modifier.weight(1f)) {
-            Text("Sahasranama Yatra", style = MaterialTheme.typography.titleLarge, color = AppColors.cream)
+            Text("Sahasranama Yatra", style = MaterialTheme.typography.titleLarge, color = AppColors.onForest)
             Text("Chant the Sri Dharma Shastha Sahasranamam four verses a day through the 41 days of Vratam, with the " +
-                "meaning of every name.", style = MaterialTheme.typography.bodyMedium, color = AppColors.cream.copy(alpha = 0.85f))
+                "meaning of every name.", style = MaterialTheme.typography.bodyMedium, color = AppColors.onForest.copy(alpha = 0.85f))
         }
         Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null, tint = AppColors.saffron)
     }

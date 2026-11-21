@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- The redesigned app (Compose). The splash screen shows the app icon on the website's cream, then the
-         app's own theme takes over. -->
+    <!-- The redesigned app (Compose). The splash screen shows the app icon on the website's cream (its dark page in
+         the phone's dark mode), then the app's own theme takes over. -->
     <style name="Theme.Tattvamasi" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/cream</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <!-- Light only: never let the system darken the app (dark mode's "force dark" / expanded dark theme) -->
+        <!-- The app draws its own dark mode (ui/theme: the website's dark colors, Appearance), so the system never
+             darkens it on its own ("force dark" / expanded dark theme). values-night/colors.xml darkens the window. -->
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
     </style>
 
