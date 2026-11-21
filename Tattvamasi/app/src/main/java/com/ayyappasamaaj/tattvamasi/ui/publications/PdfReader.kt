@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.ayyappasamaaj.tattvamasi.ui.publications
 
 import android.content.Context
@@ -8,64 +6,87 @@ import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -73,64 +94,188 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
- * Reads one text full screen: the PDF's pages one under another, pinch to zoom; Close and Share at the top, the
- * language switch at the bottom. As on the iOS app (PDFReaderView.swift), with Android's own PDF renderer.
+ * Reads one text: the PDF slides up over the Publications page (the banner too), above the player bar and the
+ * navigation bar, which stay. No title bar (the PDF shows its title): a grab handle, the PDF's pages one under another
+ * (pinch to zoom), and round buttons at the bottom right: Save (on this phone), Share and the language. Dragging it
+ * down (from the handle, or the PDF when it's at its top) slides it away; so does Back. The maintainer's design,
+ * Nov 21 (https://claude.ai/artifact/8gcAHq92Jxy8nzg86EZdGC, "Latest"). As on the iOS app (PDFReaderView.swift).
  */
 @Composable
-fun PdfReader(item: ReadingItem, onClose: () -> Unit) {
+fun PdfPopup(item: ReadingItem, onClose: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val versions = item.text.versions
     var language by rememberSaveable(item.text.id) {
         mutableStateOf((versions.firstOrNull { it.language == item.startLanguage } ?: versions.first()).language)
     }
     val version = versions.firstOrNull { it.language == language } ?: versions.first()
+    LaunchedEffect(Unit) { SavedTexts.load(context) }
+    val savedList by SavedTexts.saved.collectAsState()
+    val saved = savedList.any { it.slug == item.categorySlug && it.title == item.text.title }
 
-    Dialog(
-        onDismissRequest = onClose,
-        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
-    ) {
-        Scaffold(
-            containerColor = AppColors.cream,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(item.text.title, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleMedium)
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, contentDescription = "Close") }
-                    },
-                    actions = {
-                        IconButton(onClick = { share(context, item.text.title, version.pageUrl) }) {
-                            Icon(Icons.Outlined.Share, contentDescription = "Share")
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = AppColors.card),
-                )
-            },
-            bottomBar = {
-                if (versions.size > 1) {
-                    Surface(color = AppColors.card) {
-                        Box(Modifier.fillMaxWidth().navigationBarsPadding().padding(12.dp),
-                            contentAlignment = Alignment.Center) {
-                            LanguageChoice(
-                                options = versions.map { it.language },
-                                labels = versions.associate { it.language to it.label },
-                                selected = language,
-                                onSelect = { language = it },
-                            )
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val height = constraints.maxHeight.toFloat().coerceAtLeast(1f)
+        val threshold = with(LocalDensity.current) { 140.dp.toPx() }
+        // How far down the panel is: the full height while it slides in, 0 when open
+        var down by remember(item.text.id) { mutableFloatStateOf(height) }
+        var closing by remember(item.text.id) { mutableStateOf(false) }
+        LaunchedEffect(item.text.id) { animate(down, 0f, animationSpec = tween(260)) { v, _ -> down = v } }
+
+        fun close() {
+            if (closing) return
+            closing = true
+            scope.launch {
+                animate(down, height, animationSpec = tween(220)) { v, _ -> down = v }
+                onClose()
+            }
+        }
+        // Let go: far enough (or flung down) closes, otherwise it springs back
+        suspend fun settle(velocity: Float) {
+            if (down > threshold || velocity > 1500f) close()
+            else animate(down, 0f, initialVelocity = velocity, animationSpec = tween(180)) { v, _ -> down = v }
+        }
+        BackHandler { close() }
+
+        // Pulling the PDF down when it's at its top moves the panel; pushing up brings it back first
+        val pull = remember(item.text.id) {
+            object : NestedScrollConnection {
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    if (available.y < 0f && down > 0f) {
+                        val used = max(available.y, -down)
+                        down += used
+                        return Offset(0f, used)
+                    }
+                    return Offset.Zero
+                }
+
+                override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                    if (available.y > 0f && source == NestedScrollSource.UserInput && !closing) {
+                        down += available.y
+                        return Offset(0f, available.y)
+                    }
+                    return Offset.Zero
+                }
+
+                override suspend fun onPreFling(available: Velocity): Velocity {
+                    if (down > 0f && !closing) {
+                        settle(available.y)
+                        return available
+                    }
+                    return Velocity.Zero
+                }
+            }
+        }
+
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f * (1f - down / height))))
+        Box(
+            Modifier
+                .fillMaxSize()
+                .offset { IntOffset(0, down.roundToInt()) }
+                .background(AppColors.cream),
+        ) {
+            Column(Modifier.fillMaxSize()) {
+                // The grab handle (under the status bar): drag it down to close; TalkBack reads it as Close
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .height(24.dp)
+                        .draggable(
+                            orientation = Orientation.Vertical,
+                            state = rememberDraggableState { delta -> if (!closing) down = (down + delta).coerceAtLeast(0f) },
+                            onDragStopped = { velocity -> settle(velocity) },
+                        )
+                        .clickable(role = Role.Button, onClickLabel = "Close") { close() }
+                        .semantics { contentDescription = "Close" },
+                ) {
+                    Box(Modifier.size(width = 40.dp, height = 5.dp).background(AppColors.lineStrong, RoundedCornerShape(3.dp)))
+                }
+                Box(Modifier.weight(1f).fillMaxWidth().nestedScroll(pull)) {
+                    PdfPages(version.fileUrl)
+                }
+            }
+            ReaderButtons(
+                languages = versions.map { it.language },
+                language = language,
+                onLanguage = { language = it },
+                saved = saved,
+                onSave = {
+                    val now = SavedTexts.toggle(context, item.categorySlug, item.text.title)
+                    Toast.makeText(context, if (now) "Saved on this phone" else "Removed from Saved", Toast.LENGTH_SHORT).show()
+                },
+                onShare = { share(context, item.text.title, version.pageUrl) },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            )
+        }
+    }
+}
+
+/** The round buttons at the bottom right, from the top: Save, Share, and the language (its other languages open to
+ *  its left; none when the text has one language). */
+@Composable
+private fun ReaderButtons(
+    languages: List<String>,
+    language: String,
+    onLanguage: (String) -> Unit,
+    saved: Boolean,
+    onSave: () -> Unit,
+    onShare: () -> Unit,
+    modifier: Modifier,
+) {
+    var open by remember { mutableStateOf(false) }
+    Column(modifier, horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        RoundButton(48.dp, if (saved) "Saved on this phone, tap to remove" else "Save on this phone",
+            Modifier.padding(end = 5.dp), onClick = { open = false; onSave() }) {
+            Icon(if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, contentDescription = null,
+                tint = if (saved) AppColors.saffron else AppColors.ink)
+        }
+        RoundButton(48.dp, "Share", Modifier.padding(end = 5.dp), onClick = { open = false; onShare() }) {
+            Icon(Icons.Outlined.Share, contentDescription = null, tint = AppColors.ink)
+        }
+        if (languages.size > 1) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (open) {
+                    languages.filter { it != language }.forEach { other ->
+                        RoundButton(44.dp, other, onClick = { open = false; onLanguage(other) }) {
+                            Text(LanguageCode.button(other), color = AppColors.ink, fontWeight = FontWeight(700), fontSize = 15.sp)
                         }
                     }
                 }
-            },
-        ) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding)) {
-                PdfPages(version.fileUrl)
+                RoundButton(58.dp, "Language: $language. Choose another", background = AppColors.forest, border = false,
+                    onClick = { open = !open }) {
+                    Text(LanguageCode.button(language), color = AppColors.saffron, fontWeight = FontWeight(700), fontSize = 19.sp)
+                }
             }
         }
     }
+}
+
+@Composable
+private fun RoundButton(
+    size: Dp,
+    description: String,
+    modifier: Modifier = Modifier,
+    background: Color = AppColors.card,
+    border: Boolean = true,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(size)
+            .shadow(4.dp, CircleShape)
+            .clip(CircleShape)
+            .background(background)
+            .then(if (border) Modifier.border(1.dp, AppColors.lineStrong, CircleShape) else Modifier)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = description },
+    ) { content() }
 }
 
 private fun share(context: Context, title: String, url: String) {
