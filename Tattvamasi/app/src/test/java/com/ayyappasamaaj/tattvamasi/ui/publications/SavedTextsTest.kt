@@ -57,6 +57,6 @@ class SavedTextsTest {
         assertEquals(listOf("En", "Sa", "Ta", "Te", "Ma", "Ka"),
             listOf("English", "Sanskrit", "Tamil", "Telugu", "Malayalam", "Kannada").map(LanguageCode::button))
         assertEquals("Hi", LanguageCode.button("Hindi"))
-        assertEquals("ML", LanguageCode.short("Malayalam"))  // the list badges keep their codes
+        assertEquals("Ma", LanguageCode.button("Malayalam"))  // the list badges use these codes too
     }
 }
