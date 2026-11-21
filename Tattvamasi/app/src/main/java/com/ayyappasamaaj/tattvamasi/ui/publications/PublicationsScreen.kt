@@ -40,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
@@ -55,9 +56,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
@@ -96,48 +94,127 @@ import java.time.LocalDate
 
 /**
  * Publications: Bhajans, then Shlokas & Puja, as on the website, with one search for everything. A tile opens the
- * category's texts; a title opens the reader. On a phone the category replaces the tiles (Back returns); on a
- * tablet the tiles stay on the left and the category shows on the right, like the iPad's split view.
+ * category's texts; a title opens the reader ([read]: AppRoot shows it over the page, PdfReader.kt). On a phone the
+ * category replaces the tiles (Back returns); on a tablet the tiles stay on the left and the category shows on the
+ * right, like the iPad's split view. Texts saved on this phone get a "Saved" row at the top, opening their list.
  */
 @Composable
-fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}) {
+fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}, read: (ReadingItem) -> Unit) {
     var selectedSlug by rememberSaveable { mutableStateOf<String?>(null) }
-    var reading by remember { mutableStateOf<ReadingItem?>(null) }
     val context = LocalContext.current
     LaunchedEffect(Unit) { ReadingPrefs.load(context) }
+    LaunchedEffect(Unit) { SavedTexts.load(context) }
     val preferred by ReadingPrefs.language.collectAsState()
+    val savedList by SavedTexts.saved.collectAsState()
+    val saved = resolveSaved(savedList, state.sections)
+    val savedKeys = savedList.map { savedKey(it.slug, it.title) }.toSet()
     val all = allCategories(state.sections)
     val selected = all.firstOrNull { it.second.slug == selectedSlug }
     // Every title opens in the "Reading in" language when it has it, else English (as on the website)
-    val open = { item: ReadingItem -> reading = item.copy(startLanguage = openingLanguage(item.text, preferred)) }
+    val open = { item: ReadingItem -> read(item.copy(startLanguage = openingLanguage(item.text, preferred))) }
     val choose = { category: PublicationCategory -> selectedSlug = category.slug }
+    val showSaved = { selectedSlug = SAVED }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         if (maxWidth >= 720.dp) {
             val shown = selected ?: state.sections.firstOrNull()?.let { s -> s.categories.firstOrNull()?.let { s to it } }
+            val savedShown = selectedSlug == SAVED
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(340.dp).fillMaxHeight()) {
-                    PublicationsHome(state, selectedSlug = shown?.second?.slug, onCategory = { selectedSlug = it.slug },
-                        onRead = open, minTile = 96, openYatra = openYatra)
+                    PublicationsHome(state, selectedSlug = if (savedShown) SAVED else shown?.second?.slug,
+                        onCategory = { selectedSlug = it.slug }, onRead = open, minTile = 96, openYatra = openYatra,
+                        saved = saved.size, savedKeys = savedKeys, onSaved = showSaved)
                 }
                 VerticalDivider(color = AppColors.line)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
-                    shown?.let { (section, category) ->
-                        CategoryContent(section, category, all, onRead = open, onCategory = choose, onBack = null)
+                    if (savedShown) {
+                        SavedContent(saved, onRead = open, onBack = null)
+                    } else {
+                        shown?.let { (section, category) ->
+                            CategoryContent(section, category, all, savedKeys, onRead = open, onCategory = choose, onBack = null)
+                        }
                     }
                 }
             }
+        } else if (selectedSlug == SAVED) {
+            BackHandler { selectedSlug = null }
+            SavedContent(saved, onRead = open, onBack = { selectedSlug = null })
         } else if (selected != null) {
             BackHandler { selectedSlug = null }
-            CategoryContent(selected.first, selected.second, all, onRead = open, onCategory = choose,
+            CategoryContent(selected.first, selected.second, all, savedKeys, onRead = open, onCategory = choose,
                 onBack = { selectedSlug = null })
         } else {
             PublicationsHome(state, selectedSlug = null, onCategory = { selectedSlug = it.slug }, onRead = open,
-                minTile = 100, openYatra = openYatra)
+                minTile = 100, openYatra = openYatra, saved = saved.size, savedKeys = savedKeys, onSaved = showSaved)
         }
     }
+}
 
-    reading?.let { PdfReader(it) { reading = null } }
+/** [PublicationsScreen]'s selection when the Saved list shows (no category has this slug). */
+private const val SAVED = "__saved"
+
+/** The texts saved on this phone, newest first, each with its category. */
+@Composable
+private fun SavedContent(saved: List<PublicationHit>, onRead: (ReadingItem) -> Unit, onBack: (() -> Unit)?) {
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        if (onBack != null) {
+            item {
+                TextButton(onClick = onBack, contentPadding = PaddingValues(horizontal = 4.dp)) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null, tint = AppColors.clayDark)
+                    Text("Publications", color = AppColors.clayDark, modifier = Modifier.padding(start = 6.dp))
+                }
+            }
+        }
+        item {
+            Column(Modifier.padding(bottom = 12.dp)) {
+                Text("Saved", style = MaterialTheme.typography.headlineMedium.copy(fontSize = 30.sp),
+                    color = AppColors.ink, modifier = Modifier.semantics { heading() })
+                Text("Kept on this phone", style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
+            }
+        }
+        item {
+            if (saved.isEmpty()) {
+                Text("Nothing saved yet. Open a text and tap the bookmark to keep it here.",
+                    style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft,
+                    modifier = Modifier.fillMaxWidth().card())
+            } else {
+                Column(Modifier.fillMaxWidth().card(padding = 14.dp)) {
+                    saved.forEachIndexed { i, hit ->
+                        if (i > 0) HorizontalDivider(color = AppColors.line)
+                        TextRow(hit.text, detail = hit.category.name, saved = true) {
+                            onRead(ReadingItem(hit.text, hit.category.name, null, hit.category.slug))
+                        }
+                    }
+                }
+            }
+        }
+        item { AddressFooter() }
+    }
+}
+
+/** "Saved · 3": the way to the texts saved on this phone, at the top of Publications once there are some. */
+@Composable
+private fun SavedRow(count: Int, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (selected) AppColors.claySoft else AppColors.card)
+            .border(if (selected) 2.dp else 1.dp, if (selected) AppColors.clay else AppColors.line, RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .heightIn(min = 52.dp)
+            .padding(horizontal = 14.dp)
+            .semantics(mergeDescendants = true) { contentDescription = "Saved, $count" },
+    ) {
+        Icon(Icons.Filled.Bookmark, contentDescription = null, tint = AppColors.saffron)
+        Text("Saved · $count", style = MaterialTheme.typography.titleMedium, color = AppColors.ink, modifier = Modifier.weight(1f))
+        Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null, tint = AppColors.muted)
+    }
 }
 
 /** The title, the search for everything, and each section's tiles (or the search's results). */
@@ -149,6 +226,9 @@ private fun PublicationsHome(
     onRead: (ReadingItem) -> Unit,
     minTile: Int,
     openYatra: () -> Unit,
+    saved: Int,
+    savedKeys: Set<String>,
+    onSaved: () -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var focused by remember { mutableStateOf(false) }
@@ -176,6 +256,9 @@ private fun PublicationsHome(
                 ReadingIn(languages, preferred) { ReadingPrefs.setLanguage(context, it) }
             }
         }
+        if (query.isBlank() && saved > 0) {
+            item(span = full) { SavedRow(saved, selected = selectedSlug == SAVED, onClick = onSaved) }
+        }
         // Before anything is typed: this phone's recent searches (while the box has the cursor)
         if (query.isBlank() && focused && recents.isNotEmpty()) {
             item(span = full) { RecentSearches(recents) { query = it } }
@@ -191,9 +274,10 @@ private fun PublicationsHome(
                         Column(Modifier.fillMaxWidth().card(padding = 14.dp)) {
                             hits.forEachIndexed { i, hit ->
                                 if (i > 0) HorizontalDivider(color = AppColors.line)
-                                TextRow(hit.text, detail = hit.category.name) {
+                                TextRow(hit.text, detail = hit.category.name,
+                                    saved = savedKey(hit.category.slug, hit.text.title) in savedKeys) {
                                     ReadingPrefs.addRecent(context, query)  // a title opened from a search
-                                    onRead(ReadingItem(hit.text, hit.category.name, null))
+                                    onRead(ReadingItem(hit.text, hit.category.name, null, hit.category.slug))
                                 }
                             }
                         }
@@ -219,8 +303,9 @@ private fun PublicationsHome(
                         Column(Modifier.fillMaxWidth().card(padding = 14.dp)) {
                             shortlist.forEachIndexed { i, hit ->
                                 if (i > 0) HorizontalDivider(color = AppColors.line)
-                                TextRow(hit.text, detail = hit.category.name, title = plainTitle(hit.text.title)) {
-                                    onRead(ReadingItem(hit.text, hit.category.name, null))
+                                TextRow(hit.text, detail = hit.category.name, title = plainTitle(hit.text.title),
+                                    saved = savedKey(hit.category.slug, hit.text.title) in savedKeys) {
+                                    onRead(ReadingItem(hit.text, hit.category.name, null, hit.category.slug))
                                 }
                             }
                         }
@@ -274,6 +359,7 @@ private fun CategoryContent(
     section: PublicationSection,
     category: PublicationCategory,
     all: List<Pair<PublicationSection, PublicationCategory>>,
+    savedKeys: Set<String>,
     onRead: (ReadingItem) -> Unit,
     onCategory: (PublicationCategory) -> Unit,
     onBack: (() -> Unit)?,
@@ -340,13 +426,13 @@ private fun CategoryContent(
             }
             Column(Modifier.fillMaxWidth().background(AppColors.card, shape).padding(horizontal = 14.dp)) {
                 if (index > 0) HorizontalDivider(color = AppColors.line)
-                TextRow(text) {
-                    onRead(ReadingItem(text, category.name, null))
+                TextRow(text, saved = savedKey(category.slug, text.title) in savedKeys) {
+                    onRead(ReadingItem(text, category.name, null, category.slug))
                 }
             }
         }
         item {
-            Text("Tap a title to read it. You can zoom in, switch language and share.",
+            Text("Tap a title to read it. You can zoom in, switch language, share and save it on this phone.",
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = AppColors.muted,
                 modifier = Modifier.padding(top = 12.dp))
         }
@@ -558,9 +644,15 @@ private fun FitText(text: String, style: TextStyle) {
     }
 }
 
-/** A title in a list, with its languages as small badges. */
+/** A title in a list, with its languages as small badges (and a bookmark when it's saved on this phone). */
 @Composable
-private fun TextRow(text: PublicationText, detail: String? = null, title: String = text.title, open: () -> Unit) {
+private fun TextRow(
+    text: PublicationText,
+    detail: String? = null,
+    title: String = text.title,
+    saved: Boolean = false,
+    open: () -> Unit,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -575,6 +667,9 @@ private fun TextRow(text: PublicationText, detail: String? = null, title: String
             detail?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = AppColors.muted)
             }
+        }
+        if (saved) {
+            Icon(Icons.Filled.Bookmark, contentDescription = "Saved", tint = AppColors.saffron, modifier = Modifier.size(16.dp))
         }
         Text(
             text.languages.joinToString(" · ") { LanguageCode.short(it) },
@@ -621,54 +716,4 @@ private fun SearchField(
         ),
         modifier = Modifier.fillMaxWidth().onFocusChanged { onFocus(it.isFocused) },
     )
-}
-
-/**
- * All / English / Tamil / ...: segmented buttons for up to four choices, a drop-down for more. [labels] gives a
- * choice's own name ("தமிழ்"), when there is one.
- */
-@Composable
-fun LanguageChoice(options: List<String>, labels: Map<String, String>, selected: String, onSelect: (String) -> Unit) {
-    if (options.size <= 4) {
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            options.forEachIndexed { index, option ->
-                SegmentedButton(
-                    selected = option == selected,
-                    onClick = { onSelect(option) },
-                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
-                    colors = SegmentedButtonDefaults.colors(
-                        activeContainerColor = AppColors.claySoft, activeContentColor = AppColors.clayDark,
-                        inactiveContainerColor = AppColors.card,
-                    ),
-                ) {
-                    Text(labels[option] ?: option, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-            }
-        }
-    } else {
-        var expanded by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-            OutlinedTextField(
-                value = labels[selected] ?: selected,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Language") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                shape = RoundedCornerShape(50),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = AppColors.card, unfocusedContainerColor = AppColors.card,
-                    focusedBorderColor = AppColors.clay, focusedLabelColor = AppColors.clayDark,
-                ),
-                modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
-            )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(labels[option] ?: option, fontWeight = if (option == selected) FontWeight(700) else null) },
-                        onClick = { onSelect(option); expanded = false },
-                    )
-                }
-            }
-        }
-    }
 }

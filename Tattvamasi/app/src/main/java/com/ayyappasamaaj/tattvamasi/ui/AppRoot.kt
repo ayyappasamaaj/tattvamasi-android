@@ -66,7 +66,9 @@ import com.ayyappasamaaj.tattvamasi.ui.guides.GuidesStore
 import com.ayyappasamaaj.tattvamasi.ui.home.SlidesStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.guideTarget
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
+import com.ayyappasamaaj.tattvamasi.ui.publications.PdfPopup
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
+import com.ayyappasamaaj.tattvamasi.ui.publications.ReadingItem
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
 import com.ayyappasamaaj.tattvamasi.ui.sabarimala.SabarimalaScreen
 import com.ayyappasamaaj.tattvamasi.ui.text.LocalLinkHandler
@@ -101,6 +103,7 @@ fun AppRoot() {
     // The Sahasranama Yatra, open on the tab it was opened from (Home or Publications), as on iOS
     var homeYatra by rememberSaveable { mutableStateOf(false) }
     var publicationsYatra by rememberSaveable { mutableStateOf(false) }
+    var reading by remember { mutableStateOf<ReadingItem?>(null) }  // the text open on Publications (PdfReader.kt)
     // Keeps each tab's yatra where it was (a day, its step) while another tab is shown
     val yatraPlaces = rememberSaveableStateHolder()
 
@@ -156,6 +159,7 @@ fun AppRoot() {
                             if (destination == Destination.Sabarimala && current == Destination.Sabarimala) openGuide = null
                             if (destination == Destination.Home && current == Destination.Home) { homeYatra = false; yatraPlaces.removeState("home") }
                             if (destination == Destination.Publications && current == Destination.Publications) {
+                                reading = null
                                 publicationsYatra = false
                                 yatraPlaces.removeState("publications")
                             }
@@ -185,7 +189,10 @@ fun AppRoot() {
                 }
                 return@NavigationSuiteScaffold
             }
-            AppScreen {
+            // A text from Publications slides up over the page (the banner too), above the player and navigation bars
+            AppScreen(overlay = {
+                if (current == Destination.Publications) reading?.let { PdfPopup(it) { reading = null } }
+            }) {
                 when (current) {
                     Destination.Home -> HomeScreen(events, go = {
                         if (it == Destination.Events) openEvent = null  // "See events": the list
@@ -195,7 +202,8 @@ fun AppRoot() {
                         current = Destination.Events
                     }, openYatra = { homeYatra = true }, slides = slides)
                     Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
-                    Destination.Publications -> PublicationsScreen(publications) { publicationsYatra = true }
+                    Destination.Publications -> PublicationsScreen(publications, openYatra = { publicationsYatra = true },
+                        read = { reading = it })
                     Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode), openingDates) {
                         openGuide = it?.encode()
                     }
@@ -252,13 +260,13 @@ fun BannerHeader() {
     }
 }
 
-/** A section's screen: the banner, then the content on the cream page. */
+/** A section's screen: the banner, then the content on the cream page; [overlay] (a text being read) covers both,
+ *  above the player bar. */
 @Composable
-fun AppScreen(content: @Composable () -> Unit) {
+fun AppScreen(overlay: @Composable () -> Unit = {}, content: @Composable () -> Unit) {
     Scaffold(
         containerColor = AppColors.cream,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),  // the banner takes the status bar; the bar or rail the rest
-        topBar = { BannerHeader() },
         bottomBar = { PlayerBar() },  // the Namavali player, while it's in use (ui/yatra/PlayerBar.kt)
     ) { padding ->
         Box(
@@ -266,7 +274,11 @@ fun AppScreen(content: @Composable () -> Unit) {
                 .fillMaxSize()
                 .padding(padding),
         ) {
-            content()
+            Column(Modifier.fillMaxSize()) {
+                BannerHeader()
+                Box(Modifier.weight(1f).fillMaxWidth()) { content() }
+            }
+            overlay()
         }
     }
 }

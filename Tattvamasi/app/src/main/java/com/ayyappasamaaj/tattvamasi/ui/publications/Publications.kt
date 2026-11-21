@@ -52,8 +52,14 @@ data class PublicationSection(val key: String, val title: String, val categories
 /** A search result: a text and the category it's in. */
 data class PublicationHit(val category: PublicationCategory, val text: PublicationText)
 
-/** What the reader opens: a text, and the language to start in (null: the text's first version). */
-data class ReadingItem(val text: PublicationText, val categoryName: String, val startLanguage: String?)
+/** What the reader opens: a text, and the language to start in (null: the text's first version). [categorySlug]
+ *  names the text on this phone's Saved list. */
+data class ReadingItem(
+    val text: PublicationText,
+    val categoryName: String,
+    val startLanguage: String?,
+    val categorySlug: String = "",
+)
 
 object LanguageCode {
     private val codes = mapOf(
@@ -63,6 +69,45 @@ object LanguageCode {
 
     /** "Tamil" -> "TA", for the small badges in lists. */
     fun short(language: String): String = codes[language.lowercase()] ?: language.take(2).uppercase()
+
+    private val buttonCodes = mapOf(
+        "english" to "En", "sanskrit" to "Sa", "tamil" to "Ta", "telugu" to "Te", "malayalam" to "Ma", "kannada" to "Ka",
+    )
+
+    /** "Tamil" -> "Ta", on the reader's round language button (the maintainer's choice, Nov 21). */
+    fun button(language: String): String =
+        buttonCodes[language.lowercase()] ?: language.take(2).lowercase().replaceFirstChar { it.uppercase() }
+}
+
+/** A text kept on this phone's Saved list: its category's slug and title (together they name it), and when. */
+data class SavedText(val slug: String, val title: String, val at: Long)
+
+fun savedKey(slug: String, title: String) = "$slug|$title"
+
+/** Saving a text puts it first; saving it again takes it off. */
+fun toggledSaved(saved: List<SavedText>, slug: String, title: String, now: Long): List<SavedText> =
+    if (saved.any { it.slug == slug && it.title == title }) saved.filterNot { it.slug == slug && it.title == title }
+    else listOf(SavedText(slug, title, now)) + saved
+
+/** The Saved list as stored on the phone: a line per text, "time<TAB>slug<TAB>title". */
+fun encodeSaved(saved: List<SavedText>): String = saved.joinToString("\n") { item ->
+    listOf(item.at.toString(), item.slug, item.title).joinToString("\t") { it.replace(Regex("[\t\n]"), " ") }
+}
+
+fun decodeSaved(text: String?): List<SavedText> = text.orEmpty().split("\n").mapNotNull { line ->
+    val parts = line.split("\t")
+    if (parts.size != 3) return@mapNotNull null
+    val at = parts[0].toLongOrNull() ?: return@mapNotNull null
+    SavedText(parts[1], parts[2], at).takeIf { it.slug.isNotEmpty() && it.title.isNotEmpty() }
+}
+
+/** The saved texts that are still published, newest first; one the website took away is left out. */
+fun resolveSaved(saved: List<SavedText>, sections: List<PublicationSection>): List<PublicationHit> {
+    val categories = sections.flatMap { it.categories }.associateBy { it.slug }
+    return saved.sortedByDescending { it.at }.mapNotNull { item ->
+        val category = categories[item.slug] ?: return@mapNotNull null
+        category.texts.firstOrNull { it.title == item.title }?.let { PublicationHit(category, it) }
+    }
 }
 
 /** Firebase's `/publications` value as sections; anything malformed is left out. */
