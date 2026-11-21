@@ -145,10 +145,11 @@ private sealed interface View {
 
 /**
  * The Sahasranama Yatra, as on the website: choose Day 1, then walk the path of the trek a day at a time. Opened from
- * Home or Publications; [onClose] goes back there.
+ * Home or Publications, as a page of that tab (the navigation bar stays); [onClose] goes back to the tab's own page,
+ * named by [back] on the top bar's Back button.
  */
 @Composable
-fun YatraScreen(onClose: () -> Unit) {
+fun YatraScreen(back: String, onClose: () -> Unit) {
     val context = LocalContext.current
     LaunchedEffect(Unit) { YatraStore.start(context) }
     val state by YatraStore.state.collectAsState()
@@ -230,7 +231,7 @@ fun YatraScreen(onClose: () -> Unit) {
             .statusBarsPadding(),
     ) {
         TopBar(
-            back = if (view is View.Day) "Path" else "Publications",
+            back = if (view is View.Day || (view is View.Start && progress.start != null)) "Path" else back,
             onBack = { if (view is View.Day || (view is View.Start && progress.start != null)) viewText = "path" else onClose() },
             state = state,
             onHowTo = { introOpen = true },

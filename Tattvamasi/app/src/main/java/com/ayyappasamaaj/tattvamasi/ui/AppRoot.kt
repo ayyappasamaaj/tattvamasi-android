@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,11 +98,11 @@ fun AppRoot() {
     val slides by SlidesStore.state.collectAsState()
     val guides by GuidesStore.state.collectAsState()
     val openingDates by GuidesStore.dates.collectAsState()
-    var yatraOpen by rememberSaveable { mutableStateOf(false) }  // the Sahasranama Yatra, under Publications
-    val openYatra = {
-        yatraOpen = true
-        current = Destination.Publications
-    }
+    // The Sahasranama Yatra, open on the tab it was opened from (Home or Publications), as on iOS
+    var homeYatra by rememberSaveable { mutableStateOf(false) }
+    var publicationsYatra by rememberSaveable { mutableStateOf(false) }
+    // Keeps each tab's yatra where it was (a day, its step) while another tab is shown
+    val yatraPlaces = rememberSaveableStateHolder()
 
     // A link to one of the guides (in an event's text, or in another guide) opens the guide in the app
     val openLink: (String) -> Boolean = remember(guides) {
@@ -153,7 +154,11 @@ fun AppRoot() {
                         onClick = {
                             if (destination == Destination.Events && current == Destination.Events) openEvent = null
                             if (destination == Destination.Sabarimala && current == Destination.Sabarimala) openGuide = null
-                            if (destination == Destination.Publications && current == Destination.Publications) yatraOpen = false
+                            if (destination == Destination.Home && current == Destination.Home) { homeYatra = false; yatraPlaces.removeState("home") }
+                            if (destination == Destination.Publications && current == Destination.Publications) {
+                                publicationsYatra = false
+                                yatraPlaces.removeState("publications")
+                            }
                             current = destination
                         },
                         icon = { Icon(destination.icon, contentDescription = null) },
@@ -167,9 +172,17 @@ fun AppRoot() {
             },
             containerColor = AppColors.cream,
         ) {
-            // The yatra has its own bar at the top, in place of the banner
-            if (current == Destination.Publications && yatraOpen) {
-                YatraScreen(onClose = { yatraOpen = false })
+            // The yatra has its own bar at the top, in place of the banner; Back returns to the tab's own page
+            if (current == Destination.Home && homeYatra) {
+                yatraPlaces.SaveableStateProvider("home") {
+                    YatraScreen(back = "Home", onClose = { homeYatra = false; yatraPlaces.removeState("home") })
+                }
+                return@NavigationSuiteScaffold
+            }
+            if (current == Destination.Publications && publicationsYatra) {
+                yatraPlaces.SaveableStateProvider("publications") {
+                    YatraScreen(back = "Publications", onClose = { publicationsYatra = false; yatraPlaces.removeState("publications") })
+                }
                 return@NavigationSuiteScaffold
             }
             AppScreen {
@@ -180,9 +193,9 @@ fun AppRoot() {
                     }, openEvent = { key ->
                         openEvent = key
                         current = Destination.Events
-                    }, openYatra = openYatra, slides = slides)
+                    }, openYatra = { homeYatra = true }, slides = slides)
                     Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
-                    Destination.Publications -> PublicationsScreen(publications, openYatra)
+                    Destination.Publications -> PublicationsScreen(publications) { publicationsYatra = true }
                     Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode), openingDates) {
                         openGuide = it?.encode()
                     }
