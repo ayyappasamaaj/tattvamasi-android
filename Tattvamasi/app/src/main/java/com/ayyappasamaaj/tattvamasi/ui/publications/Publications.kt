@@ -62,19 +62,11 @@ data class ReadingItem(
 )
 
 object LanguageCode {
-    private val codes = mapOf(
-        "english" to "EN", "tamil" to "TA", "malayalam" to "ML", "sanskrit" to "SA", "telugu" to "TE",
-        "kannada" to "KN", "hindi" to "HI", "marathi" to "MR", "gujarati" to "GU", "bengali" to "BN",
-    )
-
-    /** "Tamil" -> "TA", for the small badges in lists. */
-    fun short(language: String): String = codes[language.lowercase()] ?: language.take(2).uppercase()
-
     private val buttonCodes = mapOf(
         "english" to "En", "sanskrit" to "Sa", "tamil" to "Ta", "telugu" to "Te", "malayalam" to "Ma", "kannada" to "Ka",
     )
 
-    /** "Tamil" -> "Ta", on the reader's round language button (the maintainer's choice, Nov 21). */
+    /** "Tamil" -> "Ta": the reader's round language button and the badges in lists (the maintainer's choice, Nov 21). */
     fun button(language: String): String =
         buttonCodes[language.lowercase()] ?: language.take(2).lowercase().replaceFirstChar { it.uppercase() }
 }

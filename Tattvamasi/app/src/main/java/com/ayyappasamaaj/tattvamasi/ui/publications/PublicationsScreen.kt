@@ -672,7 +672,7 @@ private fun TextRow(
             Icon(Icons.Filled.Bookmark, contentDescription = "Saved", tint = AppColors.saffron, modifier = Modifier.size(16.dp))
         }
         Text(
-            text.languages.joinToString(" · ") { LanguageCode.short(it) },
+            text.languages.joinToString(" · ") { LanguageCode.button(it) },
             style = MaterialTheme.typography.labelMedium,
             color = AppColors.clayDark,
             modifier = Modifier

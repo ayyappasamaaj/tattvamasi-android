@@ -70,8 +70,9 @@ class PublicationsTest {
         assertEquals(1, parsed.size)
         assertEquals(listOf("Good"), parsed[0].categories[0].texts.map { it.title })
         assertEquals("தமிழ்", parsed[0].categories[0].texts[0].versions[0].label)
-        assertEquals("TA", LanguageCode.short("Tamil"))
-        assertEquals("SA", LanguageCode.short("sanskrit"))
+        // The list badges use the round language button's codes (the maintainer, Nov 21)
+        assertEquals("Ta", LanguageCode.button("Tamil"))
+        assertEquals("Sa", LanguageCode.button("sanskrit"))
     }
 
     private fun text(vararg languages: String) = PublicationText("T", languages.map {
