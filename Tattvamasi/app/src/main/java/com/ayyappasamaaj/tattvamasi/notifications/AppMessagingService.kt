@@ -6,8 +6,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ayyappasamaaj.tattvamasi.MainActivity
 import com.ayyappasamaaj.tattvamasi.R
-import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
-import androidx.compose.ui.graphics.toArgb
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -30,7 +28,7 @@ class AppMessagingService : FirebaseMessagingService() {
         )
         val shown = NotificationCompat.Builder(this, channel)
             .setSmallIcon(R.drawable.ic_notification)
-            .setColor(AppColors.clay.toArgb())
+            .setColor(getColor(R.color.notification))  // the website's clay (res/values/colors.xml)
             .setContentTitle(notification.title)
             .setContentText(notification.body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(notification.body))

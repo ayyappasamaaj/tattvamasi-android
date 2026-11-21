@@ -165,7 +165,7 @@ private fun PdfPages(url: String) {
         ) {
             Text("This text couldn't be opened. Check your connection and try again.",
                 style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft, textAlign = TextAlign.Center)
-            Button(onClick = { attempt++ }, colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest)) {
+            Button(onClick = { attempt++ }, colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton)) {
                 Text("Try again")
             }
         }

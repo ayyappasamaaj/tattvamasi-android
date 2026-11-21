@@ -180,7 +180,7 @@ fun EventCard(event: AppEvent, openDetails: () -> Unit) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
                 onClick = openDetails,
-                colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest),
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
             ) {
                 Text("Details", fontWeight = FontWeight(700))
             }

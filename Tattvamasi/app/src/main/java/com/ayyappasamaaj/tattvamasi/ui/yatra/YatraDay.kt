@@ -50,6 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -221,7 +222,7 @@ private fun Stepper(yatra: Yatra, progress: Progress, day: Int, steps: List<Step
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
                     .background(if (now) AppColors.forest else if (stepDone) YatraColors.goldSoft else AppColors.card, RoundedCornerShape(50))
-                    .border(1.dp, if (now) AppColors.forest else AppColors.line, RoundedCornerShape(50))
+                    .border(1.dp, if (now) AppColors.forestInk else AppColors.line, RoundedCornerShape(50))
                     .clickable(role = Role.Tab, onClick = { onStep(i) })
                     .semantics(mergeDescendants = true) { selected = now }
                     .heightIn(min = 48.dp)
@@ -233,14 +234,14 @@ private fun Stepper(yatra: Yatra, progress: Progress, day: Int, steps: List<Step
                 ) {
                     when {
                         stepDone && !now -> Icon(Icons.Outlined.Check, contentDescription = "done", tint = AppColors.card, modifier = Modifier.size(16.dp))
-                        step is Step.VerseStep -> Text("${step.verse}", style = MaterialTheme.typography.labelMedium, color = AppColors.forest)
-                        step is Step.NameOfDay -> Text("★", color = AppColors.forest)
-                        else -> Icon(painterResource(R.drawable.ic_yatra_lamp), contentDescription = null, tint = AppColors.forest, modifier = Modifier.size(16.dp))
+                        step is Step.VerseStep -> Text("${step.verse}", style = MaterialTheme.typography.labelMedium, color = if (now) AppColors.forest else AppColors.forestInk)
+                        step is Step.NameOfDay -> Text("★", color = if (now) AppColors.forest else AppColors.forestInk)
+                        else -> Icon(painterResource(R.drawable.ic_yatra_lamp), contentDescription = null, tint = if (now) AppColors.forest else AppColors.forestInk, modifier = Modifier.size(16.dp))
                     }
                 }
                 Column {
-                    Text(label, style = MaterialTheme.typography.labelLarge, color = if (now) AppColors.cream else AppColors.ink)
-                    Text(sub, style = MaterialTheme.typography.bodySmall, color = if (now) AppColors.cream.copy(alpha = 0.8f) else AppColors.muted)
+                    Text(label, style = MaterialTheme.typography.labelLarge, color = if (now) AppColors.onForest else AppColors.ink)
+                    Text(sub, style = MaterialTheme.typography.bodySmall, color = if (now) AppColors.onForest.copy(alpha = 0.8f) else AppColors.muted)
                 }
             }
         }
@@ -283,15 +284,26 @@ private fun Tag(text: String, note: String) {
 }
 
 /** The verse with each name highlighted (tap one to see it in the Namavali), its number raised after it. */
-private fun markedVerse(verse: Verse, selected: Int?, onSelect: (Int) -> Unit): AnnotatedString = buildAnnotatedString {
+@Composable
+private fun markedVerse(verse: Verse, selected: Int?, onSelect: (Int) -> Unit): AnnotatedString {
+    // Read here, in the composition: the colors follow the light or dark mode
+    val gold = YatraColors.gold
+    val goldSoft = YatraColors.goldSoft
+    val forest = AppColors.forest
+    return markedVerse(verse, selected, onSelect, gold, goldSoft, forest)
+}
+
+private fun markedVerse(
+    verse: Verse, selected: Int?, onSelect: (Int) -> Unit, gold: Color, goldSoft: Color, forest: Color,
+): AnnotatedString = buildAnnotatedString {
     var at = 0
     verse.marks.forEach { m ->
         if (m.start < at) return@forEach
         append(verse.text.substring(at, m.start))
         val on = m.n == selected
         val style = SpanStyle(
-            background = if (on) AppColors.saffron.copy(alpha = 0.55f) else YatraColors.goldSoft,
-            color = if (on) AppColors.forest else YatraColors.gold,
+            background = if (on) AppColors.saffron.copy(alpha = 0.55f) else goldSoft,
+            color = if (on) forest else gold,
         )
         withLink(LinkAnnotation.Clickable("name-${m.n}", TextLinkStyles(style)) { onSelect(m.n) }) {
             append(verse.text.substring(m.start, m.end))
@@ -395,7 +407,7 @@ private fun Namavali(yatra: Yatra, day: Int, verseNumber: Int, names: List<Int>,
                         .widthIn(min = 52.dp)
                         .clip(RoundedCornerShape(50))
                         .background(if (on) AppColors.forest else if (star) YatraColors.goldSoft else AppColors.cream, RoundedCornerShape(50))
-                        .border(1.dp, if (on) AppColors.forest else AppColors.line, RoundedCornerShape(50))
+                        .border(1.dp, if (on) AppColors.forestInk else AppColors.line, RoundedCornerShape(50))
                         .clickable(role = Role.Tab) { onSelect(n) }
                         .semantics {
                             this.selected = on
@@ -404,7 +416,7 @@ private fun Namavali(yatra: Yatra, day: Int, verseNumber: Int, names: List<Int>,
                         .padding(horizontal = 12.dp),
                 ) {
                     Text("$n" + if (star) " ★" else "", style = MaterialTheme.typography.labelLarge,
-                        color = if (on) AppColors.cream else AppColors.ink)
+                        color = if (on) AppColors.onForest else AppColors.ink)
                 }
             }
         }
@@ -639,17 +651,17 @@ private fun QuickCheck(yatra: Yatra, quiz: Quiz) {
                     else -> AppColors.card
                 }),
                 border = BorderStroke(if (right || wrong) 2.dp else 1.dp,
-                    when { right -> AppColors.forest; wrong -> AppColors.clay; else -> AppColors.line }),
+                    when { right -> AppColors.forestInk; wrong -> AppColors.clay; else -> AppColors.line }),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
             ) {
-                Text(option, color = when { right -> AppColors.forest; wrong -> AppColors.clayDark; else -> AppColors.ink },
+                Text(option, color = when { right -> AppColors.forestInk; wrong -> AppColors.clayDark; else -> AppColors.ink },
                     fontWeight = if (right) FontWeight(700) else FontWeight(400), modifier = Modifier.fillMaxWidth())
             }
         }
         answer?.let {
             Text(if (it == quiz.correct) "Right." else "Not quite. It means “${quiz.name.m}.”",
                 style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight(600),
-                color = if (it == quiz.correct) AppColors.forest else AppColors.clayDark,
+                color = if (it == quiz.correct) AppColors.forestInk else AppColors.clayDark,
                 modifier = Modifier.semantics { this.contentDescription = if (it == quiz.correct) "Right." else "Not quite. It means ${quiz.name.m}." })
         }
     }

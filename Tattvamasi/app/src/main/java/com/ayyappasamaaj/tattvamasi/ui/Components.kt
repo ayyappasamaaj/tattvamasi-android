@@ -26,7 +26,8 @@ import com.ayyappasamaaj.tattvamasi.ui.events.EventTime
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import java.time.Instant
 
-/** A white card with the website's thin border and rounded corners. */
+/** A white card (dark in dark mode) with the website's thin border and rounded corners. */
+@Composable
 fun Modifier.card(padding: Dp = 16.dp): Modifier = this
     .background(AppColors.card, RoundedCornerShape(16.dp))
     .border(1.dp, AppColors.line, RoundedCornerShape(16.dp))

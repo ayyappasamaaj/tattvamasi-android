@@ -228,7 +228,7 @@ fun BannerHeader() {
             Text(
                 "Gathering Place for Ayyappa Devotees Worldwide",
                 style = MaterialTheme.typography.bodyMedium,
-                color = AppColors.ink,
+                color = Color(0xFF2A2620),  // dark in both modes: the backing stays white
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

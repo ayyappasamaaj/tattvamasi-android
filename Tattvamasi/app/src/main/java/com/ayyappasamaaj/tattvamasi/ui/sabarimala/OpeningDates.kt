@@ -52,6 +52,7 @@ import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
+import com.ayyappasamaaj.tattvamasi.ui.theme.LocalDarkTheme
 import org.json.JSONObject
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -171,11 +172,13 @@ fun addToCalendar(context: Context, p: OpeningPeriod) {
     }
 }
 
+@Composable
 private fun crowdColor(crowd: String?): Pair<Color, Color> = when (crowd) {
-    "Quiet" -> Color(0xFFE5F4E4) to Color(0xFF1F5A2A)
-    "Moderate" -> Color(0xFFF9EEDA) to Color(0xFF7A5200)
-    "High" -> Color(0xFFF9ECE7) to AppColors.clayDark
-    "Extreme" -> AppColors.clay to Color.White
+    // Dark mode: dark tints with light text
+    "Quiet" -> if (LocalDarkTheme.current) Color(0xFF1F3324) to Color(0xFF9FD6A8) else Color(0xFFE5F4E4) to Color(0xFF1F5A2A)
+    "Moderate" -> if (LocalDarkTheme.current) Color(0xFF3A2E14) to Color(0xFFF0C674) else Color(0xFFF9EEDA) to Color(0xFF7A5200)
+    "High" -> (if (LocalDarkTheme.current) Color(0xFF3A2418) else Color(0xFFF9ECE7)) to AppColors.clayDark
+    "Extreme" -> AppColors.clay to AppColors.card
     else -> AppColors.cream to AppColors.muted
 }
 
@@ -242,7 +245,7 @@ fun OpeningDatesScreen(dates: OpeningDates, onBack: () -> Unit, today: LocalDate
                         Text(if (now) "OPEN NOW" else "NEXT OPENING", color = AppColors.saffron,
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight(700), letterSpacing = 1.sp))
                         Text(p.title, color = Color.White, style = MaterialTheme.typography.titleLarge)
-                        Text(openingLine(p), color = AppColors.cream, style = MaterialTheme.typography.bodyMedium)
+                        Text(openingLine(p), color = AppColors.onForest, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }

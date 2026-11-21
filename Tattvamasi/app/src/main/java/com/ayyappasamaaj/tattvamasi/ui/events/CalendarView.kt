@@ -188,7 +188,7 @@ fun CalendarView(events: List<AppEvent>, onOpenEvent: (String) -> Unit) {
                 style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft)
             Button(
                 onClick = { openInBrowser(context, HOST_HOUSE_BHAJAN_URL) },
-                colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest),
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
             ) { Text("Add your house bhajan", fontWeight = FontWeight(700)) }
         }
 
@@ -239,7 +239,7 @@ private fun DayCell(day: LocalDate, here: List<CalendarItem>, selected: Boolean,
                 fontSize = 16.sp,
                 fontWeight = FontWeight(if (today || selected) 700 else 500),
                 color = when {
-                    selected -> Color.White
+                    selected -> AppColors.card  // on the ink circle: white, or dark on dark mode's light ink
                     today -> AppColors.clay
                     else -> AppColors.ink
                 },

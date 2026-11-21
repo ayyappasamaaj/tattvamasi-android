@@ -151,7 +151,7 @@ private fun RegistrationCard(registration: Registration, now: Instant, register:
             modifier = Modifier.semantics { heading() })
         when (val status = registration.status(now)) {
             Registration.Status.Open -> {
-                Button(onClick = register, colors = ButtonDefaults.buttonColors(containerColor = AppColors.forest)) {
+                Button(onClick = register, colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton)) {
                     Text("Register", fontWeight = FontWeight(700))
                 }
                 Text(
