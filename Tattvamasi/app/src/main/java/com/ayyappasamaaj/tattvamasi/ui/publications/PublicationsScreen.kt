@@ -90,6 +90,7 @@ import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
+import com.ayyappasamaaj.tattvamasi.ui.shruti.TanpuraRow
 import java.time.LocalDate
 
 /**
@@ -256,6 +257,8 @@ private fun PublicationsHome(
                 ReadingIn(languages, preferred) { ReadingPrefs.setLanguage(context, it) }
             }
         }
+        // The tanpura, to sing along with while reading (ui/shruti)
+        if (query.isBlank()) item(span = full) { TanpuraRow() }
         if (query.isBlank() && saved > 0) {
             item(span = full) { SavedRow(saved, selected = selectedSlug == SAVED, onClick = onSaved) }
         }
@@ -410,6 +413,7 @@ private fun CategoryContent(
                 }
             }
         }
+        item { TanpuraRow(Modifier.padding(top = 12.dp)) }
         item { Spacer(Modifier.padding(top = 12.dp)) }
         if (shown.isEmpty()) {
             item {
