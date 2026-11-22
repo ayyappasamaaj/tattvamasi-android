@@ -20,6 +20,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionToken
 import com.ayyappasamaaj.tattvamasi.R
+import com.ayyappasamaaj.tattvamasi.ui.shruti.ShrutiPlayer
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +33,8 @@ import kotlinx.coroutines.flow.update
  * bundled: res/raw/tanpura_c.m4a, at the website's level), with a short pause between names, the same five speeds
  * (the voice keeps its pitch; the tanpura isn't sped up), and the next clips fetched ahead by the player. It keeps
  * playing in the background, with the lock screen's and earphones' controls (NamavaliService), and remembers where
- * listening stopped and the speed on the device.
+ * listening stopped and the speed on the device. It and the tanpura player (ui/shruti/ShrutiPlayer.kt) pause each
+ * other: starting one pauses the other.
  */
 
 data class ListenState(
@@ -171,6 +173,7 @@ object NamavaliPlayer {
      */
     fun play(context: Context, recorded: List<Triple<Int, String, String>>, n: Int, all: Boolean, chosen: Boolean = false) {
         val player = voice(context)
+        ShrutiPlayer.pause()  // the two pause each other
         connect()
         cancelGap()
         lastRecorded = recorded.lastOrNull()?.first
@@ -295,7 +298,7 @@ object NamavaliPlayer {
                 }
                 // Paused or played from the lock screen, earphones, a call: the tanpura follows
                 reason != Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM -> {
-                    if (!playWhenReady) cancelGap()
+                    if (!playWhenReady) cancelGap() else ShrutiPlayer.pause()
                     droneOn(playWhenReady && _state.value.all)
                     _state.update { it.copy(playing = playWhenReady, turnMs = if (playWhenReady) it.turnMs else null) }
                 }

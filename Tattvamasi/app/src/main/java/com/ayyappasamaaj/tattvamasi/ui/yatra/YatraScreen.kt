@@ -2,6 +2,7 @@
 
 package com.ayyappasamaaj.tattvamasi.ui.yatra
 
+import com.ayyappasamaaj.tattvamasi.ui.PlayerBars
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -262,7 +263,7 @@ fun YatraScreen(back: String, onClose: () -> Unit) {
                     })
             }
         }
-        PlayerBar()
+        PlayerBars()  // the tanpura's bar too, when it is in use
     }
 
     // The welcome: on the first visit, and from "How it works"

@@ -73,6 +73,10 @@ import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
 import com.ayyappasamaaj.tattvamasi.ui.sabarimala.SabarimalaScreen
 import com.ayyappasamaaj.tattvamasi.ui.text.LocalLinkHandler
 import com.ayyappasamaaj.tattvamasi.ui.yatra.PlayerBar
+import com.ayyappasamaaj.tattvamasi.ui.shruti.ShrutiBar
+import com.ayyappasamaaj.tattvamasi.ui.shruti.ShrutiPlayer
+import com.ayyappasamaaj.tattvamasi.ui.shruti.TanpuraSheet
+import com.ayyappasamaaj.tattvamasi.ui.yatra.NamavaliPlayer
 import com.ayyappasamaaj.tattvamasi.ui.yatra.YatraScreen
 
 /** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
@@ -95,6 +99,7 @@ fun AppRoot() {
     val publications by PublicationsStore.state.collectAsState()
     var openGuide by rememberSaveable { mutableStateOf<String?>(null) }  // GuideTarget.encode() of the guide shown
     val context = LocalContext.current
+    LaunchedEffect(Unit) { ShrutiPlayer.init(context) }  // the tanpura's remembered key, for the Tanpura row
     LaunchedEffect(Unit) { GuidesStore.start(context) }
     LaunchedEffect(Unit) { SlidesStore.start(context) }
     val slides by SlidesStore.state.collectAsState()
@@ -211,6 +216,8 @@ fun AppRoot() {
                 }
             }
         }
+        // The tanpura's sheet, over any screen (opened from the Tanpura row or the tanpura's bar)
+        TanpuraSheet()
     }
 }
 
@@ -260,6 +267,16 @@ fun BannerHeader() {
     }
 }
 
+/** The tanpura's bar above the Namavali's player bar, each while in use; the lowest clears the phone's own bar. */
+@Composable
+fun PlayerBars() {
+    val listen by NamavaliPlayer.state.collectAsState()
+    Column {
+        ShrutiBar(bottomInset = !listen.shown)
+        PlayerBar()
+    }
+}
+
 /** A section's screen: the banner, then the content on the cream page; [overlay] (a text being read) covers both,
  *  above the player bar. */
 @Composable
@@ -267,7 +284,8 @@ fun AppScreen(overlay: @Composable () -> Unit = {}, content: @Composable () -> U
     Scaffold(
         containerColor = AppColors.cream,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),  // the banner takes the status bar; the bar or rail the rest
-        bottomBar = { PlayerBar() },  // the Namavali player, while it's in use (ui/yatra/PlayerBar.kt)
+        // The tanpura's bar and the Namavali's, while each is in use (ui/shruti, ui/yatra/PlayerBar.kt)
+        bottomBar = { PlayerBars() },
     ) { padding ->
         Box(
             Modifier

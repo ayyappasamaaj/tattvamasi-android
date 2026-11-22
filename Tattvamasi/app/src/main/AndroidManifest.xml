@@ -40,6 +40,16 @@
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
+        <!-- The tanpura (shruti) player, the same way (ui/shruti/ShrutiPlayer.kt) -->
+        <service
+            android:name=".ui.shruti.ShrutiService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
 
         <!-- Notifications that arrive while the app is open (notifications/AppMessagingService.kt) -->
         <service
