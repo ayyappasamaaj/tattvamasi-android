@@ -11,6 +11,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ayyappasamaaj.tattvamasi.notifications.AppNotifications
 import com.ayyappasamaaj.tattvamasi.ui.AppRoot
+import com.ayyappasamaaj.tattvamasi.ui.Shot
 import com.ayyappasamaaj.tattvamasi.ui.theme.Appearance
 import com.ayyappasamaaj.tattvamasi.ui.theme.TattvamasiTheme
 import com.ayyappasamaaj.tattvamasi.ui.theme.appIsDark
@@ -26,6 +27,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppNotifications.start(this)
         if (savedInstanceState == null) AppNotifications.tapped(intent?.getStringExtra(EXTRA_URL))
+        if (BuildConfig.DEBUG) {  // the store screenshots only: that screen, in Light mode
+            Shot.screen = intent?.getStringExtra("shot")
+            if (Shot.screen != null) Appearance.set(this, Appearance.Choice.LIGHT)
+        }
         setContent {
             val dark = appIsDark()
             DisposableEffect(dark) {

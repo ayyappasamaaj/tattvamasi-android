@@ -68,6 +68,7 @@ import com.ayyappasamaaj.tattvamasi.ui.guides.guideTarget
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
 import com.ayyappasamaaj.tattvamasi.ui.publications.PdfPopup
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
+import com.ayyappasamaaj.tattvamasi.BuildConfig
 import com.ayyappasamaaj.tattvamasi.ui.publications.ReadingItem
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsStore
 import com.ayyappasamaaj.tattvamasi.ui.sabarimala.SabarimalaScreen
@@ -87,6 +88,11 @@ enum class Destination(val label: String, val icon: ImageVector) {
     Publications("Publications", Icons.AutoMirrored.Outlined.MenuBook),
     Sabarimala("Sabarimala", Icons.Outlined.Landscape),
     About("About us", Icons.Outlined.Info),
+}
+
+/** The screen a Debug build was started on for the store screenshots (MainActivity, `--es shot <screen>`). */
+object Shot {
+    var screen: String? = null
 }
 
 @Composable
@@ -111,6 +117,29 @@ fun AppRoot() {
     var reading by remember { mutableStateOf<ReadingItem?>(null) }  // the text open on Publications (PdfReader.kt)
     // Keeps each tab's yatra where it was (a day, its step) while another tab is shown
     val yatraPlaces = rememberSaveableStateHolder()
+
+    // The store screenshots (scripts/store-screenshots.sh), Debug builds only: started with `--es shot <screen>`, the
+    // app opens that screen by itself, so no taps are needed
+    LaunchedEffect(publications.loaded) {
+        if (!BuildConfig.DEBUG) return@LaunchedEffect
+        when (Shot.screen) {
+            "publications" -> current = Destination.Publications
+            "tanpura" -> { current = Destination.Publications; ShrutiPlayer.openSheet() }
+            "reader" -> {
+                current = Destination.Publications
+                // A text in several languages, so its round language button shows
+                val category = publications.sections.flatMap { it.categories }
+                    .firstOrNull { c -> c.texts.any { it.versions.size >= 4 } }
+                val text = category?.texts?.firstOrNull { it.versions.size >= 4 }
+                if (reading == null && category != null && text != null) {
+                    reading = ReadingItem(text, category.name, null, category.slug)
+                }
+            }
+            "yatra" -> homeYatra = true
+            "events" -> current = Destination.Events
+            "sabarimala" -> current = Destination.Sabarimala
+        }
+    }
 
     // A link to one of the guides (in an event's text, or in another guide) opens the guide in the app
     val openLink: (String) -> Boolean = remember(guides) {
