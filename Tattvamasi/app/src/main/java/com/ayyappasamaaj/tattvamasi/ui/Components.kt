@@ -37,7 +37,9 @@ fun Modifier.card(padding: Dp = 16.dp): Modifier = this
 @Composable
 fun ReadableWidth(maxWidth: Dp = 820.dp, content: @Composable () -> Unit) {
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-        Box(Modifier.widthIn(max = maxWidth).fillMaxWidth()) { content() }
+        // A Column, not a Box: more than one child goes one under another instead of on top of each other (the
+        // Opening Dates note and its links overlapped, the maintainer's phone check, Nov 23)
+        Column(Modifier.widthIn(max = maxWidth).fillMaxWidth()) { content() }
     }
 }
 
