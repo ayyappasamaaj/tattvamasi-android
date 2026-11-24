@@ -8,6 +8,9 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ayyappasamaaj.tattvamasi.notifications.AppNotifications
 import com.ayyappasamaaj.tattvamasi.ui.AppRoot
@@ -15,6 +18,8 @@ import com.ayyappasamaaj.tattvamasi.ui.Shot
 import com.ayyappasamaaj.tattvamasi.ui.theme.Appearance
 import com.ayyappasamaaj.tattvamasi.ui.theme.TattvamasiTheme
 import com.ayyappasamaaj.tattvamasi.ui.theme.appIsDark
+import com.ayyappasamaaj.tattvamasi.update.RequiredUpdate
+import com.ayyappasamaaj.tattvamasi.update.RequiredUpdateScreen
 
 /** The redesigned app (Compose), one activity for every section. The system splash screen shows the app
  *  icon while it starts; the app then draws edge to edge, behind the status and navigation bars. The bars'
@@ -40,7 +45,10 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
             TattvamasiTheme {
-                AppRoot()
+                // A required update (update/RequiredUpdate.kt) shows only "Please update"
+                LaunchedEffect(Unit) { RequiredUpdate.start() }
+                val updateRequired by RequiredUpdate.required.collectAsState()
+                if (updateRequired) RequiredUpdateScreen() else AppRoot()
             }
         }
     }
