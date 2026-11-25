@@ -218,8 +218,8 @@ fun DonateSheet() {
                                         }
                                     }
                                 } else if (!signedIn) {
-                                    Text("Monthly gifts are for signed-in members, so you can see and change them on " +
-                                        "the website.", style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
+                                    Text("Monthly gifts are for signed-in members: each month's gift goes on your account and " +
+                                        "in your year-end summary.", style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
                                     Primary("Sign In") { AccountStore.open() }
                                 } else {
                                     SectionLabel("Every month")
@@ -241,7 +241,8 @@ fun DonateSheet() {
                                             }
                                         }
                                     }
-                                    Text("To stop or change a monthly gift, sign in on our website.",
+                                    // Neither the website nor the app can stop one yet (found Nov 25): the treasurer does it
+                                    Text("To stop or change a monthly gift, email treasurer@ayyappasamaaj.org.",
                                         style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
                                 }
                             }

@@ -28,9 +28,11 @@ object AccountStore {
         val moreDonations: Boolean = false,
         val donationsFailed: Boolean = false,
         val zelle: List<ZelleGift> = emptyList(),
+        val registration: String? = null,           // the registration's code its page shows
+        val registrationFrom: Page? = null,         // where its page was opened from (Back goes there)
     )
 
-    enum class Page { SUMMARY, DONATIONS }
+    enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION }
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
@@ -55,7 +57,14 @@ object AccountStore {
     fun close() = _state.update { it.copy(shown = false, message = null, page = null) }
 
     fun openPage(page: Page) = _state.update { it.copy(page = page) }
-    fun closePage() = _state.update { it.copy(page = null) }
+    fun closePage() = _state.update {
+        if (it.page == Page.REGISTRATION) it.copy(page = it.registrationFrom, registration = null) else it.copy(page = null)
+    }
+
+    /** One registration's page (from My account or the full list). */
+    fun openRegistration(code: String) = _state.update {
+        it.copy(page = Page.REGISTRATION, registration = code, registrationFrom = it.page)
+    }
 
     /** The year-end summary of [year] (this year to start with) for "me" or "household". */
     suspend fun loadSummary(year: Int? = null, scope: String? = null) {

@@ -95,6 +95,8 @@ fun AccountSheet() {
             Text(when (state.page) {
                 AccountStore.Page.SUMMARY -> "Year-End Summary"
                 AccountStore.Page.DONATIONS -> "My Donations"
+                AccountStore.Page.REGISTRATIONS -> "My Registrations"
+                AccountStore.Page.REGISTRATION -> "Registration"
                 null -> "My Account"
             }, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
@@ -108,6 +110,8 @@ fun AccountSheet() {
                         state.user == null -> SignInForm(state)
                         state.page == AccountStore.Page.SUMMARY -> YearSummaryPage(state)
                         state.page == AccountStore.Page.DONATIONS -> DonationsListPage(state)
+                        state.page == AccountStore.Page.REGISTRATIONS -> RegistrationsListPage(state)
+                        state.page == AccountStore.Page.REGISTRATION -> RegistrationPage(state)
                         else -> SignedIn(state)
                     }
                     AddressFooter()
@@ -224,7 +228,8 @@ private fun SignedIn(state: AccountStore.State) {
             CircularProgressIndicator(color = AppColors.clay, modifier = Modifier.size(32.dp))
         }
     } else {
-        if (overview.failed) Problem("Some of your details couldn't be loaded. Please try again later, or see them on the website.")
+        if (overview.failed) Problem("Some of your details couldn't be loaded. Please try again later.")
+        nextRegistration(overview.registrations)?.let { NextEventCard(it) }
         overview.year?.let { year ->
             Column(Modifier.fillMaxWidth().card(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 SectionLabel("${year.year} so far")
@@ -236,22 +241,7 @@ private fun SignedIn(state: AccountStore.State) {
                 }
             }
         }
-        Column(Modifier.fillMaxWidth().card(16.dp)) {
-            SectionLabel("My registrations", Modifier.padding(bottom = 6.dp))
-            if (overview.registrations.isEmpty()) {
-                Text("No registrations yet.", style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
-            }
-            overview.registrations.take(10).forEachIndexed { index, r ->
-                if (index > 0) HorizontalDivider(color = AppColors.line)
-                Column(Modifier.fillMaxWidth().padding(vertical = 10.dp).semantics(mergeDescendants = true) {}) {
-                    Text(r.eventName ?: r.title, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight(600)),
-                        color = AppColors.ink)
-                    val parts = listOfNotNull(
-                        day(r.eventDate).ifBlank { null }, r.status, r.registeredBy?.let { "by $it" })
-                    Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
-                }
-            }
-        }
+        RegistrationsCard(overview.registrations)
         Column(Modifier.fillMaxWidth().card(16.dp)) {
             SectionLabel("My donations", Modifier.padding(bottom = 6.dp))
             if (overview.donations.isEmpty()) {
