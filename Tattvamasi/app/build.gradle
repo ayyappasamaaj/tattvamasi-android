@@ -39,7 +39,13 @@ android {
     }
 
     buildTypes {
+        // The website the account screens talk to (ui/account/AccountApi.kt): staging while testing, the live site
+        // in the stores
+        debug {
+            buildConfigField "String", "SITE_URL", '"https://staging.ayyappasamaaj.org"'
+        }
         release {
+            buildConfigField "String", "SITE_URL", '"https://ayyappasamaaj.org"'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (releaseStoreFile) {

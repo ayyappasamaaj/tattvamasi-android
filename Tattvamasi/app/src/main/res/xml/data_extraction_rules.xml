@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 and later: the website sign-in (ui/account/TokenStore.kt) isn't backed up or moved to a new phone;
+     its key never leaves this phone's Keystore, so the person signs in again there. Everything else is as before. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="account.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="account.xml" />
+    </device-transfer>
+</data-extraction-rules>
