@@ -51,6 +51,8 @@ import com.ayyappasamaaj.tattvamasi.ui.addToCalendar
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.openDirections
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
+import com.ayyappasamaaj.tattvamasi.ui.register.RegisterStore
+import com.ayyappasamaaj.tattvamasi.ui.register.formSlug
 import com.ayyappasamaaj.tattvamasi.ui.text.RichText
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import java.time.Instant
@@ -121,7 +123,12 @@ fun EventScreen(event: AppEvent, onBack: () -> Unit, now: Instant = Instant.now(
                     }
                 }
 
-                event.registration?.let { RegistrationCard(it, now) { openWebPage(context, it.url) } }
+                // The form in the app when it's one of the website's registration forms; else its page in the app's browser
+                event.registration?.let { reg ->
+                    RegistrationCard(reg, now) {
+                        formSlug(reg.url)?.let { RegisterStore.open(it, reg.url) } ?: openWebPage(context, reg.url)
+                    }
+                }
 
                 if (event.details.isNotBlank()) {
                     RichText(event.details)
@@ -154,13 +161,10 @@ private fun RegistrationCard(registration: Registration, now: Instant, register:
                 Button(onClick = register, colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton)) {
                     Text("Register", fontWeight = FontWeight(700))
                 }
-                Text(
-                    listOfNotNull(
-                        registration.closesAt?.let { "Open until ${registrationTime(it)}." },
-                        "The form opens on ayyappasamaaj.org.",
-                    ).joinToString(" "),
-                    style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft,
-                )
+                registration.closesAt?.let {
+                    Text("Open until ${registrationTime(it)}.", style = MaterialTheme.typography.bodyMedium,
+                        color = AppColors.inkSoft)
+                }
             }
             is Registration.Status.OpensOn -> Text("Registration opens ${registrationTime(status.at)}.",
                 style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
