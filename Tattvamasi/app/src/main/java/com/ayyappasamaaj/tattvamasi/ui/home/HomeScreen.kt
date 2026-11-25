@@ -52,6 +52,7 @@ import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.events.AppEvent
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsState
 import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
+import com.ayyappasamaaj.tattvamasi.ui.donate.DonateStore
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
 /**
@@ -111,7 +112,8 @@ fun HomeScreen(
                             go(Destination.About)
                         },
                         Tile("Donate", "Support Lord Ayyappa's seva; tax-deductible", Icons.Outlined.FavoriteBorder) {
-                            openInBrowser(context, WebPages.DONATE)
+                            // In the app when the website has app giving on; otherwise Donate offers the website
+                            DonateStore.open()
                         },
                     ),
                 )
