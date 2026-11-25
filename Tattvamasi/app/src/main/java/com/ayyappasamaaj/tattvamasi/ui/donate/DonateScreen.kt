@@ -92,6 +92,8 @@ fun DonateSheet() {
     var amount by rememberSaveable { mutableStateOf("") }       // the one-time amount, "108" or typed
     var other by rememberSaveable { mutableStateOf(false) }      // "Other" chosen: the box shows
     var monthlyId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var forWhat by rememberSaveable { mutableStateOf("GENERAL") }     // General or Annadana
+    var monthlyOwn by rememberSaveable { mutableStateOf<String?>(null) } // the member's own monthly amount; null: a fixed one
     var name by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var paying by remember { mutableStateOf<Pair<String, Boolean>?>(null) }  // amount, monthly: shown on the sheet
@@ -179,6 +181,18 @@ fun DonateSheet() {
                                         ) { Text(label) }
                                     }
                                 }
+                                // What it's for, as the website's Donate page (an older website sends no choice)
+                                if (options.categories.isNotEmpty()) {
+                                    SectionLabel("For")
+                                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        options.categories.forEach { (handle, label) ->
+                                            Chip(label, forWhat == handle) {
+                                                forWhat = handle
+                                                if (options.monthly.firstOrNull { it.id == monthlyId }?.forWhat?.let { it != handle } == true) monthlyId = null
+                                            }
+                                        }
+                                    }
+                                }
                                 if (!monthly) {
                                     SectionLabel("Amount")
                                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -211,7 +225,7 @@ fun DonateSheet() {
                                         else "Donate ${dollars(amount.removePrefix("$"))}", enabled = ready) {
                                         keyboard?.hide()
                                         scope.launch {
-                                            when (val start = DonateStore.startOneTime(amount, name, email)) {
+                                            when (val start = DonateStore.startOneTime(amount, name, email, forWhat)) {
                                                 is PayStart.Ready -> present(start.clientSecret, start.amount, false)
                                                 is PayStart.Problem -> {}
                                             }
@@ -223,19 +237,36 @@ fun DonateSheet() {
                                     Primary("Sign In") { AccountStore.open() }
                                 } else {
                                     SectionLabel("Every month")
-                                    options.monthly.forEach { m ->
-                                        Chip("${dollars(m.amount)} · ${m.category}", monthlyId == m.id, wide = true) { monthlyId = m.id }
+                                    // The amounts for what it's for (all of them from an older website)
+                                    val shown = options.monthly.filter { it.forWhat.isEmpty() || it.forWhat == forWhat }
+                                    val ownAllowed = options.categories.isNotEmpty()
+                                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        shown.forEach { m ->
+                                            val label = if (m.forWhat.isEmpty()) "${dollars(m.amount)} · ${m.category}" else dollars(m.amount)
+                                            Chip(label, monthlyOwn == null && monthlyId == m.id) { monthlyOwn = null; monthlyId = m.id }
+                                        }
+                                        if (ownAllowed) Chip("Other", monthlyOwn != null) { monthlyOwn = ""; monthlyId = null }
                                     }
-                                    if (options.monthly.isEmpty()) {
+                                    if (shown.isEmpty() && !ownAllowed) {
                                         Text("No monthly amounts are offered right now.", color = AppColors.muted)
+                                    }
+                                    monthlyOwn?.let { own ->
+                                        OutlinedTextField(value = own, onValueChange = { monthlyOwn = it },
+                                            label = { Text("Whole dollars a month (${dollars(options.monthlyMin)} to ${dollars(options.monthlyMax)})") },
+                                            singleLine = true, modifier = Modifier.fillMaxWidth(),
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done))
                                     }
                                     state.message?.ifBlank { null }?.let { Problem(it) }
                                     val chosen = options.monthly.firstOrNull { it.id == monthlyId }
-                                    Primary(if (state.busy) "Starting…" else chosen?.let { "Give ${dollars(it.amount)} Every Month" }
-                                        ?: "Choose an Amount", enabled = chosen != null && !state.busy) {
-                                        val pick = chosen ?: return@Primary
+                                    val own = monthlyOwn?.trim()?.removePrefix("$")?.replace(",", "")?.takeIf { it.isNotEmpty() }
+                                    val amountShown = own ?: chosen?.amount
+                                    Primary(if (state.busy) "Starting…" else amountShown?.let { "Give ${dollars(it)} Every Month" }
+                                        ?: "Choose an Amount", enabled = amountShown != null && !state.busy) {
+                                        keyboard?.hide()
                                         scope.launch {
-                                            when (val start = DonateStore.startMonthly(pick.id)) {
+                                            val start = if (own != null) DonateStore.startMonthlyOwn(own, forWhat)
+                                            else DonateStore.startMonthly(chosen?.id ?: return@launch)
+                                            when (start) {
                                                 is PayStart.Ready -> present(start.clientSecret, start.amount, true)
                                                 is PayStart.Problem -> if (start.signIn) AccountStore.open()
                                             }
