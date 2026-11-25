@@ -51,7 +51,7 @@ import com.ayyappasamaaj.tattvamasi.ui.WebPages
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.events.AppEvent
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsState
-import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
+import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.donate.DonateStore
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
@@ -90,7 +90,7 @@ fun HomeScreen(
                     val event = events.events.firstOrNull { it.pageUrl != null && samePage(it.pageUrl, slide.link) }
                     when {
                         event != null -> openEvent(event.key)
-                        slide.link.isNotEmpty() -> openInBrowser(context, slide.link)
+                        slide.link.isNotEmpty() -> openWebPage(context, slide.link)
                     }
                 }
                 NextEvent(events, seeEvents = { go(Destination.Events) }, open = openEvent)
