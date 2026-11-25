@@ -18,6 +18,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Tattvamasi">
+        <!-- Google Pay in Stripe's payment sheet (ui/donate) -->
+        <meta-data android:name="com.google.android.gms.wallet.api.enabled" android:value="true" />
         <!-- One activity for the whole app (Compose); the splash theme shows the icon while it starts -->
         <activity
             android:name=".MainActivity"

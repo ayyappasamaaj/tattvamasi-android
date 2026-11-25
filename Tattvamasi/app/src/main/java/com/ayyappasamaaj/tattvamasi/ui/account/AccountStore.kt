@@ -27,6 +27,9 @@ object AccountStore {
     private var store: TokenStore? = null
     private var token: String? = null
 
+    /** The website's session token while signed in (for Donate's own calls, ui/donate), else null. */
+    val sessionToken: String? get() = token
+
     /** Once, when the app starts: signed in from last time, if the token is still there. */
     fun init(context: Context) {
         if (store != null) return
