@@ -53,8 +53,12 @@ class AccountApiTest {
             "year": 2025, "registered_by": null, "event": null}]}"""
         val list = parseRegistrations(body)
         assertEquals(2, list.size)
+        val first = list[0]
         assertEquals(Registration("Mandala Mahotsavam 2026", "Paid", "25.00", "Mandala Mahotsavam", "2026-12-12",
-            true, "Priya Kumar"), list[0])
+            true, "Priya Kumar"), first.copy(code = "", state = "", formActive = false, year = 0, registeredAt = "", event = null))
+        assertEquals("R1", first.code)
+        assertEquals(RegistrationEvent("Mandala Mahotsavam", "2026-12-12", "2026-12-12", "09:00", "13:00", "SVCC Temple", true),
+            first.event)
         assertNull(list[1].eventName)
         assertNull(list[1].registeredBy)
     }

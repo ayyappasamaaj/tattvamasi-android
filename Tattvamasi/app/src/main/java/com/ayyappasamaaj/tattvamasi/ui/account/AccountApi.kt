@@ -133,7 +133,24 @@ sealed interface Deletion {
 }
 
 data class Registration(val title: String, val status: String, val total: String, val eventName: String?,
-                        val eventDate: String?, val upcoming: Boolean, val registeredBy: String?)
+                        val eventDate: String?, val upcoming: Boolean, val registeredBy: String?,
+                        val code: String = "",
+                        val state: String = "",              // paid, free, pending
+                        val items: List<RegistrationItem> = emptyList(),
+                        val amountPaid: String? = null,
+                        val answers: List<Pair<String, String>> = emptyList(),
+                        val whatsappUrl: String = "",
+                        val whatsappNote: String = "",
+                        val formActive: Boolean = false,
+                        val year: Int = 0,
+                        val registeredAt: String = "",
+                        val event: RegistrationEvent? = null)
+
+data class RegistrationItem(val name: String, val quantity: Int, val amount: String, val details: List<String>)
+
+/** The event using the registration's form, and its next date (or its last, once over). */
+data class RegistrationEvent(val name: String, val startDate: String, val endDate: String, val startTime: String,
+                             val endTime: String, val venue: String, val upcoming: Boolean)
 
 data class Donation(val title: String, val date: String, val amount: String, val donatedBy: String?)
 
@@ -179,6 +196,30 @@ fun parseRegistrations(body: String): List<Registration> {
             eventDate = event?.text("start_date"),
             upcoming = event?.optBoolean("is_upcoming") ?: false,
             registeredBy = r.text("registered_by"),
+            code = r.optString("code"),
+            state = r.optString("status"),
+            items = (r.optJSONArray("items") ?: JSONArray()).let { list ->
+                (0 until list.length()).mapNotNull { list.optJSONObject(it) }.map { line ->
+                    val details = line.optJSONArray("details") ?: JSONArray()
+                    RegistrationItem(line.optString("name"), line.optInt("quantity", 1), line.optString("amount"),
+                        (0 until details.length()).map { details.optString(it) }.filter { it.isNotBlank() })
+                }
+            },
+            amountPaid = r.text("amount_paid"),
+            answers = (r.optJSONArray("answers") ?: JSONArray()).let { list ->
+                (0 until list.length()).mapNotNull { list.optJSONObject(it) }
+                    .map { it.optString("question") to it.optString("answer") }
+            },
+            whatsappUrl = r.optString("whatsapp_group_url"),
+            whatsappNote = r.optString("whatsapp_group_note"),
+            formActive = r.optBoolean("form_active"),
+            year = r.optInt("year"),
+            registeredAt = r.optString("registered_at"),
+            event = event?.let {
+                RegistrationEvent(it.optString("name"), it.optString("start_date"), it.optString("end_date"),
+                    it.optString("start_time"), it.optString("end_time"), it.optString("venue"),
+                    it.optBoolean("is_upcoming"))
+            },
         )
     }
 }
