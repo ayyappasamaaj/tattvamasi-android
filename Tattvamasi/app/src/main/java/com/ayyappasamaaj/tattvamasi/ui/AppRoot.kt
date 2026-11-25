@@ -20,11 +20,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Landscape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -59,6 +61,8 @@ import com.ayyappasamaaj.tattvamasi.notifications.notificationTarget
 import kotlinx.coroutines.delay
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.ui.about.AboutScreen
+import com.ayyappasamaaj.tattvamasi.ui.account.AccountSheet
+import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
@@ -105,6 +109,7 @@ fun AppRoot() {
     val publications by PublicationsStore.state.collectAsState()
     var openGuide by rememberSaveable { mutableStateOf<String?>(null) }  // GuideTarget.encode() of the guide shown
     val context = LocalContext.current
+    LaunchedEffect(Unit) { AccountStore.init(context) }  // signed in from last time (ui/account)
     LaunchedEffect(Unit) { ShrutiPlayer.init(context) }  // the tanpura's remembered key, for the Tanpura row
     LaunchedEffect(Unit) { GuidesStore.start(context) }
     LaunchedEffect(Unit) { SlidesStore.start(context) }
@@ -247,6 +252,8 @@ fun AppRoot() {
         }
         // The tanpura's sheet, over any screen (opened from the Tanpura row or the tanpura's bar)
         TanpuraSheet()
+        // My account, over any screen (opened from the person button on the banner)
+        AccountSheet()
     }
 }
 
@@ -291,6 +298,22 @@ fun BannerHeader() {
                 modifier = Modifier
                     .background(Color.White.copy(alpha = 0.78f), RoundedCornerShape(6.dp))
                     .padding(horizontal = 8.dp, vertical = 1.dp),
+            )
+        }
+        // My account (ui/account): signing in is optional, so a small button at the corner, on a white backing so it
+        // shows on the picture in both modes
+        IconButton(
+            onClick = { AccountStore.open() },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(top = 2.dp, end = 6.dp),
+        ) {
+            Icon(
+                Icons.Outlined.AccountCircle,
+                contentDescription = "My account",
+                tint = Color(0xFF2A2620),
+                modifier = Modifier.background(Color.White.copy(alpha = 0.78f), RoundedCornerShape(50)).padding(4.dp),
             )
         }
     }
