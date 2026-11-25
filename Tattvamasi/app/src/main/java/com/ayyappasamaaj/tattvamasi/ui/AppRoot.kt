@@ -64,6 +64,7 @@ import com.ayyappasamaaj.tattvamasi.ui.about.AboutScreen
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountSheet
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.donate.DonateSheet
+import com.ayyappasamaaj.tattvamasi.ui.register.RegisterSheet
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
@@ -255,6 +256,7 @@ fun AppRoot() {
         TanpuraSheet()
         // Donate, over any screen (Home's Donate tile), and My account above it (Donate's Sign In opens it)
         DonateSheet()
+        RegisterSheet()
         // My account, over any screen (opened from the person button on the banner)
         AccountSheet()
     }

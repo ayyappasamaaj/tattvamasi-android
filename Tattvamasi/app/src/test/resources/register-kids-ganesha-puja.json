@@ -1,0 +1,114 @@
+{
+ "slug": "kids-ganesha-puja-2027",
+ "title": "Kids Ganesha Puja 2027",
+ "intro": "Kids Ganesha Puja: Sunday, August 29, 2027, 9:30 AM to 12 noon, at the Siddhi Vinayaka (SVCC) Temple in Fremont.\r\n\r\nRegister each child ($35 per child, up to 3) with their name. Please arrive by 9:30 AM for check-in.",
+ "state": "open",
+ "website": "/forms/kids-ganesha-puja-2027/",
+ "phone": "required",
+ "ask_whatsapp": true,
+ "offer_fee_cover": true,
+ "fee": {
+  "percent": "0.029",
+  "fixed": "0.30"
+ },
+ "require_item": true,
+ "hold_minutes": 30,
+ "groups": [
+  {
+   "name": "Kids Ganesha Puja",
+   "note": "",
+   "folded": false
+  },
+  {
+   "name": "General",
+   "note": "",
+   "folded": false
+  }
+ ],
+ "items": [
+  {
+   "id": 57,
+   "group": "Kids Ganesha Puja",
+   "name": "Kids Ganesha Puja (per child)",
+   "description": "",
+   "kind": "quantity",
+   "price": "35.00",
+   "max_quantity": 4,
+   "amounts": [],
+   "other": false,
+   "min_amount": "1.00",
+   "remaining": null,
+   "detail_label": "Child's name",
+   "required": false
+  },
+  {
+   "id": 58,
+   "group": "Kids Ganesha Puja",
+   "name": "Kids Ganesha Puja Grand Sponsor",
+   "description": "",
+   "kind": "checkbox",
+   "price": "504.00",
+   "max_quantity": 20,
+   "amounts": [],
+   "other": false,
+   "min_amount": "1.00",
+   "remaining": null,
+   "detail_label": "",
+   "required": false
+  },
+  {
+   "id": 59,
+   "group": "General",
+   "name": "General Donation",
+   "description": "",
+   "kind": "choice",
+   "price": null,
+   "max_quantity": 10,
+   "amounts": [
+    "27",
+    "54",
+    "108",
+    "252",
+    "504",
+    "1008"
+   ],
+   "other": false,
+   "min_amount": "1.00",
+   "remaining": null,
+   "detail_label": "",
+   "required": false
+  },
+  {
+   "id": 60,
+   "group": "General",
+   "name": "Annadana",
+   "description": "",
+   "kind": "checkbox",
+   "price": "252.00",
+   "max_quantity": 10,
+   "amounts": [],
+   "other": false,
+   "min_amount": "1.00",
+   "remaining": null,
+   "detail_label": "",
+   "required": false
+  }
+ ],
+ "fields": [
+  {
+   "id": 9,
+   "label": "Comments / Notes",
+   "kind": "textarea",
+   "required": false,
+   "help": "",
+   "choices": [],
+   "required_with": [],
+   "only_when_chosen": false
+  }
+ ],
+ "supported": true,
+ "prefill": {
+  "name": "",
+  "email": ""
+ }
+}

@@ -42,8 +42,8 @@ data class AppEvent(
 }
 
 /**
- * Where and when to register: the website's registration form (it stays on the website: sign-in, payment and
- * emails). [opensAt] / [closesAt] are null when there's no such limit.
+ * Where and when to register: the website's registration form, drawn in the app (ui/register; an older
+ * registration page opens in the app's browser). [opensAt] / [closesAt] are null when there's no such limit.
  */
 data class Registration(val url: String, val opensAt: Instant?, val closesAt: Instant?) {
     sealed interface Status {
