@@ -18,6 +18,9 @@ android {
     compileSdk 36
 
     defaultConfig {
+        // The website's Google sign-in client (one project and client for staging and the live site): the app asks
+        // Google for an ID token for it, which the website checks (ui/account/GoogleSignIn.kt). Not a secret.
+        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", '"701541806507-ibtfr6f0j4h956kvc3icti21lrt5ng9m.apps.googleusercontent.com"'
         applicationId "com.ayyappasamaaj.tattvamasi"
         // Android 8 and up (the redesign, Nov 2026): Compose, adaptive layouts and variable fonts
         minSdk 26
@@ -79,6 +82,10 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.9.3'
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.browser:browser:1.8.0'  // Custom Tabs for the website's pages
+    // Continue with Google (ui/account/GoogleSignIn.kt): Credential Manager asks Google for an ID token for the website
+    implementation 'androidx.credentials:credentials:1.3.0'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.3.0'
+    implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
     // Pictures from the website (events' covers, the guides), cached on the device
     implementation 'io.coil-kt.coil3:coil-compose:3.0.4'
     implementation 'io.coil-kt.coil3:coil-network-okhttp:3.0.4'

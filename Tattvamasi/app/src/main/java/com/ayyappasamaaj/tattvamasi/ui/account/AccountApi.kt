@@ -56,6 +56,12 @@ object AccountApi {
         parseSignIn(call("POST", "/_allauth/app/v1/auth/login", body = JSONObject()
             .put("email", email.trim()).put("password", password)))
 
+    /** Continue with Google: the ID token from Google (GoogleSignIn) for the website's own client. */
+    suspend fun signInWithGoogle(idToken: String): SignIn =
+        parseSignIn(call("POST", "/_allauth/app/v1/auth/provider/token", body = JSONObject()
+            .put("provider", "google").put("process", "login")
+            .put("token", JSONObject().put("client_id", GoogleSignIn.webClientId).put("id_token", idToken))))
+
     suspend fun signOut(token: String) {
         call("DELETE", "/_allauth/app/v1/auth/session", token)
     }

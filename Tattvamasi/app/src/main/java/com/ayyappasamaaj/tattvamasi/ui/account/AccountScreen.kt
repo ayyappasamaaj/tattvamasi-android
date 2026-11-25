@@ -1,6 +1,7 @@
 package com.ayyappasamaaj.tattvamasi.ui.account
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -46,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
@@ -57,6 +59,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.SectionLabel
@@ -138,6 +141,21 @@ private fun SignInForm(state: AccountStore.State) {
         Text("Sign in with your ayyappasamaaj.org account to see your registrations, donations and year-end summary " +
             "here. Everything else in the app works without signing in.",
             style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
+        // Google's own account picker; a first-time Google sign-in makes the account (the website's sign-up limits)
+        OutlinedButton(
+            onClick = { keyboard?.hide(); scope.launch { AccountStore.signInWithGoogle(context) } },
+            enabled = !state.busy,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        ) {
+            Image(painterResource(R.drawable.google_g), contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.size(10.dp))
+            Text("Continue with Google", color = AppColors.ink, style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp))
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            HorizontalDivider(color = AppColors.line, modifier = Modifier.weight(1f))
+            Text("or with your email", style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
+            HorizontalDivider(color = AppColors.line, modifier = Modifier.weight(1f))
+        }
         OutlinedTextField(
             value = email, onValueChange = { email = it }, label = { Text("Email") }, singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
