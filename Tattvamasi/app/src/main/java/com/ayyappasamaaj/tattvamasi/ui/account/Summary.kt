@@ -52,6 +52,20 @@ data class ZelleGift(val id: Int, val title: String, val date: String, val amoun
 
 data class DonationsPage(val donations: List<MyDonation>, val more: Boolean)
 
+/** A running monthly gift (website: donations/monthly.py): Stripe's subscription id, and what the page shows. */
+data class MonthlyGift(val id: String, val amount: String, val category: String, val since: String?,
+                       val nextPayment: String?, val status: String, val amountId: Int? = null, val day: Int? = null)
+
+/** A monthly amount a gift can change to (the Donate page's). */
+data class MonthlyAmountChoice(val id: Int, val amount: String, val category: String)
+
+data class MonthlyGifts(val gifts: List<MonthlyGift>, val amounts: List<MonthlyAmountChoice>)
+
+fun parseMonthlyGift(g: JSONObject): MonthlyGift =
+    MonthlyGift(g.optString("id"), g.optString("amount"), g.optString("category"), g.text("since"),
+        g.text("next_payment"), g.optString("status"), if (g.isNull("amount_id")) null else g.optInt("amount_id"),
+        if (g.isNull("day")) null else g.optInt("day"))
+
 private fun JSONObject.text(name: String): String? = if (isNull(name)) null else optString(name).ifBlank { null }
 
 private fun JSONArray?.objects(): List<JSONObject> =
@@ -102,6 +116,17 @@ fun parseDonationsPage(body: String): DonationsPage {
     }
     return DonationsPage(donations, more = json.text("next") != null)
 }
+
+fun parseMonthlyGifts(body: String): MonthlyGifts {
+    val json = JSONObject(body)
+    return MonthlyGifts(
+        json.optJSONArray("gifts").objects().map { parseMonthlyGift(it) },
+        json.optJSONArray("amounts").objects().map { MonthlyAmountChoice(it.optInt("id"), it.optString("amount"), it.optString("category")) },
+    )
+}
+
+/** "5th" */
+fun ordinal(n: Int): String = "$n" + if (n % 100 in 11..13) "th" else when (n % 10) { 1 -> "st"; 2 -> "nd"; 3 -> "rd"; else -> "th" }
 
 fun parseZelleGifts(body: String): List<ZelleGift> = JSONArray(body).objects().map { g ->
     ZelleGift(g.optInt("id"), g.optString("title"), g.optString("date"), g.optString("amount"), g.optString("state"),

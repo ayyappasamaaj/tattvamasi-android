@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,8 +26,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -165,6 +171,56 @@ fun YearSummaryPage(state: AccountStore.State) {
 fun DonationsListPage(state: AccountStore.State) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) { AccountStore.loadDonations() }
+    var confirm by remember { mutableStateOf<MonthlyGift?>(null) }
+    var editing by remember { mutableStateOf<MonthlyGift?>(null) }
+    if (state.monthly.isNotEmpty() || state.monthlyMessage != null || state.monthlyFailed) {
+        Column(Modifier.fillMaxWidth().card(16.dp)) {
+            SectionLabel("Monthly gifts", Modifier.padding(bottom = 4.dp))
+            state.monthly.forEachIndexed { index, g ->
+                if (index > 0) HorizontalDivider(color = AppColors.line)
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+                        Text("${summaryDollars(g.amount).removeSuffix(".00")} every month · ${g.category}",
+                            style = MaterialTheme.typography.bodyLarge, color = AppColors.ink)
+                        Text(listOfNotNull(g.since?.let { "Since ${summaryDay(it)}" }, g.nextPayment?.let { "Next ${summaryDay(it)}" },
+                            "Last payment failed".takeIf { g.status == "past_due" }).joinToString(" · "),
+                            style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        OutlinedButton(onClick = { editing = g }, enabled = state.stopping == null) {
+                            Text("Change", color = AppColors.ink)
+                        }
+                        OutlinedButton(onClick = { confirm = g }, enabled = state.stopping == null) {
+                            Text(if (state.stopping == g.id) "Working…" else "Stop", color = AppColors.ink)
+                        }
+                    }
+                }
+            }
+            if (state.monthlyFailed) Note("Your monthly gifts couldn't be loaded. Please try again later.", AppColors.clayDark)
+            state.monthlyMessage?.let { Note(it, AppColors.inkSoft) }
+
+        }
+    }
+    editing?.let { g -> ChangeGiftDialog(g, state.monthlyAmounts, onDismiss = { editing = null }) { amount, day ->
+        editing = null
+        scope.launch { AccountStore.changeMonthlyGift(g, amount, day) }
+    } }
+    confirm?.let { g ->
+        AlertDialog(
+            onDismissRequest = { confirm = null },
+            title = { Text("Stop this monthly gift?") },
+            text = {
+                Text("${summaryDollars(g.amount).removeSuffix(".00")} every month for ${g.category}. It stops now: no " +
+                    "more payments will be taken. The months you gave stay on your account and your year-end summary.")
+            },
+            confirmButton = {
+                TextButton(onClick = { confirm = null; scope.launch { AccountStore.stopMonthlyGift(g) } }) {
+                    Text("Stop It", color = AppColors.clayDark)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirm = null }) { Text("Keep It", color = AppColors.ink) } },
+        )
+    }
     if (state.zelle.isNotEmpty()) {
         Column(Modifier.fillMaxWidth().card(16.dp)) {
             SectionLabel("Zelle gifts being checked", Modifier.padding(bottom = 4.dp))
@@ -221,4 +277,53 @@ fun printSummary(context: Context, summary: YearSummary) {
     }
     printPage = page
     page.loadDataWithBaseURL(AccountApi.site, summaryLetterHtml(summary, AccountApi.logoUrl), "text/html", "utf-8", null)
+}
+
+
+/** Another amount or day for a monthly gift: the amounts offered for monthly gifts, and the 1st to the 28th. */
+@OptIn(ExperimentalLayoutApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun ChangeGiftDialog(gift: MonthlyGift, amounts: List<MonthlyAmountChoice>, onDismiss: () -> Unit,
+                             onSave: (Int?, Int?) -> Unit) {
+    var amount by remember { mutableStateOf(gift.amountId) }
+    var day by remember { mutableStateOf(gift.day) }
+    var dayMenu by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Change your monthly gift") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (amounts.isNotEmpty()) {
+                    SectionLabel("Amount")
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        amounts.forEach { a ->
+                            FilterChip(selected = amount == a.id, onClick = { amount = a.id },
+                                label = { Text("${summaryDollars(a.amount).removeSuffix(".00")} · ${a.category}") },
+                                colors = chipColors())
+                        }
+                    }
+                }
+                SectionLabel("Pay on the")
+                androidx.compose.material3.ExposedDropdownMenuBox(expanded = dayMenu, onExpandedChange = { dayMenu = it }) {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = day?.let { "${ordinal(it)} of each month" }.orEmpty(), onValueChange = {}, readOnly = true,
+                        trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(dayMenu) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable),
+                    )
+                    ExposedDropdownMenu(expanded = dayMenu, onDismissRequest = { dayMenu = false }) {
+                        (1..28).forEach { d ->
+                            androidx.compose.material3.DropdownMenuItem(text = { Text("${ordinal(d)} of each month") },
+                                onClick = { day = d; dayMenu = false })
+                        }
+                    }
+                }
+                Text("A new amount starts with your next payment. A new day moves your next payment to that day; " +
+                    "nothing extra is charged.", style = MaterialTheme.typography.bodySmall, color = AppColors.muted)
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(amount, day) }) { Text("Save Changes", color = AppColors.clayDark) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color = AppColors.ink) } },
+    )
 }

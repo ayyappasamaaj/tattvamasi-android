@@ -28,6 +28,11 @@ object AccountStore {
         val moreDonations: Boolean = false,
         val donationsFailed: Boolean = false,
         val zelle: List<ZelleGift> = emptyList(),
+        val monthly: List<MonthlyGift> = emptyList(),
+        val monthlyAmounts: List<MonthlyAmountChoice> = emptyList(),
+        val monthlyFailed: Boolean = false,
+        val stopping: String? = null,               // the monthly gift being stopped
+        val monthlyMessage: String? = null,         // the last stop's outcome
         val registration: String? = null,           // the registration's code its page shows
         val registrationFrom: Page? = null,         // where its page was opened from (Back goes there)
     )
@@ -93,11 +98,56 @@ object AccountStore {
         if (code == 401) return forget("Your sign-in has ended. Please sign in again.")
         if (answer == null) return _state.update { it.copy(donationsFailed = true) }
         val zelle = if (page == 1) AccountApi.zelleGifts(current) else _state.value.zelle
+        val monthly = if (page == 1) AccountApi.monthlyGifts(current).second else null
         _state.update {
             it.copy(donations = if (page == 1) answer.donations else it.donations + answer.donations,
-                donationsPage = page, moreDonations = answer.more, zelle = zelle)
+                donationsPage = page, moreDonations = answer.more, zelle = zelle,
+                monthly = monthly?.gifts ?: it.monthly, monthlyAmounts = monthly?.amounts ?: it.monthlyAmounts,
+                monthlyFailed = page == 1 && monthly == null)
         }
     }
+
+    /** Stops a monthly gift at once (website: donations/monthly.py); the donor gets an email. */
+    suspend fun stopMonthlyGift(gift: MonthlyGift) {
+        val current = token ?: return
+        _state.update { it.copy(stopping = gift.id, monthlyMessage = null) }
+        val (code, problem) = try {
+            AccountApi.stopMonthlyGift(current, gift.id)
+        } finally {
+            _state.update { it.copy(stopping = null) }
+        }
+        if (code == 401) return forget("Your sign-in has ended. Please sign in again.")
+        _state.update {
+            if (problem == null) it.copy(monthly = it.monthly.filter { g -> g.id != gift.id },
+                monthlyMessage = "Your monthly gift of ${summaryDollars(gift.amount).removeSuffix(".00")} has stopped. " +
+                    "We've emailed you to confirm.")
+            else it.copy(monthlyMessage = problem)
+        }
+    }
+
+    /** Another amount and/or day for a monthly gift (website: donations/monthly.py change); the donor gets an email. */
+    suspend fun changeMonthlyGift(gift: MonthlyGift, amountId: Int?, day: Int?) {
+        val current = token ?: return
+        val amount = amountId?.takeIf { it != gift.amountId }
+        val newDay = day?.takeIf { it != gift.day }
+        if (amount == null && newDay == null) return
+        _state.update { it.copy(stopping = gift.id, monthlyMessage = null) }
+        val (code, changed, problem) = try {
+            AccountApi.changeMonthlyGift(current, gift.id, amount, newDay)
+        } finally {
+            _state.update { it.copy(stopping = null) }
+        }
+        if (code == 401) return forget("Your sign-in has ended. Please sign in again.")
+        _state.update {
+            if (changed != null) it.copy(monthly = it.monthly.map { g -> if (g.id == gift.id) changed else g },
+                monthlyMessage = "Changed: ${summaryDollars(changed.amount).removeSuffix(".00")} every month" +
+                    (changed.nextPayment?.let { d -> ", next on ${summaryDay(d)}" } ?: "") + ". We've emailed you to confirm.")
+            else it.copy(monthlyMessage = problem)
+        }
+    }
+
+    /** From Donate: My account's donations page, where monthly gifts are changed or stopped. */
+    fun openDonations() = _state.update { it.copy(shown = true, page = Page.DONATIONS, deletion = null) }
 
     suspend fun signIn(email: String, password: String) {
         if (email.isBlank() || password.isEmpty()) {
