@@ -22,7 +22,8 @@ object AccountApi {
     /** The website's pages the app opens in the browser for what it doesn't do itself. */
     val signUpUrl get() = "$site/accounts/signup/"
     val resetPasswordUrl get() = "$site/accounts/password/reset/"
-    val dashboardUrl get() = "$site/app/dashboard/"
+    /** The logo on the year-end letter (the website's letterhead's) */
+    val logoUrl get() = "$site/static/images/logo_2x.png"
     val profileUrl get() = "$site/profile/"
 
     data class Reply(val code: Int, val body: String)
@@ -81,6 +82,24 @@ object AccountApi {
             year = if (summary.code == 200) parseYear(summary.body) else null,
             failed = listOf(registrations, donations, summary).any { it.code != 200 },
         )
+    }
+
+    /** The year-end summary ("me" or "household"); null data when the website didn't answer. 401: signed out. */
+    suspend fun summary(token: String, year: Int, scope: String): Pair<Int, YearSummary?> {
+        val reply = call("GET", "/api/core/year-summary/?year=$year&scope=$scope", token)
+        return reply.code to if (reply.code == 200) parseSummary(reply.body) else null
+    }
+
+    /** One page (10, newest first) of the person's confirmed donations and their household's sharing ones. */
+    suspend fun donations(token: String, page: Int): Pair<Int, DonationsPage?> {
+        val reply = call("GET", "/api/donations/mine/?page=$page", token)
+        return reply.code to if (reply.code == 200) runCatching { parseDonationsPage(reply.body) }.getOrNull() else null
+    }
+
+    /** Zelle gifts the treasurer hasn't confirmed yet (shown first, outside the totals). */
+    suspend fun zelleGifts(token: String): List<ZelleGift> {
+        val reply = call("GET", "/api/donations/mine/zelle/", token)
+        return if (reply.code == 200) runCatching { parseZelleGifts(reply.body) }.getOrDefault(emptyList()) else emptyList()
     }
 
     /** Delete my account: the website emails a link to the account's address (core/account_deletion.py). */

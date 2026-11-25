@@ -20,7 +20,17 @@ object AccountStore {
         val overview: Overview? = null,
         val loading: Boolean = false,
         val deletion: Deletion? = null,      // the answer to Delete my account
+        val page: Page? = null,              // a page over My account: the year-end summary or all donations
+        val summary: YearSummary? = null,
+        val summaryFailed: Boolean = false,
+        val donations: List<MyDonation> = emptyList(),
+        val donationsPage: Int = 0,          // pages read so far
+        val moreDonations: Boolean = false,
+        val donationsFailed: Boolean = false,
+        val zelle: List<ZelleGift> = emptyList(),
     )
+
+    enum class Page { SUMMARY, DONATIONS }
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
@@ -42,7 +52,43 @@ object AccountStore {
     }
 
     fun open() = _state.update { it.copy(shown = true, deletion = null) }
-    fun close() = _state.update { it.copy(shown = false, message = null) }
+    fun close() = _state.update { it.copy(shown = false, message = null, page = null) }
+
+    fun openPage(page: Page) = _state.update { it.copy(page = page) }
+    fun closePage() = _state.update { it.copy(page = null) }
+
+    /** The year-end summary of [year] (this year to start with) for "me" or "household". */
+    suspend fun loadSummary(year: Int? = null, scope: String? = null) {
+        val current = token ?: return
+        val shown = _state.value.summary
+        _state.update { it.copy(loading = true, summaryFailed = false) }
+        val (code, summary) = try {
+            AccountApi.summary(current, year ?: shown?.year ?: LocalDate.now().year, scope ?: shown?.scope ?: "me")
+        } finally {
+            _state.update { it.copy(loading = false) }
+        }
+        if (code == 401) return forget("Your sign-in has ended. Please sign in again.")
+        _state.update { it.copy(summary = summary ?: it.summary, summaryFailed = summary == null) }
+    }
+
+    /** All donations: the first page (with the Zelle gifts waiting), or the next one. */
+    suspend fun loadDonations(next: Boolean = false) {
+        val current = token ?: return
+        val page = if (next) _state.value.donationsPage + 1 else 1
+        _state.update { it.copy(loading = true, donationsFailed = false) }
+        val (code, answer) = try {
+            AccountApi.donations(current, page)
+        } finally {
+            _state.update { it.copy(loading = false) }
+        }
+        if (code == 401) return forget("Your sign-in has ended. Please sign in again.")
+        if (answer == null) return _state.update { it.copy(donationsFailed = true) }
+        val zelle = if (page == 1) AccountApi.zelleGifts(current) else _state.value.zelle
+        _state.update {
+            it.copy(donations = if (page == 1) answer.donations else it.donations + answer.donations,
+                donationsPage = page, moreDonations = answer.more, zelle = zelle)
+        }
+    }
 
     suspend fun signIn(email: String, password: String) {
         if (email.isBlank() || password.isEmpty()) {

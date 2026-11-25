@@ -76,7 +76,8 @@ import java.time.format.DateTimeFormatter
 fun AccountSheet() {
     val state by AccountStore.state.collectAsState()
     if (!state.shown) return
-    BackHandler { AccountStore.close() }
+    // Back from the summary or the donations list goes to My account; from My account, out of it
+    BackHandler { if (state.page != null) AccountStore.closePage() else AccountStore.close() }
     Column(
         Modifier
             .fillMaxSize()
@@ -88,10 +89,14 @@ fun AccountSheet() {
             .imePadding(),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
-            IconButton(onClick = { AccountStore.close() }) {
+            IconButton(onClick = { if (state.page != null) AccountStore.closePage() else AccountStore.close() }) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back", tint = AppColors.ink)
             }
-            Text("My Account", style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
+            Text(when (state.page) {
+                AccountStore.Page.SUMMARY -> "Year-End Summary"
+                AccountStore.Page.DONATIONS -> "My Donations"
+                null -> "My Account"
+            }, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
         }
         Column(
@@ -99,7 +104,12 @@ fun AccountSheet() {
         ) {
             ReadableWidth(maxWidth = 640.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (state.user == null) SignInForm(state) else SignedIn(state)
+                    when {
+                        state.user == null -> SignInForm(state)
+                        state.page == AccountStore.Page.SUMMARY -> YearSummaryPage(state)
+                        state.page == AccountStore.Page.DONATIONS -> DonationsListPage(state)
+                        else -> SignedIn(state)
+                    }
                     AddressFooter()
                 }
             }
@@ -221,8 +231,8 @@ private fun SignedIn(state: AccountStore.State) {
                 Text(dollars(year.all), style = MaterialTheme.typography.headlineMedium, color = AppColors.ink)
                 Text("Donations ${dollars(year.donations)} · Registrations ${dollars(year.registrations)}",
                     style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft)
-                TextButton(onClick = { openWebPage(context, AccountApi.dashboardUrl) }) {
-                    Text("Year-end summary for taxes (website)", color = AppColors.clayDark)
+                TextButton(onClick = { AccountStore.openPage(AccountStore.Page.SUMMARY) }) {
+                    Text("Year-end summary for taxes", color = AppColors.clayDark)
                 }
             }
         }
@@ -260,8 +270,8 @@ private fun SignedIn(state: AccountStore.State) {
                         color = AppColors.ink)
                 }
             }
-            TextButton(onClick = { openWebPage(context, AccountApi.dashboardUrl) }) {
-                Text("See everything on the website", color = AppColors.clayDark)
+            TextButton(onClick = { AccountStore.openPage(AccountStore.Page.DONATIONS) }) {
+                Text("See all my donations", color = AppColors.clayDark)
             }
         }
     }
