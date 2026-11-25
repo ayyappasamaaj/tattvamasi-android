@@ -65,7 +65,7 @@ import com.ayyappasamaaj.tattvamasi.ui.SectionLabel
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountApi
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.card
-import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
+import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -161,7 +161,7 @@ fun DonateSheet() {
                             verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("Give on our website: by card, Apple Pay or Google Pay, Zelle or check.",
                                 style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
-                            Primary("Donate on the Website") { openInBrowser(context, AccountApi.site + "/donate/") }
+                            Primary("Donate on the Website") { openWebPage(context, AccountApi.site + "/donate/") }
                         }
                         else -> {
                             Column(Modifier.fillMaxWidth().card(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -245,7 +245,7 @@ fun DonateSheet() {
                                         style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
                                 }
                             }
-                            TextButton(onClick = { openInBrowser(context, AccountApi.site + "/donate/") }) {
+                            TextButton(onClick = { openWebPage(context, AccountApi.site + "/donate/") }) {
                                 Text("Prefer Zelle or a check? Give on our website", color = AppColors.clayDark)
                             }
                         }

@@ -19,9 +19,9 @@ object WebPages {
 }
 
 /**
- * Opens a website page in the phone's browser app, outside the app. Used for Donate: giving happens on the
- * website, and the app only links out to it (as the iOS app does in Safari, which the App Store requires of
- * nonprofits it hasn't approved for in-app giving).
+ * Opens a page in the phone's browser app, outside the app. Only for what the browser has to hand on to another app
+ * (Google Calendar's subscribe link); every website page opens in the app's own browser (openWebPage), the
+ * maintainer's call, Nov 25.
  */
 fun openInBrowser(context: Context, url: String) {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).addCategory(Intent.CATEGORY_BROWSABLE)

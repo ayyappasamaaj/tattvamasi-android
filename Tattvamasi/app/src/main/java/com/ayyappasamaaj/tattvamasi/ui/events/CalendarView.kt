@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
+import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -82,7 +83,7 @@ private val dayTitle = DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.US)
 /**
  * The Calendar, as the website shows it on a phone: a compact month (a dot per item, a line under the days of an
  * event over several days) and the chosen day's items below. An event opens the app's event screen; a house bhajan
- * or other date opens its page on the website in the phone's browser, where people are signed in.
+ * or other date opens its page on the website in the app's browser (a Chrome Custom Tab, signed in as in Chrome).
  */
 @Composable
 fun CalendarView(events: List<AppEvent>, onOpenEvent: (String) -> Unit) {
@@ -165,7 +166,7 @@ fun CalendarView(events: List<AppEvent>, onOpenEvent: (String) -> Unit) {
                 ItemRow(item) {
                     when {
                         item.eventKey != null -> onOpenEvent(item.eventKey)
-                        item.url != null -> openInBrowser(context, item.url)
+                        item.url != null -> openWebPage(context, item.url)
                     }
                 }
             }
@@ -180,14 +181,14 @@ fun CalendarView(events: List<AppEvent>, onOpenEvent: (String) -> Unit) {
             }
         }
 
-        // Host a house bhajan: the website's form, in the phone's browser (sign-in, then a coordinator approves it)
+        // Host a house bhajan: the website's form, in the browser inside the app (sign-in, then a coordinator approves it)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().card()) {
             Text("Hosting an Ayyappa puja and bhajan at home?", style = MaterialTheme.typography.titleMedium,
                 color = AppColors.ink)
-            Text("Add it to the calendar on ayyappasamaaj.org: it opens in your browser, and a coordinator approves it first.",
+            Text("Add it to the calendar on ayyappasamaaj.org: the form opens here, and a coordinator approves it first.",
                 style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft)
             Button(
-                onClick = { openInBrowser(context, HOST_HOUSE_BHAJAN_URL) },
+                onClick = { openWebPage(context, HOST_HOUSE_BHAJAN_URL) },
                 colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
             ) { Text("Add your house bhajan", fontWeight = FontWeight(700)) }
         }
