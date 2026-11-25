@@ -104,12 +104,15 @@ class SummaryTest {
     @Test
     fun monthlyGifts() {
         // The website's answer (donations/monthly.py, website #728)
-        val gifts = parseMonthlyGifts("""{"gifts": [{"id": "sub_1", "amount": "51.00", "category": "Annadanam",
-            "since": "2025-11-24", "next_payment": "2025-12-24", "status": "active"},
-            {"id": "sub_2", "amount": "108.00", "category": "General", "since": null, "next_payment": null,
-            "status": "past_due"}]}""")
-        assertEquals(MonthlyGift("sub_1", "51.00", "Annadanam", "2025-11-24", "2025-12-24", "active"), gifts[0])
-        assertNull(gifts[1].since)
-        assertEquals("past_due", gifts[1].status)
+        val answer = parseMonthlyGifts("""{"gifts": [{"id": "sub_1", "amount_id": 7, "amount": "51.00",
+            "category": "Annadanam", "since": "2025-11-24", "next_payment": "2025-12-24", "day": 24, "status": "active"},
+            {"id": "sub_2", "amount_id": null, "amount": "108.00", "category": "General", "since": null,
+            "next_payment": null, "day": null, "status": "past_due"}],
+            "amounts": [{"id": 7, "amount": "51.00", "category": "Annadanam"}, {"id": 9, "amount": "108.00", "category": "General"}]}""")
+        assertEquals(MonthlyGift("sub_1", "51.00", "Annadanam", "2025-11-24", "2025-12-24", "active", 7, 24), answer.gifts[0])
+        assertNull(answer.gifts[1].since)
+        assertNull(answer.gifts[1].day)
+        assertEquals(MonthlyAmountChoice(9, "108.00", "General"), answer.amounts[1])
+        assertEquals(listOf("1st", "2nd", "3rd", "4th", "11th", "21st", "22nd"), listOf(1, 2, 3, 4, 11, 21, 22).map { ordinal(it) })
     }
 }

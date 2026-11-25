@@ -241,9 +241,9 @@ fun DonateSheet() {
                                             }
                                         }
                                     }
-                                    // Stopping one: My account's donations page (website: donations/monthly.py)
+                                    // Changing or stopping one: My account's donations page (website: donations/monthly.py)
                                     TextButton(onClick = { DonateStore.close(); AccountStore.openDonations() }) {
-                                        Text("Stop a monthly gift: My Account", color = AppColors.clayDark)
+                                        Text("Change or stop a monthly gift: My Account", color = AppColors.clayDark)
                                     }
                                 }
                             }

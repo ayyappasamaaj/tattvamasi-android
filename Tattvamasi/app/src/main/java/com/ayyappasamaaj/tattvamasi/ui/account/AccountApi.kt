@@ -103,9 +103,24 @@ object AccountApi {
     }
 
     /** The running monthly gifts (null: couldn't be loaded). 401: signed out. */
-    suspend fun monthlyGifts(token: String): Pair<Int, List<MonthlyGift>?> {
+    suspend fun monthlyGifts(token: String): Pair<Int, MonthlyGifts?> {
         val reply = call("GET", "/api/donations/mine/monthly/", token)
         return reply.code to if (reply.code == 200) runCatching { parseMonthlyGifts(reply.body) }.getOrNull() else null
+    }
+
+    /** Another amount (an amount id) and/or day (1-28). The gift as it is now, or the website's reason. */
+    suspend fun changeMonthlyGift(token: String, id: String, amountId: Int?, day: Int?): Triple<Int, MonthlyGift?, String?> {
+        val body = JSONObject()
+        amountId?.let { body.put("amount", it) }
+        day?.let { body.put("day", it) }
+        val reply = call("POST", "/api/donations/mine/monthly/$id/change/", token, body)
+        val json = runCatching { JSONObject(reply.body) }.getOrNull()
+        if (reply.code == 200) json?.optJSONObject("changed")?.let { return Triple(200, parseMonthlyGift(it), null) }
+        val detail = json?.optString("detail").orEmpty()
+        return Triple(reply.code, null, detail.ifBlank {
+            if (reply.code == 0) "Couldn't reach ayyappasamaaj.org. Check your connection and try again."
+            else "It couldn't be changed just now. Please try again in a few minutes."
+        })
     }
 
     /** Stops one at once. null when stopped; else the website's reason. */
