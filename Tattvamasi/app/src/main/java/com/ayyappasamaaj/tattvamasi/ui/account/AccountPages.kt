@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,8 +26,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -165,6 +171,47 @@ fun YearSummaryPage(state: AccountStore.State) {
 fun DonationsListPage(state: AccountStore.State) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) { AccountStore.loadDonations() }
+    var confirm by remember { mutableStateOf<MonthlyGift?>(null) }
+    if (state.monthly.isNotEmpty() || state.monthlyMessage != null || state.monthlyFailed) {
+        Column(Modifier.fillMaxWidth().card(16.dp)) {
+            SectionLabel("Monthly gifts", Modifier.padding(bottom = 4.dp))
+            state.monthly.forEachIndexed { index, g ->
+                if (index > 0) HorizontalDivider(color = AppColors.line)
+                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+                        Text("${summaryDollars(g.amount).removeSuffix(".00")} every month · ${g.category}",
+                            style = MaterialTheme.typography.bodyLarge, color = AppColors.ink)
+                        Text(listOfNotNull(g.since?.let { "Since ${summaryDay(it)}" }, g.nextPayment?.let { "Next ${summaryDay(it)}" },
+                            "Last payment failed".takeIf { g.status == "past_due" }).joinToString(" · "),
+                            style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
+                    }
+                    OutlinedButton(onClick = { confirm = g }, enabled = state.stopping == null) {
+                        Text(if (state.stopping == g.id) "Stopping…" else "Stop", color = AppColors.ink)
+                    }
+                }
+            }
+            if (state.monthlyFailed) Note("Your monthly gifts couldn't be loaded. Please try again later.", AppColors.clayDark)
+            state.monthlyMessage?.let { Note(it, AppColors.inkSoft) }
+            Text("To change the amount, stop it and start a new one from Donate.",
+                style = MaterialTheme.typography.bodySmall, color = AppColors.muted, modifier = Modifier.padding(top = 6.dp))
+        }
+    }
+    confirm?.let { g ->
+        AlertDialog(
+            onDismissRequest = { confirm = null },
+            title = { Text("Stop this monthly gift?") },
+            text = {
+                Text("${summaryDollars(g.amount).removeSuffix(".00")} every month for ${g.category}. It stops now: no " +
+                    "more payments will be taken. The months you gave stay on your account and your year-end summary.")
+            },
+            confirmButton = {
+                TextButton(onClick = { confirm = null; scope.launch { AccountStore.stopMonthlyGift(g) } }) {
+                    Text("Stop It", color = AppColors.clayDark)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirm = null }) { Text("Keep It", color = AppColors.ink) } },
+        )
+    }
     if (state.zelle.isNotEmpty()) {
         Column(Modifier.fillMaxWidth().card(16.dp)) {
             SectionLabel("Zelle gifts being checked", Modifier.padding(bottom = 4.dp))

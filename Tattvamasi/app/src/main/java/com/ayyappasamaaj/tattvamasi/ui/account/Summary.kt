@@ -52,6 +52,10 @@ data class ZelleGift(val id: Int, val title: String, val date: String, val amoun
 
 data class DonationsPage(val donations: List<MyDonation>, val more: Boolean)
 
+/** A running monthly gift (website: donations/monthly.py): Stripe's subscription id, and what the page shows. */
+data class MonthlyGift(val id: String, val amount: String, val category: String, val since: String?,
+                       val nextPayment: String?, val status: String)
+
 private fun JSONObject.text(name: String): String? = if (isNull(name)) null else optString(name).ifBlank { null }
 
 private fun JSONArray?.objects(): List<JSONObject> =
@@ -101,6 +105,11 @@ fun parseDonationsPage(body: String): DonationsPage {
             d.optString("amount"), d.text("donated_by"), d.text("memo_code"))
     }
     return DonationsPage(donations, more = json.text("next") != null)
+}
+
+fun parseMonthlyGifts(body: String): List<MonthlyGift> = JSONObject(body).optJSONArray("gifts").objects().map { g ->
+    MonthlyGift(g.optString("id"), g.optString("amount"), g.optString("category"), g.text("since"),
+        g.text("next_payment"), g.optString("status"))
 }
 
 fun parseZelleGifts(body: String): List<ZelleGift> = JSONArray(body).objects().map { g ->

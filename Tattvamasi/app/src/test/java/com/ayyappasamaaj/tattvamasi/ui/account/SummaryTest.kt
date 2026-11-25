@@ -100,4 +100,16 @@ class SummaryTest {
         assertEquals("Nov 25, 2026", summaryDay("2026-11-25"))
         assertEquals("$1,250.00", summaryDollars("1250"))
     }
+
+    @Test
+    fun monthlyGifts() {
+        // The website's answer (donations/monthly.py, website #728)
+        val gifts = parseMonthlyGifts("""{"gifts": [{"id": "sub_1", "amount": "51.00", "category": "Annadanam",
+            "since": "2025-11-24", "next_payment": "2025-12-24", "status": "active"},
+            {"id": "sub_2", "amount": "108.00", "category": "General", "since": null, "next_payment": null,
+            "status": "past_due"}]}""")
+        assertEquals(MonthlyGift("sub_1", "51.00", "Annadanam", "2025-11-24", "2025-12-24", "active"), gifts[0])
+        assertNull(gifts[1].since)
+        assertEquals("past_due", gifts[1].status)
+    }
 }

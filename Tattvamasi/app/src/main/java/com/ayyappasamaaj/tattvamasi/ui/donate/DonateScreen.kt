@@ -241,9 +241,10 @@ fun DonateSheet() {
                                             }
                                         }
                                     }
-                                    // Neither the website nor the app can stop one yet (found Nov 25): the treasurer does it
-                                    Text("To stop or change a monthly gift, email treasurer@ayyappasamaaj.org.",
-                                        style = MaterialTheme.typography.bodyMedium, color = AppColors.muted)
+                                    // Stopping one: My account's donations page (website: donations/monthly.py)
+                                    TextButton(onClick = { DonateStore.close(); AccountStore.openDonations() }) {
+                                        Text("Stop a monthly gift: My Account", color = AppColors.clayDark)
+                                    }
                                 }
                             }
                             TextButton(onClick = { openInBrowser(context, AccountApi.site + "/donate/") }) {

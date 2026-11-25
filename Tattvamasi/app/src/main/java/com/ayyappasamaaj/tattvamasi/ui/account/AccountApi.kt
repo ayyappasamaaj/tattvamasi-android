@@ -102,6 +102,23 @@ object AccountApi {
         return if (reply.code == 200) runCatching { parseZelleGifts(reply.body) }.getOrDefault(emptyList()) else emptyList()
     }
 
+    /** The running monthly gifts (null: couldn't be loaded). 401: signed out. */
+    suspend fun monthlyGifts(token: String): Pair<Int, List<MonthlyGift>?> {
+        val reply = call("GET", "/api/donations/mine/monthly/", token)
+        return reply.code to if (reply.code == 200) runCatching { parseMonthlyGifts(reply.body) }.getOrNull() else null
+    }
+
+    /** Stops one at once. null when stopped; else the website's reason. */
+    suspend fun stopMonthlyGift(token: String, id: String): Pair<Int, String?> {
+        val reply = call("POST", "/api/donations/mine/monthly/$id/stop/", token)
+        if (reply.code == 200) return 200 to null
+        val detail = runCatching { JSONObject(reply.body).optString("detail") }.getOrNull().orEmpty()
+        return reply.code to detail.ifBlank {
+            if (reply.code == 0) "Couldn't reach ayyappasamaaj.org. Check your connection and try again."
+            else "It couldn't be stopped just now. Please try again in a few minutes."
+        }
+    }
+
     /** Delete my account: the website emails a link to the account's address (core/account_deletion.py). */
     suspend fun requestDeletion(token: String): Deletion {
         val reply = call("POST", "/api/core/delete-account/", token)
