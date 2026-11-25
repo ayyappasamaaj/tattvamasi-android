@@ -46,10 +46,29 @@ object AccountStore {
             _state.update { it.copy(message = "Enter your email and password.") }
             return
         }
+        finish { AccountApi.signIn(email, password) }
+    }
+
+    /** Continue with Google: Google's account picker, then the website (a new account follows its sign-up limits). */
+    suspend fun signInWithGoogle(activity: Context) {
+        _state.update { it.copy(busy = true, message = null, confirmEmail = false) }
+        val google = try {
+            GoogleSignIn.idToken(activity)
+        } finally {
+            _state.update { it.copy(busy = false) }
+        }
+        when (google) {
+            is GoogleSignIn.Result.Token -> finish { AccountApi.signInWithGoogle(google.idToken) }
+            GoogleSignIn.Result.Cancelled -> {}
+            is GoogleSignIn.Result.Problem -> _state.update { it.copy(message = google.message) }
+        }
+    }
+
+    private suspend fun finish(call: suspend () -> SignIn) {
         _state.update { it.copy(busy = true, message = null, confirmEmail = false) }
         // Whatever happens (closing My account cancels the call), the button doesn't stay on "Signing In…"
         val result = try {
-            AccountApi.signIn(email, password)
+            call()
         } finally {
             _state.update { it.copy(busy = false) }
         }
