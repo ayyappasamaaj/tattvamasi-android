@@ -73,13 +73,56 @@ object DonateStore {
         val busy: Boolean = false,
         val message: String? = null,
         val thanks: String? = null,           // after a gift went through
+        val zelle: Boolean = false,           // "I sent a Zelle gift" (ZelleReport.kt) is open
+        val zelleForm: ZelleForm? = null,
+        val zelleFailed: Boolean = false,
+        val zelleErrors: Map<String, String> = emptyMap(),
+        val zelleReported: ZelleReported? = null,
     )
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
 
-    fun open() = _state.update { it.copy(shown = true, message = null, thanks = null) }
-    fun close() = _state.update { it.copy(shown = false) }
+    fun open() = _state.update { it.copy(shown = true, message = null, thanks = null, zelle = false) }
+    fun close() = _state.update { it.copy(shown = false, zelle = false) }
+
+    /** "I sent a Zelle gift" (ZelleReport.kt): a fresh form each time, with the memo code the website holds. */
+    fun openZelle() = _state.update {
+        it.copy(zelle = true, zelleForm = null, zelleFailed = false, zelleErrors = emptyMap(), zelleReported = null)
+    }
+    fun closeZelle() = _state.update { it.copy(zelle = false) }
+
+    suspend fun loadZelle() {
+        val token = AccountStore.sessionToken ?: return
+        val reply = AccountApi.call("GET", "/api/donations/zelle/", token)
+        if (reply.code == 401) return AccountStore.ended()
+        val form = if (reply.code == 200) parseZelleForm(reply.body) else null
+        _state.update { it.copy(zelleForm = form, zelleFailed = form == null) }
+    }
+
+    suspend fun reportZelle(amount: String, givenOn: String, category: Int, sender: String, memo: String, memoCode: String) {
+        val token = AccountStore.sessionToken ?: return
+        _state.update { it.copy(busy = true, zelleErrors = emptyMap()) }
+        val body = JSONObject().put("amount", amount.trim().removePrefix("$").replace(",", "")).put("given_on", givenOn)
+            .put("category", category).put("sender_name", sender.trim()).put("memo", memo.trim())
+            .put("memo_code", memoCode.trim())
+        val reply = try {
+            AccountApi.call("POST", "/api/donations/zelle/", token, body)
+        } finally {
+            _state.update { it.copy(busy = false) }
+        }
+        when (val result = parseZelleReport(reply.code, reply.body)) {
+            ZelleResult.SignedOut -> AccountStore.ended()
+            is ZelleResult.Problems -> _state.update { it.copy(zelleErrors = result.errors) }
+            is ZelleResult.Reported -> _state.update { it.copy(zelleReported = result.gift) }
+        }
+    }
+
+    /** Another one: a new form, with a new memo code. */
+    suspend fun anotherZelle() {
+        openZelle()
+        loadZelle()
+    }
 
     suspend fun load() {
         val reply = AccountApi.call("GET", "/api/donations/app/")
