@@ -47,15 +47,20 @@ import org.json.JSONObject
  */
 data class ToolPage(val section: String, val title: String, val url: String, val description: String,
                     /** The app's own report of it (Reports.kt): its API address, or . */
-                    val appReport: String = "")
+                    val appReport: String = "",
+                    /** The app's own screen for it (TreasurerPages.kt): "zelle", "checks", or "". */
+                    val appScreen: String = "")
 
 fun parseToolPages(body: String): List<ToolPage> = runCatching {
     val pages = JSONObject(body).optJSONArray("pages") ?: return emptyList()
     (0 until pages.length()).mapNotNull { pages.optJSONObject(it) }.map {
         ToolPage(it.optString("section").ifBlank { "Other" }, it.optString("title"), it.optString("url"),
-            it.optString("description"), it.optString("app_report"))
+            it.optString("description"), it.optString("app_report"), it.optString("app_screen"))
     }.filter { it.title.isNotBlank() && it.url.isNotBlank() }
 }.getOrDefault(emptyList())
+
+/** Whether the app has its own screen for a page (a report, or a treasurer tool). */
+val ToolPage.inApp: Boolean get() = appReport.isNotBlank() || appScreen in treasurerScreens
 
 /** The pages by section, in the order the sections first come (the website's). */
 fun toolSections(pages: List<ToolPage>): List<Pair<String, List<ToolPage>>> =
@@ -74,7 +79,8 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
     ) {
         Text("Volunteer tools", style = MaterialTheme.typography.titleLarge, color = AppColors.onForest,
             modifier = Modifier.semantics { heading() })
-        Text("Reports open here; other pages open in your phone's browser, where you sign in to the website once.",
+        Text("Reports and the treasurer's Zelle and check pages open here; other pages open in your phone's browser, " +
+            "where you sign in to the website once.",
             style = MaterialTheme.typography.bodySmall, color = AppColors.onForest.copy(alpha = 0.8f))
         toolSections(pages).forEach { (section, list) ->
             var open by rememberSaveable(section) { mutableStateOf(false) }
@@ -100,9 +106,13 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
                                     .background(Color.White.copy(alpha = 0.06f))
-                                    .clickable(onClickLabel = if (page.appReport.isNotBlank()) "Open" else "Open in the browser") {
-                                        if (page.appReport.isNotBlank()) AccountStore.openReport(page.appReport)
-                                        else openInBrowser(context, toolUrl(page))
+                                    .clickable(onClickLabel = if (page.inApp) "Open" else "Open in the browser") {
+                                        when {
+                                            page.appReport.isNotBlank() -> AccountStore.openReport(page.appReport)
+                                            page.appScreen == "zelle" -> AccountStore.openPage(AccountStore.Page.ZELLE)
+                                            page.appScreen == "checks" -> AccountStore.openPage(AccountStore.Page.CHECKS)
+                                            else -> openInBrowser(context, toolUrl(page))
+                                        }
                                     }
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                                     .semantics(mergeDescendants = true) {},
@@ -115,7 +125,7 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
                                             color = AppColors.onForest.copy(alpha = 0.8f))
                                     }
                                 }
-                                Icon(if (page.appReport.isNotBlank()) Icons.AutoMirrored.Outlined.KeyboardArrowRight
+                                Icon(if (page.inApp) Icons.AutoMirrored.Outlined.KeyboardArrowRight
                                      else Icons.AutoMirrored.Outlined.OpenInNew, null, tint = AppColors.onForest.copy(alpha = 0.8f),
                                     modifier = Modifier.padding(start = 8.dp))
                             }

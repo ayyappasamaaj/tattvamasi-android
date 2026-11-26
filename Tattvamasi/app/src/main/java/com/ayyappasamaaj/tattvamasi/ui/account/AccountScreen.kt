@@ -101,6 +101,8 @@ fun AccountSheet() {
                 AccountStore.Page.HOURS -> "My Volunteer Hours"
                 AccountStore.Page.ADD_HOURS -> "Add Hours"
                 AccountStore.Page.REPORT -> "Report"
+                AccountStore.Page.ZELLE -> "Zelle Donations"
+                AccountStore.Page.CHECKS -> "Check and Cash Donations"
                 null -> "My Account"
             }, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
@@ -119,6 +121,8 @@ fun AccountSheet() {
                         state.page == AccountStore.Page.HOURS -> VolunteerHoursPage(state)
                         state.page == AccountStore.Page.ADD_HOURS -> AddHoursPage(state)
                         state.page == AccountStore.Page.REPORT -> ReportPage(state)
+                        state.page == AccountStore.Page.ZELLE -> ZellePage()
+                        state.page == AccountStore.Page.CHECKS -> ChecksPage()
                         else -> SignedIn(state)
                     }
                     AddressFooter()
