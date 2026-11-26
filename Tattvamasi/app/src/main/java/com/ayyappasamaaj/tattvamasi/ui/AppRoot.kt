@@ -74,6 +74,7 @@ import kotlinx.coroutines.delay
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.ui.festivals.FestivalsScreen
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountSheet
+import com.ayyappasamaaj.tattvamasi.ui.housebhajan.HouseBhajanSheet
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.donate.DonateSheet
 import com.ayyappasamaaj.tattvamasi.ui.register.RegisterSheet
@@ -292,6 +293,7 @@ fun AppRoot() {
         RegisterSheet()
         // About or Settings (the top-right menu), then My account above them
         AppMenuSheet()
+        HouseBhajanSheet()  // under My Account, which it opens to sign in
         AccountSheet()
     }
 }

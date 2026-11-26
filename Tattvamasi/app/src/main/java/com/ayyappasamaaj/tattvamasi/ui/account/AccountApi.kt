@@ -28,11 +28,13 @@ object AccountApi {
 
     data class Reply(val code: Int, val body: String)
 
-    /** One request to the website. A network failure is code 0. */
-    suspend fun call(method: String, path: String, token: String? = null, body: JSONObject? = null): Reply =
+    /** One request to the website ([base]: another site than the app's, e.g. the calendar's). A network failure is
+     *  code 0. */
+    suspend fun call(method: String, path: String, token: String? = null, body: JSONObject? = null,
+                     base: String = site): Reply =
         withContext(Dispatchers.IO) {
             runCatching {
-                val connection = URL(site + path).openConnection() as HttpURLConnection
+                val connection = URL(base + path).openConnection() as HttpURLConnection
                 connection.requestMethod = method
                 connection.connectTimeout = 10000
                 connection.readTimeout = 20000
