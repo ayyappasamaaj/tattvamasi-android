@@ -41,9 +41,12 @@ object AccountStore {
         val hoursForm: AddHoursForm? = null,        // Add hours: what it offers
         val hoursFormFailed: Boolean = false,
         val hoursErrors: Map<String, String> = emptyMap(),  // Add hours: the website's problems by field
+        val reportPath: String? = null,             // a Volunteer tools report (Reports.kt): its API address
+        val report: Report? = null,
+        val reportFailed: Boolean = false,
     )
 
-    enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION, HOURS, ADD_HOURS }
+    enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION, HOURS, ADD_HOURS, REPORT }
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
@@ -74,6 +77,28 @@ object AccountStore {
             Page.ADD_HOURS -> it.copy(page = Page.HOURS, hoursErrors = emptyMap())
             else -> it.copy(page = null, hoursMessage = null)
         }
+    }
+
+    /** A Volunteer tools report (Reports.kt), from its API address (the website's my-pages "app_report"). */
+    fun openReport(path: String) = _state.update {
+        it.copy(page = Page.REPORT, reportPath = path, report = if (it.reportPath == path) it.report else null, reportFailed = false)
+    }
+
+    suspend fun loadReport() {
+        val current = token ?: return
+        val path = _state.value.reportPath ?: return
+        _state.update { it.copy(loading = true, reportFailed = false) }
+        val reply = try { AccountApi.call("GET", path, current) } finally { _state.update { it.copy(loading = false) } }
+        if (reply.code == 401) return forget("Your sign-in has ended. Please sign in again.")
+        val report = if (reply.code == 200) parseReport(reply.body) else null
+        _state.update { if (it.reportPath == path) it.copy(report = report ?: it.report, reportFailed = report == null) else it }
+    }
+
+    /** Another year (or event's year) of the report shown. */
+    suspend fun filterReport(name: String, value: String) {
+        val path = _state.value.reportPath ?: return
+        _state.update { it.copy(reportPath = reportPath(path, name, value)) }
+        loadReport()
     }
 
     /** My volunteer hours of [year] (the year shown, or this year to start with). */

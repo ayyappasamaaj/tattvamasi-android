@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
@@ -44,13 +45,15 @@ import org.json.JSONObject
  * its own screen for opens there; the rest open in the phone's browser (Chrome), where the person signs in to the
  * website once (the maintainer's call, Nov 26). As the iOS app's VolunteerTools.swift.
  */
-data class ToolPage(val section: String, val title: String, val url: String, val description: String)
+data class ToolPage(val section: String, val title: String, val url: String, val description: String,
+                    /** The app's own report of it (Reports.kt): its API address, or . */
+                    val appReport: String = "")
 
 fun parseToolPages(body: String): List<ToolPage> = runCatching {
     val pages = JSONObject(body).optJSONArray("pages") ?: return emptyList()
     (0 until pages.length()).mapNotNull { pages.optJSONObject(it) }.map {
         ToolPage(it.optString("section").ifBlank { "Other" }, it.optString("title"), it.optString("url"),
-            it.optString("description"))
+            it.optString("description"), it.optString("app_report"))
     }.filter { it.title.isNotBlank() && it.url.isNotBlank() }
 }.getOrDefault(emptyList())
 
@@ -71,7 +74,7 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
     ) {
         Text("Volunteer tools", style = MaterialTheme.typography.titleLarge, color = AppColors.onForest,
             modifier = Modifier.semantics { heading() })
-        Text("Pages open in your phone's browser; sign in to the website there once.",
+        Text("Reports open here; other pages open in your phone's browser, where you sign in to the website once.",
             style = MaterialTheme.typography.bodySmall, color = AppColors.onForest.copy(alpha = 0.8f))
         toolSections(pages).forEach { (section, list) ->
             var open by rememberSaveable(section) { mutableStateOf(false) }
@@ -97,7 +100,10 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
                                     .background(Color.White.copy(alpha = 0.06f))
-                                    .clickable(onClickLabel = "Open in the browser") { openInBrowser(context, toolUrl(page)) }
+                                    .clickable(onClickLabel = if (page.appReport.isNotBlank()) "Open" else "Open in the browser") {
+                                        if (page.appReport.isNotBlank()) AccountStore.openReport(page.appReport)
+                                        else openInBrowser(context, toolUrl(page))
+                                    }
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                                     .semantics(mergeDescendants = true) {},
                             ) {
@@ -109,7 +115,8 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
                                             color = AppColors.onForest.copy(alpha = 0.8f))
                                     }
                                 }
-                                Icon(Icons.AutoMirrored.Outlined.OpenInNew, null, tint = AppColors.onForest.copy(alpha = 0.8f),
+                                Icon(if (page.appReport.isNotBlank()) Icons.AutoMirrored.Outlined.KeyboardArrowRight
+                                     else Icons.AutoMirrored.Outlined.OpenInNew, null, tint = AppColors.onForest.copy(alpha = 0.8f),
                                     modifier = Modifier.padding(start = 8.dp))
                             }
                         }

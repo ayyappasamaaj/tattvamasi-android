@@ -100,6 +100,7 @@ fun AccountSheet() {
                 AccountStore.Page.REGISTRATION -> "Registration"
                 AccountStore.Page.HOURS -> "My Volunteer Hours"
                 AccountStore.Page.ADD_HOURS -> "Add Hours"
+                AccountStore.Page.REPORT -> "Report"
                 null -> "My Account"
             }, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
@@ -117,6 +118,7 @@ fun AccountSheet() {
                         state.page == AccountStore.Page.REGISTRATION -> RegistrationPage(state)
                         state.page == AccountStore.Page.HOURS -> VolunteerHoursPage(state)
                         state.page == AccountStore.Page.ADD_HOURS -> AddHoursPage(state)
+                        state.page == AccountStore.Page.REPORT -> ReportPage(state)
                         else -> SignedIn(state)
                     }
                     AddressFooter()
