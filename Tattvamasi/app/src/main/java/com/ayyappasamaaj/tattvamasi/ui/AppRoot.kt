@@ -194,17 +194,22 @@ fun AppRoot() {
     // A tapped notification: its event, guide or page (website: docs/app-notifications.md), once the events have
     // loaded (an event's page needs them)
     val tapped by AppNotifications.tapped.collectAsState()
-    LaunchedEffect(tapped, events, guides) {
+    val liveLoaded by LiveStore.loaded.collectAsState()
+    LaunchedEffect(tapped, events, guides, liveLoaded) {
         val url = tapped ?: return@LaunchedEffect
-        if (!events.loaded && !events.failed) return@LaunchedEffect
-        // "We're live now": the player while the stream is on (else /live/ on the website, below)
-        val stream = live
-        if (isLivePage(url) && stream != null) {
-            current = Destination.Home
-            watchLive(context, stream) { watching = true }
-            AppNotifications.opened()
-            return@LaunchedEffect
+        // "We're live now": the player (or Facebook) while the stream is on, else /live/ on the website, below. Opened
+        // from a closed app, /live hasn't arrived yet: wait for it (LiveStore gives up after 5 seconds offline)
+        if (isLivePage(url)) {
+            if (!liveLoaded) return@LaunchedEffect
+            val stream = live
+            if (stream != null) {
+                current = Destination.Home
+                watchLive(context, stream) { watching = true }
+                AppNotifications.opened()
+                return@LaunchedEffect
+            }
         }
+        if (!events.loaded && !events.failed) return@LaunchedEffect
         when (val target = notificationTarget(url, events.events, guides)) {
             is NotificationTarget.Event -> { openEvent = target.key; current = Destination.Events }
             is NotificationTarget.Guide -> showGuide(target.target, guides, { openGuide = it }, { openFestival = it }) { current = it }
