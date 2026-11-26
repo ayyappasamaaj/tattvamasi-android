@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * The texts saved on this phone (the reader's bookmark button), newest first, kept in the app's own settings: no
- * account, so they stay on this phone only. Later, with sign-in, they can move into a website playlist. As on the
- * iOS app (SavedTexts.swift).
+ * account, so they stay on this phone only. Signed in, Playlists can copy them into a website playlist
+ * (PlaylistsScreen.kt). As on the iOS app (ReadingPrefs in PublicationsModel.swift).
  */
 object SavedTexts {
     private const val PREFS = "publications"

@@ -288,7 +288,7 @@ fun AppRoot() {
             }
             // A text from Publications slides up over the page (the banner too), above the player and navigation bars
             AppScreen(overlay = {
-                if (current == Destination.Publications) reading?.let { PdfPopup(it) { reading = null } }
+                if (current == Destination.Publications) reading?.let { PdfPopup(it, onOpen = { next -> reading = next }) { reading = null } }
             }) {
                 when (current) {
                     Destination.Home -> HomeScreen(events, go = {
