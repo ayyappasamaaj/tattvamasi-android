@@ -110,7 +110,7 @@ import com.ayyappasamaaj.tattvamasi.ui.yatra.YatraScreen
 enum class Destination(
     val label: String,
     val icon: ImageVector?,
-    /** A drawn icon in place of [icon] (the Pujas tab's kalasam) */
+    /** A drawn icon in place of [icon] (the Pujas tab's diya, from the maintainer's Canva "Icon for festival"; tinted like the others) */
     @DrawableRes val iconRes: Int? = null,
     /** The full name, where there's room (a tablet's side rail) and for TalkBack; [label] fits a phone's bar */
     val fullName: String = label,
@@ -118,7 +118,7 @@ enum class Destination(
     Home("Home", Icons.Outlined.Home),
     Events("Events", Icons.Outlined.CalendarMonth),
     // "Pujas" on a phone (the maintainer's call, Nov 25, 2026: House Puja is here, and even Vishu is a puja in temples)
-    Festivals("Pujas", null, R.drawable.ic_pujas_kalasam, fullName = "Festivals & Pujas"),
+    Festivals("Pujas", null, R.drawable.ic_pujas_diya, fullName = "Festivals & Pujas"),
     Sabarimala("Sabarimala", Icons.Outlined.Landscape),
     Publications("Publications", Icons.AutoMirrored.Outlined.MenuBook),
 }
@@ -255,7 +255,9 @@ fun AppRoot() {
                             current = destination
                         },
                         icon = {
-                            destination.iconRes?.let { Icon(painterResource(it), contentDescription = null) }
+                            // The Pujas diya is a picture (its shape tinted like the others): sized as the other icons, 26dp to
+                            // show its pattern
+                            destination.iconRes?.let { Icon(painterResource(it), contentDescription = null, modifier = Modifier.size(26.dp)) }
                                 ?: Icon(destination.icon!!, contentDescription = null)
                         },
                         // 12sp so "Publications" fits the narrowest phones' five-item bar; the full name on a tablet's
