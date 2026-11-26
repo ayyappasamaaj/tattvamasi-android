@@ -447,3 +447,116 @@ fun ChecksPage() {
         }
     }
 }
+
+// MARK: Add an expense
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun ExpensePage() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    var info by remember { mutableStateOf<ExpenseFormInfo?>(null) }
+    var failed by remember { mutableStateOf(false) }
+    var told by remember { mutableStateOf<String?>(null) }
+    var event by remember { mutableStateOf<Int?>(null) }
+    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var category by remember { mutableStateOf<Int?>(null) }
+    var weekend by remember { mutableStateOf("auto") }
+    var amount by remember { mutableStateOf("") }
+    var paidTo by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+    var errors by remember { mutableStateOf(emptyMap<String, String>()) }
+    var busy by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        val token = AccountStore.sessionToken ?: return@LaunchedEffect
+        val (code, fresh) = TreasurerApi.expenseForm(token)
+        if (code == 401) return@LaunchedEffect AccountStore.ended()
+        info = fresh
+        failed = fresh == null
+        if (fresh != null && event == null) event = fresh.defaultEvent ?: fresh.events.firstOrNull()?.id
+    }
+
+    told?.let { Told(it, true) }
+    val i = info
+    if (i == null) {
+        if (failed) Told("The form couldn't be loaded. Please try again later.", false) else Waiting()
+        return
+    }
+    val picked = i.events.firstOrNull { it.id == event }
+    Column(Modifier.fillMaxWidth().card(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("What was spent for an event, by category. Imports from the bank or Wave, categories, weekends and dates " +
+            "are on the website.", style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
+        SectionLabel("Event")
+        val chip = FilterChipDefaults.filterChipColors(selectedContainerColor = AppColors.claySoft,
+            selectedLabelColor = AppColors.clayDark, labelColor = AppColors.ink)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            i.events.forEach { e ->
+                FilterChip(selected = e.id == event, onClick = { event = e.id; category = null }, label = { Text(e.name) }, colors = chip)
+            }
+        }
+        errors["event"]?.let { Told(it, false) }
+        DateInput("Date", date, errors["spent_on"], null, LocalDate.now().minusYears(3), LocalDate.now().plusDays(31)) { date = it }
+        var open by remember { mutableStateOf(false) }
+        val groups = i.categories[event] ?: emptyList()
+        val chosenLabel = groups.flatMap { g -> g.options.map { g.group to it } }.firstOrNull { it.second.id == category }
+            ?.let { (g, o) -> if (o.label.endsWith("(general)")) o.label else "$g › ${o.label}" }.orEmpty()
+        ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }) {
+            OutlinedTextField(value = chosenLabel, onValueChange = {}, readOnly = true, label = { Text("Category") },
+                isError = errors["category"] != null, supportingText = errors["category"]?.let { { Text(it) } },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(open) },
+                modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable))
+            ExposedDropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                groups.forEach { g ->
+                    Text(g.group.uppercase(), fontSize = 12.sp, fontWeight = FontWeight(700), color = AppColors.muted,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+                    g.options.forEach { o ->
+                        DropdownMenuItem(text = { Text(o.label) }, onClick = { category = o.id; open = false })
+                    }
+                }
+            }
+        }
+        if (picked?.hasWeekends == true) {
+            var weekendOpen by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(expanded = weekendOpen, onExpandedChange = { weekendOpen = it }) {
+                OutlinedTextField(value = i.weekends.firstOrNull { it.first == weekend }?.second.orEmpty(), onValueChange = {},
+                    readOnly = true, label = { Text("Weekend") }, isError = errors["weekend"] != null,
+                    supportingText = { Text(errors["weekend"] ?: "Monday and Tuesday count toward the weekend just past, " +
+                        "Wednesday to Sunday toward the coming one.") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(weekendOpen) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable))
+                ExposedDropdownMenu(expanded = weekendOpen, onDismissRequest = { weekendOpen = false }) {
+                    i.weekends.forEach { (value, label) ->
+                        DropdownMenuItem(text = { Text(label) }, onClick = { weekend = value; weekendOpen = false })
+                    }
+                }
+            }
+        }
+        Input("Amount ($)", amount, errors["amount"], keyboard = KeyboardOptions(keyboardType = KeyboardType.Decimal)) { amount = it }
+        Input("Paid to", paidTo, errors["paid_to"], "The shop or person paid.",
+            KeyboardOptions(capitalization = KeyboardCapitalization.Words)) { paidTo = it.take(150) }
+        Input("Note", note, errors["note"], "E.g. what was bought, or the receipt or check number.") { note = it.take(300) }
+        errors[""]?.let { Told(it, false) }
+        Primary(if (busy) "Adding…" else "Add the Expense", enabled = !busy) {
+            scope.launch {
+                val token = AccountStore.sessionToken ?: return@launch
+                busy = true
+                val answer = try {
+                    TreasurerApi.addExpense(token, mapOf("event" to (event?.toString() ?: ""), "spent_on" to date,
+                        "category" to (category?.toString() ?: ""), "weekend" to if (picked?.hasWeekends == true) weekend else "",
+                        "amount" to amount.replace("$", "").replace(",", ""), "paid_to" to paidTo, "note" to note))
+                } finally { busy = false }
+                when (answer) {
+                    is TreasurerAnswer.Done -> { told = answer.message; errors = emptyMap(); amount = ""; paidTo = ""; note = "" }
+                    is TreasurerAnswer.Problems -> { errors = answer.errors; told = null }
+                    TreasurerAnswer.SignedOut -> AccountStore.ended()
+                }
+            }
+        }
+        if (i.webUrl.isNotBlank()) {
+            TextButton(onClick = { com.ayyappasamaaj.tattvamasi.ui.openInBrowser(context, i.webUrl) }) {
+                Text("Expense management on the website", color = AppColors.clayDark)
+            }
+        }
+    }
+}

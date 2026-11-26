@@ -79,7 +79,7 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
     ) {
         Text("Volunteer tools", style = MaterialTheme.typography.titleLarge, color = AppColors.onForest,
             modifier = Modifier.semantics { heading() })
-        Text("Reports and the treasurer's Zelle and check pages open here; other pages open in your phone's browser, " +
+        Text("Reports and the treasurer's Zelle, check and expense pages open here; other pages open in your phone's browser, " +
             "where you sign in to the website once.",
             style = MaterialTheme.typography.bodySmall, color = AppColors.onForest.copy(alpha = 0.8f))
         toolSections(pages).forEach { (section, list) ->
@@ -111,6 +111,7 @@ fun VolunteerToolsCard(pages: List<ToolPage>) {
                                             page.appReport.isNotBlank() -> AccountStore.openReport(page.appReport)
                                             page.appScreen == "zelle" -> AccountStore.openPage(AccountStore.Page.ZELLE)
                                             page.appScreen == "checks" -> AccountStore.openPage(AccountStore.Page.CHECKS)
+                                            page.appScreen == "expense" -> AccountStore.openPage(AccountStore.Page.EXPENSE)
                                             else -> openInBrowser(context, toolUrl(page))
                                         }
                                     }

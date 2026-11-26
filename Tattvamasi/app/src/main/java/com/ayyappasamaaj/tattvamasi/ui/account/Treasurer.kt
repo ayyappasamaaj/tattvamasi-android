@@ -84,8 +84,32 @@ fun parseTreasurerAnswer(code: Int, body: String): TreasurerAnswer {
     return TreasurerAnswer.Problems(mapOf("" to reason))
 }
 
-/** "zelle" or "checks": the treasurer screens the app has (the website's my-pages "app_screen"). */
-val treasurerScreens = setOf("zelle", "checks")
+/** The treasurer screens the app has (the website's my-pages "app_screen"). */
+val treasurerScreens = setOf("zelle", "checks", "expense")
+
+data class ExpenseEventChoice(val id: Int, val name: String, val hasWeekends: Boolean)
+data class CategoryGroup(val group: String, val options: List<GiftCategory>)
+data class ExpenseFormInfo(val events: List<ExpenseEventChoice>, val defaultEvent: Int?,
+                           val categories: Map<Int, List<CategoryGroup>>, val weekends: List<Pair<String, String>>,
+                           val webUrl: String)
+
+fun parseExpenseForm(body: String): ExpenseFormInfo? = runCatching {
+    val j = JSONObject(body)
+    val cats = j.optJSONObject("categories") ?: JSONObject()
+    ExpenseFormInfo(
+        events = j.getJSONArray("events").objects().map {
+            ExpenseEventChoice(it.getInt("id"), it.optString("name"), it.optBoolean("has_weekends"))
+        },
+        defaultEvent = if (j.isNull("default_event")) null else j.optInt("default_event"),
+        categories = cats.keys().asSequence().associate { key ->
+            key.toInt() to cats.optJSONArray(key).objects().map { g ->
+                CategoryGroup(g.optString("group"), g.optJSONArray("options").objects().map { GiftCategory(it.optInt("id"), it.optString("label")) })
+            }
+        },
+        weekends = j.optJSONArray("weekends").objects().map { it.optString("value") to it.optString("label") },
+        webUrl = j.optString("web_url"),
+    )
+}.getOrNull()
 
 object TreasurerApi {
     suspend fun zelle(token: String): Pair<Int, ZelleList?> {
@@ -108,6 +132,16 @@ object TreasurerApi {
         val q = java.net.URLEncoder.encode(query.trim(), "UTF-8")
         val reply = AccountApi.call("GET", "/api/treasurer/checks/" + (if (q.isEmpty()) "" else "?q=$q"), token)
         return reply.code to if (reply.code == 200) parseChecks(reply.body) else null
+    }
+
+    suspend fun expenseForm(token: String): Pair<Int, ExpenseFormInfo?> {
+        val reply = AccountApi.call("GET", "/api/treasurer/expenses/", token)
+        return reply.code to if (reply.code == 200) parseExpenseForm(reply.body) else null
+    }
+
+    suspend fun addExpense(token: String, fields: Map<String, String>): TreasurerAnswer {
+        val reply = AccountApi.call("POST", "/api/treasurer/expenses/", token, JSONObject(fields))
+        return parseTreasurerAnswer(reply.code, reply.body)
     }
 
     suspend fun addCheck(token: String, fields: Map<String, Any>): TreasurerAnswer {
