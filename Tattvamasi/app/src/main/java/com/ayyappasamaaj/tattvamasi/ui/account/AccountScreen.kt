@@ -248,6 +248,7 @@ private fun SignedIn(state: AccountStore.State) {
         }
         RegistrationsCard(overview.registrations)
         overview.hours?.takeIf { it.isVolunteer || it.entries.isNotEmpty() }?.let { HoursCard(it) }
+        VolunteerToolsCard(overview.tools)
         Column(Modifier.fillMaxWidth().card(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionLabel("My house bhajans")
             Text("Host an Ayyappa puja and bhajan at home on the Samaaj calendar, or change or cancel yours.",
