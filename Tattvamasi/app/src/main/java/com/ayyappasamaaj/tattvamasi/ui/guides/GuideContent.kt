@@ -38,6 +38,8 @@ data class GuideContent(
     val url: String,
     val intro: List<GuideBlock>,
     val sections: List<GuideSection>,
+    /** The website menu's section it's under: "sabarimala" or "festivals" (website: pages/app_guides.py) */
+    val tab: String = "sabarimala",
 ) {
     /** The ids of the sections from the top of the guide down to [id] (empty if it isn't in this guide). */
     fun pathTo(id: String): List<String> {
@@ -104,9 +106,23 @@ fun parseGuides(json: String): List<GuideContent>? = runCatching {
             url = it.optString("url"),
             intro = parseBlocks(it.optJSONArray("intro")),
             sections = parseSections(it.optJSONArray("sections")),
+            tab = it.optString("tab").ifBlank { "sabarimala" },
         )
     }.filter { it.sections.isNotEmpty() }.takeIf { it.isNotEmpty() }
 }.getOrNull()
+
+/** One of the website menu's Festivals & Pujas pages, for the Festivals tab: its guide's slug, short name, one-line
+ *  summary and first picture ("" if it has none yet). */
+data class Festival(val slug: String, val name: String, val summary: String, val image: String, val url: String)
+
+/** The Festivals & Pujas list beside the guides (empty in a copy from before Nov 25, 2026). */
+fun parseFestivals(json: String): List<Festival> = runCatching {
+    val list = JSONObject(json).optJSONArray("festivals") ?: return@runCatching emptyList()
+    (0 until list.length()).mapNotNull { list.optJSONObject(it) }.map {
+        Festival(it.optString("slug"), it.optString("name"), it.optString("summary"),
+            it.optString("image").takeIf { url -> url.startsWith("https://") }.orEmpty(), it.optString("url"))
+    }.filter { it.slug.isNotBlank() && it.name.isNotBlank() }
+}.getOrDefault(emptyList())
 
 /** Where a link inside the app goes when it's one of the guides: the guide, and the section if the link names one. */
 data class GuideTarget(val slug: String, val section: String? = null) {

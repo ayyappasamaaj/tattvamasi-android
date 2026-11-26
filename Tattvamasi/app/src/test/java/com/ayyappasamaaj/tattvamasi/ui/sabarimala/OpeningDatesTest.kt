@@ -111,7 +111,7 @@ class OpeningDatesTest {
     @Test
     fun theOpeningDatesCardIsBesideTheGuidesWithTheWebsitesNames() {
         assertEquals(
-            listOf("Traditional Path", "Sabarimala Opening Dates", "Observing the Vratam", "Sabarimala Virtual Q", "House Puja and Bhajan"),
+            listOf("Traditional Path", "Sabarimala Opening Dates", "Observing the Vratam", "Sabarimala Virtual Q"),
             guides.map { it.title },
         )
         assertEquals(OPENING_DATES, guides[1].slug)

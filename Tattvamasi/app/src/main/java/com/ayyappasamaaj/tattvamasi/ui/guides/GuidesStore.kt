@@ -34,6 +34,9 @@ object GuidesStore {
     val state: StateFlow<List<GuideContent>> = _state.asStateFlow()
     private val _dates = MutableStateFlow<OpeningDates?>(null)
     val dates: StateFlow<OpeningDates?> = _dates.asStateFlow()
+    /** The Festivals tab's pages, in the website menu's order */
+    private val _festivals = MutableStateFlow<List<Festival>>(emptyList())
+    val festivals: StateFlow<List<Festival>> = _festivals.asStateFlow()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var started = false
 
@@ -48,12 +51,14 @@ object GuidesStore {
             val local = savedText?.let(::parseGuides) ?: bundled?.let(::parseGuides)
             if (local != null) _state.value = local
             _dates.value = savedText?.let(::parseOpeningDates) ?: bundled?.let(::parseOpeningDates)
+            _festivals.value = savedText?.let(::parseFestivals)?.ifEmpty { null } ?: bundled?.let(::parseFestivals).orEmpty()
 
             val text = runCatching { download() }.onFailure { AppLog.w(TAG, "guides: " + it.message) }.getOrNull()
             val fresh = text?.let(::parseGuides)
             if (fresh != null) {
                 _state.value = fresh
                 parseOpeningDates(text)?.let { _dates.value = it }
+                parseFestivals(text).takeIf { it.isNotEmpty() }?.let { _festivals.value = it }
                 runCatching { saved.writeText(text) }.onFailure { AppLog.w(TAG, "save: " + it.message) }
             }
             keepPictures(app, _state.value)
@@ -74,7 +79,7 @@ object GuidesStore {
     /** Fetches every picture into the image cache (the disk cache only: nothing is shown yet). */
     private fun keepPictures(context: Context, guides: List<GuideContent>) {
         val loader = SingletonImageLoader.get(context)
-        guides.flatMap { it.pictures }.distinct().forEach { url ->
+        (guides.flatMap { it.pictures } + _festivals.value.map { it.image }.filter { it.isNotEmpty() }).distinct().forEach { url ->
             loader.enqueue(
                 ImageRequest.Builder(context).data(url).memoryCachePolicy(CachePolicy.DISABLED).build(),
             )

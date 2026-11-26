@@ -43,14 +43,13 @@ class AboutTest {
     @Test
     fun guidesHaveTheirFeedSlugsAndPages() {
         // The Opening Dates card sits among them (its own screen, from the opening dates beside the guides)
-        assertEquals(listOf("traditional-path", "opening-dates", "vratam", "virtual-q", "house-puja"), guides.map { it.slug })
+        assertEquals(listOf("traditional-path", "opening-dates", "vratam", "virtual-q"), guides.map { it.slug })
         assertEquals(
             listOf(
                 "https://ayyappasamaaj.org/traditional-path/",
                 "https://ayyappasamaaj.org/sabarimala-opening-dates/",
                 "https://ayyappasamaaj.org/vratam/",
                 "https://ayyappasamaaj.org/sabarimala-virtual-q/",
-                "https://ayyappasamaaj.org/house-puja-bhajan/",
             ),
             guides.map { it.url },
         )

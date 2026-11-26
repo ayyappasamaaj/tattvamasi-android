@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.DateBlock
+import com.ayyappasamaaj.tattvamasi.ui.AppMenu
 import com.ayyappasamaaj.tattvamasi.ui.Destination
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.WebPages
@@ -109,7 +110,7 @@ fun HomeScreen(
                             go(Destination.Sabarimala)
                         },
                         Tile("About us", "Who we are, our Board, contact", Icons.Outlined.Info) {
-                            go(Destination.About)
+                            AppMenu.open(AppMenu.Page.About)  // a page over Home (the top-right menu's About)
                         },
                         Tile("Donate", "Support Lord Ayyappa's seva; tax-deductible", Icons.Outlined.FavoriteBorder) {
                             // In the app when the website has app giving on; otherwise Donate offers the website

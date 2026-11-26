@@ -55,14 +55,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ayyappasamaaj.tattvamasi.notifications.NotificationsCard
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
-import com.ayyappasamaaj.tattvamasi.ui.theme.AppearanceCard
 
 /** The tab's three parts. */
 enum class AboutPart(val title: String) { About("About us"), Board("Our Board"), Contact("Contact") }
@@ -72,14 +70,14 @@ enum class AboutPart(val title: String) { About("About us"), Board("Our Board"),
  * (ayyappasamaaj.org/about/ and /contact/); the Board comes from the website. As on the iOS app (AboutView.swift).
  */
 @Composable
-fun AboutScreen() {
+fun AboutScreen(showTitle: Boolean = true) {
     var part by rememberSaveable { mutableStateOf(AboutPart.About) }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         ReadableWidth {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ScreenTitle(part.title)
+                if (showTitle) ScreenTitle(part.title)
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                     AboutPart.entries.forEachIndexed { index, option ->
                         SegmentedButton(
@@ -305,6 +303,5 @@ private fun Contact() {
             }
         }
     }
-    NotificationsCard()
-    AppearanceCard()
+    // Notifications and Appearance moved to Settings in the top-right menu (ui/AppMenu.kt, Nov 25, 2026)
 }

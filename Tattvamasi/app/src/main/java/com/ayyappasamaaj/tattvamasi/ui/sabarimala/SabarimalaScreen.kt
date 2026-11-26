@@ -80,8 +80,8 @@ val guides = listOf(
         null, "sabarimala-opening-dates/", Icons.Outlined.EditCalendar),
     Guide("vratam", "Observing the Vratam", "The vow for the pilgrimage: what to do and not do", R.drawable.guide_vratam, "vratam/"),
     Guide("virtual-q", "Sabarimala Virtual Q", "Book your Sannidhanam darshan slot, step by step", null, "sabarimala-virtual-q/"),
-    Guide("house-puja", "House Puja and Bhajan", "Host an Ayyappa Puja and Bhajan at home", R.drawable.guide_house_puja, "house-puja-bhajan/"),
 )
+// House Puja and Bhajan moved to the Festivals tab with the website's menu (ui/festivals, Nov 25, 2026)
 
 private val shrines = listOf("Kulathupuzha", "Aryankavu", "Achankovil", "Erumeli", "Sabarimala")
 
