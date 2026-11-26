@@ -78,6 +78,8 @@ object AccountApi {
         val info = call("GET", "/api/core/user-info/", token)
         // My volunteer hours shows for volunteers (and anyone with hours from before)
         val hours = call("GET", "/api/volunteers/mine/", token)
+        // Volunteer tools (VolunteerTools.kt): only the pages this person may open
+        val tools = call("GET", "/api/core/my-pages/", token)
         if (donations.code == 401 || summary.code == 401) return null
         return Overview(
             name = if (info.code == 200) parseName(info.body) else null,
@@ -86,6 +88,7 @@ object AccountApi {
             year = if (summary.code == 200) parseYear(summary.body) else null,
             failed = listOf(registrations, donations, summary).any { it.code != 200 },
             hours = if (hours.code == 200) parseVolunteerHours(hours.body) else null,
+            tools = if (tools.code == 200) parseToolPages(tools.body) else emptyList(),
         )
     }
 
@@ -216,7 +219,8 @@ data class YearTotals(val year: Int, val donations: String, val registrations: S
                       val donationCount: Int, val registrationCount: Int)
 
 data class Overview(val name: String? = null, val registrations: List<Registration>, val donations: List<Donation>,
-                    val year: YearTotals?, val failed: Boolean, val hours: VolunteerHours? = null)
+                    val year: YearTotals?, val failed: Boolean, val hours: VolunteerHours? = null,
+                    val tools: List<ToolPage> = emptyList())
 
 private fun JSONObject.text(name: String): String? = if (isNull(name)) null else optString(name).ifBlank { null }
 

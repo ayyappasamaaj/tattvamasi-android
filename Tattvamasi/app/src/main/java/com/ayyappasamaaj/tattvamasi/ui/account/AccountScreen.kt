@@ -100,6 +100,7 @@ fun AccountSheet() {
                 AccountStore.Page.REGISTRATION -> "Registration"
                 AccountStore.Page.HOURS -> "My Volunteer Hours"
                 AccountStore.Page.ADD_HOURS -> "Add Hours"
+                AccountStore.Page.REPORT -> "Report"
                 null -> "My Account"
             }, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
@@ -117,6 +118,7 @@ fun AccountSheet() {
                         state.page == AccountStore.Page.REGISTRATION -> RegistrationPage(state)
                         state.page == AccountStore.Page.HOURS -> VolunteerHoursPage(state)
                         state.page == AccountStore.Page.ADD_HOURS -> AddHoursPage(state)
+                        state.page == AccountStore.Page.REPORT -> ReportPage(state)
                         else -> SignedIn(state)
                     }
                     AddressFooter()
@@ -248,6 +250,7 @@ private fun SignedIn(state: AccountStore.State) {
         }
         RegistrationsCard(overview.registrations)
         overview.hours?.takeIf { it.isVolunteer || it.entries.isNotEmpty() }?.let { HoursCard(it) }
+        VolunteerToolsCard(overview.tools)
         Column(Modifier.fillMaxWidth().card(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionLabel("My house bhajans")
             Text("Host an Ayyappa puja and bhajan at home on the Samaaj calendar, or change or cancel yours.",
