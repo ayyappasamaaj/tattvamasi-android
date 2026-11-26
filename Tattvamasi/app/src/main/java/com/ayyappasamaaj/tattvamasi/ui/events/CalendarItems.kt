@@ -21,7 +21,6 @@ import java.util.Locale
  * board meetings), which aren't in Firebase and come from /events/calendar-entries.json a month at a time.
  */
 const val SITE = "https://ayyappasamaaj.org"
-const val HOST_HOUSE_BHAJAN_URL = "$SITE/calendar/house-bhajans/new/"
 const val CALENDAR_FEED_URL = "$SITE/events/calendar.ics"
 /** Google Calendar's subscribe link for the feed, as on the website's "Add to My Calendar" menu (events/ics.py). */
 const val GOOGLE_SUBSCRIBE_URL =

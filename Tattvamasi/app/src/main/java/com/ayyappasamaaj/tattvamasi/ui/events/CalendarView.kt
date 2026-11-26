@@ -61,6 +61,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.openInBrowser
+import com.ayyappasamaaj.tattvamasi.ui.housebhajan.HouseBhajanStore
+import com.ayyappasamaaj.tattvamasi.ui.housebhajan.bhajanId
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import kotlinx.coroutines.launch
@@ -82,8 +84,8 @@ private val dayTitle = DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.US)
 
 /**
  * The Calendar, as the website shows it on a phone: a compact month (a dot per item, a line under the days of an
- * event over several days) and the chosen day's items below. An event opens the app's event screen; a house bhajan
- * or other date opens its page on the website in the app's browser (a Chrome Custom Tab, signed in as in Chrome).
+ * event over several days) and the chosen day's items below. An event opens the app's event screen, a house bhajan
+ * its page in the app (ui/housebhajan); another date opens its page on the website in the app's browser.
  */
 @Composable
 fun CalendarView(events: List<AppEvent>, onOpenEvent: (String) -> Unit) {
@@ -166,6 +168,9 @@ fun CalendarView(events: List<AppEvent>, onOpenEvent: (String) -> Unit) {
                 ItemRow(item) {
                     when {
                         item.eventKey != null -> onOpenEvent(item.eventKey)
+                        // A house bhajan's page, in the app (ui/housebhajan)
+                        item.kind == CalendarItem.Kind.HOUSE && item.url != null && bhajanId(item.url) != null ->
+                            scope.launch { HouseBhajanStore.openDetail(item.url) }
                         item.url != null -> openWebPage(context, item.url)
                     }
                 }
@@ -181,16 +186,21 @@ fun CalendarView(events: List<AppEvent>, onOpenEvent: (String) -> Unit) {
             }
         }
 
-        // Host a house bhajan: the website's form, in the browser inside the app (sign-in, then a coordinator approves it)
+        // Host a house bhajan: the app's form (ui/housebhajan; sign in first), and a coordinator approves it
         Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().card()) {
             Text("Hosting an Ayyappa puja and bhajan at home?", style = MaterialTheme.typography.titleMedium,
                 color = AppColors.ink)
-            Text("Add it to the calendar on ayyappasamaaj.org: the form opens here, and a coordinator approves it first.",
+            Text("Add it to the calendar: sign in, fill in the form, and a coordinator approves it first.",
                 style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft)
-            Button(
-                onClick = { openWebPage(context, HOST_HOUSE_BHAJAN_URL) },
-                colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
-            ) { Text("Add your house bhajan", fontWeight = FontWeight(700)) }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { scope.launch { HouseBhajanStore.openForm() } },
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.button, contentColor = AppColors.onButton),
+                ) { Text("Add your house bhajan", fontWeight = FontWeight(700)) }
+                TextButton(onClick = { scope.launch { HouseBhajanStore.openMine() } }) {
+                    Text("My house bhajans", color = AppColors.clayDark)
+                }
+            }
         }
 
         // The whole calendar in the phone's own calendar app, kept up to date

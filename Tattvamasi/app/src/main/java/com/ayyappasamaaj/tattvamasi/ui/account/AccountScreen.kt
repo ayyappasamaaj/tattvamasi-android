@@ -64,6 +64,7 @@ import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.SectionLabel
 import com.ayyappasamaaj.tattvamasi.ui.card
+import com.ayyappasamaaj.tattvamasi.ui.housebhajan.HouseBhajanStore
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import kotlinx.coroutines.launch
@@ -247,6 +248,14 @@ private fun SignedIn(state: AccountStore.State) {
         }
         RegistrationsCard(overview.registrations)
         overview.hours?.takeIf { it.isVolunteer || it.entries.isNotEmpty() }?.let { HoursCard(it) }
+        Column(Modifier.fillMaxWidth().card(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            SectionLabel("My house bhajans")
+            Text("Host an Ayyappa puja and bhajan at home on the Samaaj calendar, or change or cancel yours.",
+                style = MaterialTheme.typography.bodyMedium, color = AppColors.inkSoft)
+            TextButton(onClick = { scope.launch { HouseBhajanStore.openMine() } }) {
+                Text("See my house bhajans", color = AppColors.clayDark)
+            }
+        }
         Column(Modifier.fillMaxWidth().card(16.dp)) {
             SectionLabel("My donations", Modifier.padding(bottom = 6.dp))
             if (overview.donations.isEmpty()) {

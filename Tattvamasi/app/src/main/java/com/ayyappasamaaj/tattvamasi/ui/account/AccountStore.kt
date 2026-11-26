@@ -286,6 +286,9 @@ object AccountStore {
         _state.update { it.copy(busy = false, deletion = answer) }
     }
 
+    /** The website said the sign-in has ended (another screen got a 401). */
+    fun ended() = forget("Your sign-in has ended. Please sign in again.")
+
     private fun forget(message: String?) {
         token = null
         store?.clear()
