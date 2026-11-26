@@ -57,7 +57,7 @@ import com.ayyappasamaaj.tattvamasi.ui.donate.DonateStore
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
 /**
- * Home: today's slides from the website (HomeSlides.kt), the next event, the Sahasranama Yatra, then the app's
+ * Home: the Live now card while the Samaaj is streaming (LiveNow.kt), today's slides from the website (HomeSlides.kt), the next event, the Sahasranama Yatra, then the app's
  * sections and Donate. As on the iOS app (HomeView.swift). A slide for an event the app has opens its event screen;
  * any other opens its page.
  */
@@ -68,6 +68,8 @@ fun HomeScreen(
     openEvent: (String) -> Unit = {},
     openYatra: () -> Unit = {},
     slides: List<HomeSlide> = emptyList(),
+    live: AppLive? = null,
+    watchLive: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val today = websiteToday()
@@ -87,6 +89,8 @@ fun HomeScreen(
                     color = AppColors.ink,
                     modifier = Modifier.semantics { heading() },
                 )
+                // The stream on now (Firebase /live), above everything else while it lasts
+                if (live != null) LiveCard(live, watchLive)
                 HomeSlides(shown) { slide ->
                     val event = events.events.firstOrNull { it.pageUrl != null && samePage(it.pageUrl, slide.link) }
                     when {

@@ -86,6 +86,10 @@ import com.ayyappasamaaj.tattvamasi.ui.guides.GuidesStore
 import com.ayyappasamaaj.tattvamasi.ui.home.SlidesStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.guideTarget
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
+import com.ayyappasamaaj.tattvamasi.ui.home.LivePlayer
+import com.ayyappasamaaj.tattvamasi.ui.home.LiveStore
+import com.ayyappasamaaj.tattvamasi.ui.home.isLivePage
+import com.ayyappasamaaj.tattvamasi.ui.home.watchLive
 import com.ayyappasamaaj.tattvamasi.ui.publications.PdfPopup
 import com.ayyappasamaaj.tattvamasi.ui.publications.PublicationsScreen
 import com.ayyappasamaaj.tattvamasi.BuildConfig
@@ -139,6 +143,11 @@ fun AppRoot() {
     LaunchedEffect(Unit) { ShrutiPlayer.init(context) }  // the tanpura's remembered key, for the Tanpura row
     LaunchedEffect(Unit) { GuidesStore.start(context) }
     LaunchedEffect(Unit) { SlidesStore.start(context) }
+    LaunchedEffect(Unit) { LiveStore.start() }
+    val live by LiveStore.live.collectAsState()
+    var watching by remember { mutableStateOf(false) }  // the live stream's player is open
+    // Over everything; closes by itself when the stream ends (Firebase /live goes)
+    live?.takeIf { watching && it.playsInApp }?.let { LivePlayer(it) { watching = false } }
     val slides by SlidesStore.state.collectAsState()
     val guides by GuidesStore.state.collectAsState()
     val openingDates by GuidesStore.dates.collectAsState()
@@ -188,6 +197,14 @@ fun AppRoot() {
     LaunchedEffect(tapped, events, guides) {
         val url = tapped ?: return@LaunchedEffect
         if (!events.loaded && !events.failed) return@LaunchedEffect
+        // "We're live now": the player while the stream is on (else /live/ on the website, below)
+        val stream = live
+        if (isLivePage(url) && stream != null) {
+            current = Destination.Home
+            watchLive(context, stream) { watching = true }
+            AppNotifications.opened()
+            return@LaunchedEffect
+        }
         when (val target = notificationTarget(url, events.events, guides)) {
             is NotificationTarget.Event -> { openEvent = target.key; current = Destination.Events }
             is NotificationTarget.Guide -> showGuide(target.target, guides, { openGuide = it }, { openFestival = it }) { current = it }
@@ -273,7 +290,8 @@ fun AppRoot() {
                     }, openEvent = { key ->
                         openEvent = key
                         current = Destination.Events
-                    }, openYatra = { homeYatra = true }, slides = slides)
+                    }, openYatra = { homeYatra = true }, slides = slides,
+                        live = live, watchLive = { live?.let { watchLive(context, it) { watching = true } } })
                     Destination.Events -> EventsScreen(events, EventsStore::refresh, openEvent) { openEvent = it }
                     Destination.Publications -> PublicationsScreen(publications, openYatra = { publicationsYatra = true },
                         read = { reading = it })
