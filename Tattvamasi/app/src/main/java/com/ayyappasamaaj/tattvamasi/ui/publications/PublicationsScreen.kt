@@ -88,6 +88,7 @@ import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.R
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
 import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
+import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.card
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.ui.shruti.TanpuraRow
@@ -97,7 +98,8 @@ import java.time.LocalDate
  * Publications: Bhajans, then Shlokas & Puja, as on the website, with one search for everything. A tile opens the
  * category's texts; a title opens the reader ([read]: AppRoot shows it over the page, PdfReader.kt). On a phone the
  * category replaces the tiles (Back returns); on a tablet the tiles stay on the left and the category shows on the
- * right, like the iPad's split view. Texts saved on this phone get a "Saved" row at the top, opening their list.
+ * right, like the iPad's split view. Texts saved on this phone get a "Saved" row at the top, opening their list; the
+ * account's playlists a "Playlists" row under it (PlaylistsScreen.kt; signed out, it offers Sign In).
  */
 @Composable
 fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}, read: (ReadingItem) -> Unit) {
@@ -115,21 +117,30 @@ fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}, rea
     val open = { item: ReadingItem -> read(item.copy(startLanguage = openingLanguage(item.text, preferred))) }
     val choose = { category: PublicationCategory -> selectedSlug = category.slug }
     val showSaved = { selectedSlug = SAVED }
+    val showPlaylists = { selectedSlug = PLAYLISTS }
+    val account by AccountStore.state.collectAsState()
+    val playlists by PlaylistStore.state.collectAsState()
+    LaunchedEffect(account.user) { if (account.user != null) PlaylistStore.load() }
+    val playlistCount = if (account.user != null) playlists.data?.playlists?.size else null
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         if (maxWidth >= 720.dp) {
             val shown = selected ?: state.sections.firstOrNull()?.let { s -> s.categories.firstOrNull()?.let { s to it } }
             val savedShown = selectedSlug == SAVED
+            val playlistsShown = selectedSlug == PLAYLISTS
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.width(340.dp).fillMaxHeight()) {
-                    PublicationsHome(state, selectedSlug = if (savedShown) SAVED else shown?.second?.slug,
+                    PublicationsHome(state, selectedSlug = if (savedShown || playlistsShown) selectedSlug else shown?.second?.slug,
                         onCategory = { selectedSlug = it.slug }, onRead = open, minTile = 96, openYatra = openYatra,
-                        saved = saved.size, savedKeys = savedKeys, onSaved = showSaved)
+                        saved = saved.size, savedKeys = savedKeys, onSaved = showSaved,
+                        playlists = playlistCount, onPlaylists = showPlaylists)
                 }
                 VerticalDivider(color = AppColors.line)
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     if (savedShown) {
                         SavedContent(saved, onRead = open, onBack = null)
+                    } else if (playlistsShown) {
+                        PlaylistsContent(state.sections, saved, onPlay = read, onBack = null)
                     } else {
                         shown?.let { (section, category) ->
                             CategoryContent(section, category, all, savedKeys, onRead = open, onCategory = choose, onBack = null)
@@ -140,19 +151,26 @@ fun PublicationsScreen(state: PublicationsState, openYatra: () -> Unit = {}, rea
         } else if (selectedSlug == SAVED) {
             BackHandler { selectedSlug = null }
             SavedContent(saved, onRead = open, onBack = { selectedSlug = null })
+        } else if (selectedSlug == PLAYLISTS) {
+            BackHandler { selectedSlug = null }
+            PlaylistsContent(state.sections, saved, onPlay = read, onBack = { selectedSlug = null })
         } else if (selected != null) {
             BackHandler { selectedSlug = null }
             CategoryContent(selected.first, selected.second, all, savedKeys, onRead = open, onCategory = choose,
                 onBack = { selectedSlug = null })
         } else {
             PublicationsHome(state, selectedSlug = null, onCategory = { selectedSlug = it.slug }, onRead = open,
-                minTile = 100, openYatra = openYatra, saved = saved.size, savedKeys = savedKeys, onSaved = showSaved)
+                minTile = 100, openYatra = openYatra, saved = saved.size, savedKeys = savedKeys, onSaved = showSaved,
+                playlists = playlistCount, onPlaylists = showPlaylists)
         }
     }
 }
 
 /** [PublicationsScreen]'s selection when the Saved list shows (no category has this slug). */
 private const val SAVED = "__saved"
+
+/** The same, for the account's playlists. */
+private const val PLAYLISTS = "__playlists"
 
 /** The texts saved on this phone, newest first, each with its category. */
 @Composable
@@ -230,6 +248,8 @@ private fun PublicationsHome(
     saved: Int,
     savedKeys: Set<String>,
     onSaved: () -> Unit,
+    playlists: Int?,
+    onPlaylists: () -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var focused by remember { mutableStateOf(false) }
@@ -261,6 +281,10 @@ private fun PublicationsHome(
         if (query.isBlank()) item(span = full) { TanpuraRow() }
         if (query.isBlank() && saved > 0) {
             item(span = full) { SavedRow(saved, selected = selectedSlug == SAVED, onClick = onSaved) }
+        }
+        // The account's playlists (signed out: the way to sign in for them)
+        if (query.isBlank()) {
+            item(span = full) { PlaylistsRow(playlists, selected = selectedSlug == PLAYLISTS, onClick = onPlaylists) }
         }
         // Before anything is typed: this phone's recent searches (while the box has the cursor)
         if (query.isBlank() && focused && recents.isNotEmpty()) {

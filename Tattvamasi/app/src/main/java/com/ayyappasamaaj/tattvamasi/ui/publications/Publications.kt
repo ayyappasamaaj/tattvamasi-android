@@ -53,12 +53,14 @@ data class PublicationSection(val key: String, val title: String, val categories
 data class PublicationHit(val category: PublicationCategory, val text: PublicationText)
 
 /** What the reader opens: a text, and the language to start in (null: the text's first version). [categorySlug]
- *  names the text on this phone's Saved list. */
+ *  names the text on this phone's Saved list; [playlist]: opened from a playlist, for its previous / next
+ *  (Playlists.kt). */
 data class ReadingItem(
     val text: PublicationText,
     val categoryName: String,
     val startLanguage: String?,
     val categorySlug: String = "",
+    val playlist: PlaylistPlay? = null,
 )
 
 object LanguageCode {
