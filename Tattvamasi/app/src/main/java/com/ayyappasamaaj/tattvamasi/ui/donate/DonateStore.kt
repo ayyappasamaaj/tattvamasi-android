@@ -20,9 +20,14 @@ data class DonateOptions(
     val max: String = "10000",
     val oneTime: List<String> = emptyList(),        // "108.00"
     val monthly: List<MonthlyAmount> = emptyList(),
+    /** What a gift can be for ("GENERAL" to "General donation", ...); empty from an older website: no choice */
+    val categories: List<Pair<String, String>> = emptyList(),
+    val monthlyMin: String = "1",
+    val monthlyMax: String = "10000",
 )
 
-data class MonthlyAmount(val id: Int, val amount: String, val category: String)
+/** [forWhat]: its category's handle ("ANNADANA"), or "" from an older website */
+data class MonthlyAmount(val id: Int, val amount: String, val category: String, val forWhat: String = "")
 
 sealed interface PayStart {
     data class Ready(val clientSecret: String, val amount: String) : PayStart
@@ -41,8 +46,13 @@ fun parseOptions(body: String): DonateOptions? = runCatching {
         max = json.optString("max", "10000"),
         oneTime = (0 until oneTime.length()).mapNotNull { oneTime.optJSONObject(it)?.optString("amount") },
         monthly = (0 until monthly.length()).mapNotNull { monthly.optJSONObject(it) }.map {
-            MonthlyAmount(it.getInt("id"), it.getString("amount"), it.optString("category"))
+            MonthlyAmount(it.getInt("id"), it.getString("amount"), it.optString("category"), it.optString("for"))
         },
+        categories = (json.optJSONArray("categories") ?: JSONArray()).let { list ->
+            (0 until list.length()).mapNotNull { list.optJSONObject(it) }.map { it.optString("handle") to it.optString("name") }
+        },
+        monthlyMin = json.optString("monthly_min", "1"),
+        monthlyMax = json.optString("monthly_max", "10000"),
     )
 }.getOrNull()
 
@@ -77,12 +87,17 @@ object DonateStore {
         _state.update { it.copy(options = options, failed = options == null) }
     }
 
-    /** One-time: [name] and [email] are ignored when signed in (the website uses the account's). */
-    suspend fun startOneTime(amount: String, name: String, email: String): PayStart =
+    /** One-time: [name] and [email] are ignored when signed in (the website uses the account's). [category]: what it's
+     *  for ("GENERAL", "ANNADANA"). */
+    suspend fun startOneTime(amount: String, name: String, email: String, category: String = "GENERAL"): PayStart =
         start(JSONObject().put("amount", amount.trim().removePrefix("$").replace(",", ""))
-            .put("name", name.trim()).put("email", email.trim()))
+            .put("name", name.trim()).put("email", email.trim()).put("category", category))
 
     suspend fun startMonthly(id: Int): PayStart = start(JSONObject().put("monthly", id))
+
+    /** A monthly gift of the member's own amount (whole dollars) for [category]. */
+    suspend fun startMonthlyOwn(dollars: String, category: String): PayStart =
+        start(JSONObject().put("monthly_own", dollars.trim().removePrefix("$").replace(",", "")).put("category", category))
 
     private suspend fun start(body: JSONObject): PayStart {
         _state.update { it.copy(busy = true, message = null) }

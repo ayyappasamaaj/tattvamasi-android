@@ -41,4 +41,24 @@ class DonateStoreTest {
         assertTrue((parsePayStart(0, "") as PayStart.Problem).message.startsWith("Couldn't reach"))
         assertTrue((parsePayStart(502, "oops") as PayStart.Problem).message.startsWith("Something went wrong"))
     }
+
+    @Test
+    fun whatAGiftIsForAndYourOwnMonthlyAmount() {
+        // The website's options since #739 (Nov 25)
+        val options = parseOptions("""{"enabled": true, "publishable_key": "pk_test_x", "min": "1", "max": "10000",
+            "one_time": [{"amount": "108.00", "category": "General donation"}],
+            "monthly": [{"id": 7, "amount": "116.00", "category": "Annadana", "for": "ANNADANA"},
+                        {"id": 3, "amount": "54.00", "category": "General donation", "for": "GENERAL"}],
+            "categories": [{"handle": "GENERAL", "name": "General donation"},
+                           {"handle": "ANNADANA", "name": "Annadana (feeding devotees)"}],
+            "monthly_min": "1", "monthly_max": "10000", "website": "/donate/"}""")!!
+        assertEquals(listOf("GENERAL" to "General donation", "ANNADANA" to "Annadana (feeding devotees)"), options.categories)
+        assertEquals("ANNADANA", options.monthly[0].forWhat)
+        assertEquals("10000", options.monthlyMax)
+        // An older website: no choice, every monthly amount shown
+        val older = parseOptions("""{"enabled": true, "publishable_key": "pk_test_x",
+            "monthly": [{"id": 7, "amount": "116.00", "category": "Annadana"}]}""")!!
+        assertTrue(older.categories.isEmpty())
+        assertEquals("", older.monthly[0].forWhat)
+    }
 }
