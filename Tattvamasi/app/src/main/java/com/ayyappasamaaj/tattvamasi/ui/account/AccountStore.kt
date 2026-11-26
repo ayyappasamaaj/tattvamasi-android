@@ -1,6 +1,7 @@
 package com.ayyappasamaaj.tattvamasi.ui.account
 
 import android.content.Context
+import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -44,6 +45,7 @@ object AccountStore {
         val reportPath: String? = null,             // a Volunteer tools report (Reports.kt): its API address
         val report: Report? = null,
         val reportFailed: Boolean = false,
+        val appleOffered: Boolean = false,          // the website has Sign in with Apple (Continue with Apple shows)
         val volunteerBusy: Boolean = false,         // Sign up as a volunteer: waiting for the website
         val volunteerMessage: String? = null,       // its answer
     )
@@ -269,6 +271,31 @@ object AccountStore {
             is GoogleSignIn.Result.Token -> finish { AccountApi.signInWithGoogle(google.idToken) }
             GoogleSignIn.Result.Cancelled -> {}
             is GoogleSignIn.Result.Problem -> _state.update { it.copy(message = google.message) }
+        }
+    }
+
+    /** Whether to show Continue with Apple: the website offers it (AccountApi.appleOffered). */
+    suspend fun checkApple() {
+        if (_state.value.appleOffered) return
+        val offered = AccountApi.appleOffered()
+        _state.update { it.copy(appleOffered = offered) }
+    }
+
+    /** Continue with Apple (AppleSignIn.kt): the website's Apple sign-in in a Custom Tab; finishApple follows. */
+    fun signInWithApple(context: Context) {
+        _state.update { it.copy(message = null, confirmEmail = false) }
+        val pending = AppleSignIn.begin(context)
+        openWebPage(context, AppleSignIn.startUrl(AccountApi.site, pending))
+    }
+
+    /** Back from the website with a code (MainActivity): swapped for the session token. */
+    suspend fun finishApple(redirect: AppleSignIn.Redirect) {
+        _state.update { it.copy(shown = true) }
+        when (redirect) {
+            is AppleSignIn.Redirect.Code -> finish { AccountApi.signInWithAppleCode(redirect.code, redirect.verifier) }
+            AppleSignIn.Redirect.Ignored -> _state.update {
+                it.copy(message = "Apple sign-in didn't finish. Please try again.")
+            }
         }
     }
 

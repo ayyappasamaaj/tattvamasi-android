@@ -46,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -175,6 +176,21 @@ private fun SignInForm(state: AccountStore.State) {
             Image(painterResource(R.drawable.google_g), contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.size(10.dp))
             Text("Continue with Google", color = AppColors.ink, style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp))
+        }
+        // Apple has no native sign-in on Android: the website's, in a Custom Tab (AppleSignIn.kt). Shown when the
+        // website offers it; Apple's style: black, with the Apple logo
+        LaunchedEffect(Unit) { AccountStore.checkApple() }
+        if (state.appleOffered) {
+            Button(
+                onClick = { keyboard?.hide(); AccountStore.signInWithApple(context) },
+                enabled = !state.busy,
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            ) {
+                Icon(painterResource(R.drawable.apple_logo), contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.size(10.dp))
+                Text("Continue with Apple", style = MaterialTheme.typography.labelLarge.copy(fontSize = 16.sp))
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             HorizontalDivider(color = AppColors.line, modifier = Modifier.weight(1f))
