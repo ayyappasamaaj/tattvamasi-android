@@ -3,6 +3,8 @@ package com.ayyappasamaaj.tattvamasi.ui.home
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import androidx.core.net.toUri
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
@@ -115,7 +117,11 @@ object LiveStore {
     private const val TAG = "LiveStore"
     private val _live = MutableStateFlow<AppLive?>(null)
     val live: StateFlow<AppLive?> = _live.asStateFlow()
+    /** Whether /live has been heard from (or 5 seconds have passed, offline): a tapped "We're live now" waits for it. */
+    private val _loaded = MutableStateFlow(false)
+    val loaded: StateFlow<Boolean> = _loaded.asStateFlow()
     private var listening = false
+    private const val WAIT_MS = 5_000L
 
     fun start() {
         if (listening) return
@@ -123,13 +129,16 @@ object LiveStore {
         FirebaseDatabase.getInstance().getReference("live").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 _live.value = parseLive(snapshot.value)
+                _loaded.value = true
             }
 
             override fun onCancelled(error: DatabaseError) {
                 AppLog.w(TAG, "live: " + error.message)
                 _live.value = null
+                _loaded.value = true
             }
         })
+        Handler(Looper.getMainLooper()).postDelayed({ _loaded.value = true }, WAIT_MS)
     }
 }
 
