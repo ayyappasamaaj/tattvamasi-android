@@ -35,9 +35,15 @@ object AccountStore {
         val monthlyMessage: String? = null,         // the last stop's outcome
         val registration: String? = null,           // the registration's code its page shows
         val registrationFrom: Page? = null,         // where its page was opened from (Back goes there)
+        val hours: VolunteerHours? = null,          // My volunteer hours: the year shown
+        val hoursFailed: Boolean = false,
+        val hoursMessage: String? = null,           // "Added 2.5 hours of volunteering."
+        val hoursForm: AddHoursForm? = null,        // Add hours: what it offers
+        val hoursFormFailed: Boolean = false,
+        val hoursErrors: Map<String, String> = emptyMap(),  // Add hours: the website's problems by field
     )
 
-    enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION }
+    enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION, HOURS, ADD_HOURS }
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
@@ -63,7 +69,53 @@ object AccountStore {
 
     fun openPage(page: Page) = _state.update { it.copy(page = page) }
     fun closePage() = _state.update {
-        if (it.page == Page.REGISTRATION) it.copy(page = it.registrationFrom, registration = null) else it.copy(page = null)
+        when (it.page) {
+            Page.REGISTRATION -> it.copy(page = it.registrationFrom, registration = null)
+            Page.ADD_HOURS -> it.copy(page = Page.HOURS, hoursErrors = emptyMap())
+            else -> it.copy(page = null, hoursMessage = null)
+        }
+    }
+
+    /** My volunteer hours of [year] (the year shown, or this year to start with). */
+    suspend fun loadHours(year: Int? = null) {
+        val current = token ?: return
+        _state.update { it.copy(loading = true, hoursFailed = false) }
+        val (code, hours) = try {
+            AccountApi.volunteerHours(current, year ?: _state.value.hours?.year)
+        } finally {
+            _state.update { it.copy(loading = false) }
+        }
+        if (code == 401) return forget("Your sign-in has ended. Please sign in again.")
+        _state.update { it.copy(hours = hours ?: it.hours, hoursFailed = hours == null) }
+    }
+
+    /** Add hours: opens its page and loads what it offers (dates, times, coordinators). */
+    suspend fun openAddHours() {
+        val current = token ?: return
+        _state.update { it.copy(page = Page.ADD_HOURS, hoursErrors = emptyMap(), hoursMessage = null, hoursFormFailed = false) }
+        val (code, form) = AccountApi.addHoursForm(current)
+        if (code == 401) return forget("Your sign-in has ended. Please sign in again.")
+        _state.update { it.copy(hoursForm = form ?: it.hoursForm, hoursFormFailed = form == null) }
+    }
+
+    /** Adds an entry; back on My volunteer hours (showing its year) with the website's message when it's added. */
+    suspend fun addHours(date: String, start: String, end: String, activity: String, coordinator: Int?) {
+        val current = token ?: return
+        _state.update { it.copy(busy = true, hoursErrors = emptyMap()) }
+        val result = try {
+            AccountApi.addHours(current, date, start, end, activity, coordinator)
+        } finally {
+            _state.update { it.copy(busy = false) }
+        }
+        when (result) {
+            AddHoursResult.SignedOut -> forget("Your sign-in has ended. Please sign in again.")
+            is AddHoursResult.Problems -> _state.update { it.copy(hoursErrors = result.errors) }
+            is AddHoursResult.Added -> {
+                _state.update { it.copy(page = Page.HOURS, hoursMessage = result.message) }
+                loadHours(result.year)
+                refresh()  // My account's card shows the new total
+            }
+        }
     }
 
     /** One registration's page (from My account or the full list). */

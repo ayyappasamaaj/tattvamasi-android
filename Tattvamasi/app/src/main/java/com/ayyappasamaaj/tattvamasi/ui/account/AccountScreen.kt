@@ -71,7 +71,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 /** My account, over any tab (opened from the person button on the banner): sign in, or the person's registrations,
- *  donations and this year's totals, with Sign out and Delete my account. */
+ *  donations, this year's totals and (volunteers) volunteer hours, with Sign out and Delete my account. */
 @Composable
 fun AccountSheet() {
     val state by AccountStore.state.collectAsState()
@@ -97,6 +97,8 @@ fun AccountSheet() {
                 AccountStore.Page.DONATIONS -> "My Donations"
                 AccountStore.Page.REGISTRATIONS -> "My Registrations"
                 AccountStore.Page.REGISTRATION -> "Registration"
+                AccountStore.Page.HOURS -> "My Volunteer Hours"
+                AccountStore.Page.ADD_HOURS -> "Add Hours"
                 null -> "My Account"
             }, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
@@ -112,6 +114,8 @@ fun AccountSheet() {
                         state.page == AccountStore.Page.DONATIONS -> DonationsListPage(state)
                         state.page == AccountStore.Page.REGISTRATIONS -> RegistrationsListPage(state)
                         state.page == AccountStore.Page.REGISTRATION -> RegistrationPage(state)
+                        state.page == AccountStore.Page.HOURS -> VolunteerHoursPage(state)
+                        state.page == AccountStore.Page.ADD_HOURS -> AddHoursPage(state)
                         else -> SignedIn(state)
                     }
                     AddressFooter()
@@ -242,6 +246,7 @@ private fun SignedIn(state: AccountStore.State) {
             }
         }
         RegistrationsCard(overview.registrations)
+        overview.hours?.takeIf { it.isVolunteer || it.entries.isNotEmpty() }?.let { HoursCard(it) }
         Column(Modifier.fillMaxWidth().card(16.dp)) {
             SectionLabel("My donations", Modifier.padding(bottom = 6.dp))
             if (overview.donations.isEmpty()) {

@@ -259,24 +259,27 @@ private tailrec fun Context.activity(): Activity? = when (this) {
 /** Kept until the print screen has the page (Android's advice for printing from a WebView). */
 private var printPage: WebView? = null
 
+/** Android's print screen with the year-end letter (summaryLetterHtml): print it, or "Save as PDF". */
+fun printSummary(context: Context, summary: YearSummary) =
+    printLetter(context, "Ayyappa Samaaj ${summary.year} year-end summary", summaryLetterHtml(summary, AccountApi.logoUrl))
+
 /**
- * Android's print screen with the year-end letter (summaryLetterHtml): print it, or "Save as PDF". The page is drawn
- * by a WebView that's never shown; it loads nothing but the letter and the website's logo.
+ * Android's print screen with a letter (the year-end summary, the volunteer hours record): print it, or "Save as
+ * PDF". The page is drawn by a WebView that's never shown; it loads nothing but the letter and the website's logo.
  */
-fun printSummary(context: Context, summary: YearSummary) {
+fun printLetter(context: Context, name: String, html: String) {
     val activity = context.activity() ?: return
     val page = WebView(activity)
     page.settings.javaScriptEnabled = false
     page.webViewClient = object : WebViewClient() {
         override fun onPageFinished(view: WebView, url: String?) {
-            val name = "Ayyappa Samaaj ${summary.year} year-end summary"
             val printing = activity.getSystemService(Context.PRINT_SERVICE) as PrintManager
             printing.print(name, view.createPrintDocumentAdapter(name),
                 PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.NA_LETTER).build())
         }
     }
     printPage = page
-    page.loadDataWithBaseURL(AccountApi.site, summaryLetterHtml(summary, AccountApi.logoUrl), "text/html", "utf-8", null)
+    page.loadDataWithBaseURL(AccountApi.site, html, "text/html", "utf-8", null)
 }
 
 

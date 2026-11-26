@@ -74,6 +74,8 @@ object AccountApi {
         val donations = call("GET", "/api/donations/mine/?page=1", token)
         val summary = call("GET", "/api/core/year-summary/?year=$year", token)
         val info = call("GET", "/api/core/user-info/", token)
+        // My volunteer hours shows for volunteers (and anyone with hours from before)
+        val hours = call("GET", "/api/volunteers/mine/", token)
         if (donations.code == 401 || summary.code == 401) return null
         return Overview(
             name = if (info.code == 200) parseName(info.body) else null,
@@ -81,6 +83,7 @@ object AccountApi {
             donations = if (donations.code == 200) parseDonations(donations.body) else emptyList(),
             year = if (summary.code == 200) parseYear(summary.body) else null,
             failed = listOf(registrations, donations, summary).any { it.code != 200 },
+            hours = if (hours.code == 200) parseVolunteerHours(hours.body) else null,
         )
     }
 
@@ -132,6 +135,27 @@ object AccountApi {
             if (reply.code == 0) "Couldn't reach ayyappasamaaj.org. Check your connection and try again."
             else "It couldn't be stopped just now. Please try again in a few minutes."
         }
+    }
+
+    /** A year's volunteer hours (null: not loaded). 401: signed out. */
+    suspend fun volunteerHours(token: String, year: Int?): Pair<Int, VolunteerHours?> {
+        val reply = call("GET", "/api/volunteers/mine/" + (year?.let { "?year=$it" } ?: ""), token)
+        return reply.code to if (reply.code == 200) parseVolunteerHours(reply.body) else null
+    }
+
+    /** What Add hours offers (null: not loaded, or not a volunteer). */
+    suspend fun addHoursForm(token: String): Pair<Int, AddHoursForm?> {
+        val reply = call("GET", "/api/volunteers/mine/add/", token)
+        return reply.code to if (reply.code == 200) parseAddHoursForm(reply.body) else null
+    }
+
+    /** Adds an entry, with the website form's rules. */
+    suspend fun addHours(token: String, date: String, start: String, end: String, activity: String,
+                         coordinator: Int?): AddHoursResult {
+        val body = JSONObject().put("date", date).put("start", start).put("end", end).put("activity", activity)
+            .put("coordinator", coordinator ?: JSONObject.NULL)
+        val reply = call("POST", "/api/volunteers/mine/add/", token, body)
+        return parseAddHours(reply.code, reply.body)
     }
 
     /** Delete my account: the website emails a link to the account's address (core/account_deletion.py). */
@@ -190,7 +214,7 @@ data class YearTotals(val year: Int, val donations: String, val registrations: S
                       val donationCount: Int, val registrationCount: Int)
 
 data class Overview(val name: String? = null, val registrations: List<Registration>, val donations: List<Donation>,
-                    val year: YearTotals?, val failed: Boolean)
+                    val year: YearTotals?, val failed: Boolean, val hours: VolunteerHours? = null)
 
 private fun JSONObject.text(name: String): String? = if (isNull(name)) null else optString(name).ifBlank { null }
 

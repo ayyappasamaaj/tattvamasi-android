@@ -143,7 +143,7 @@ fun summaryDay(iso: String?): String =
 fun summaryDollars(amount: String?): String =
     amount?.toBigDecimalOrNull()?.let { "$" + "%,.2f".format(it) } ?: amount.orEmpty()
 
-private fun esc(text: String) = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+internal fun esc(text: String) = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     .replace("\"", "&quot;")
 
 /**
@@ -170,13 +170,27 @@ fun summaryLetterHtml(s: YearSummary, logoUrl: String): String {
             "<tfoot><tr><th colspan=${if (goodsColumn) 3 else 2}>${esc(title)} total</th>" +
             "<td class=n>${esc(summaryDollars(total))}</td></tr></tfoot></table>"
     }
-    val officers = s.officers.joinToString("") { "<p><b>${esc(it.name)}</b><br>${esc(it.title)}</p>" }
     val title = "${s.year} year-end summary" + if (s.scope == "household") " (household)" else ""
     val empty = if (s.donations.isEmpty() && s.registrations.isEmpty()) "<p>Nothing recorded for ${s.year}.</p>" else ""
     val all = if (s.donations.isNotEmpty() || s.registrations.isNotEmpty())
         "<p class=all>Total for ${s.year}: <b>${esc(summaryDollars(s.totalAll))}</b></p><p class=note>${esc(s.statement)}</p>"
     else ""
-    return """<!doctype html><html><head><meta charset="utf-8"><title>${esc(s.orgName)} ${esc(title)}</title><style>
+    return letterPage("${s.orgName} $title", s.orgName, s.tagline, s.orgPlace, s.email, s.website, s.officers, logoUrl, """
+        <h2>${esc(title)}</h2>
+        <p>${esc(s.orgName)}, ${esc(s.orgPlace)}, ${esc(s.orgStatus)}, EIN ${esc(s.ein)}.</p>
+        <p>${s.year} contributions of <b>${esc(s.personName)}</b>${if (s.personEmail.isNotBlank()) " (${esc(s.personEmail)})" else ""}</p>
+        $empty${table("Donations", s.donations, s.totalDonations, false)}${table("Registrations", s.registrations, s.totalRegistrations, true)}$all
+        <p class=gen>For your records. Please check with your tax consultant on what you can deduct. Questions:
+        ${esc(s.email)}. Printed from ayyappasamaaj.org on ${esc(summaryDay(s.generated))}.</p>""")
+}
+
+/** A letter on the website's letterhead (the dashboard's Letterhead.vue): the logo, the Samaaj's name, tagline and
+ *  contact across the top, the office bearers down the left and [main] (HTML) beside them. The year-end summary's and
+ *  the volunteer hours record's. */
+fun letterPage(docTitle: String, orgName: String, tagline: String, place: String, email: String, website: String,
+               officers: List<Officer>, logoUrl: String, main: String): String {
+    val side = officers.joinToString("") { "<p><b>${esc(it.name)}</b><br>${esc(it.title)}</p>" }
+    return """<!doctype html><html><head><meta charset="utf-8"><title>${esc(docTitle)}</title><style>
         @page { margin: 16mm 14mm; }
         body { font-family: Georgia, serif; color: #2b2118; font-size: 11pt; margin: 0; }
         .head { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid #b5541c; padding-bottom: 10px; }
@@ -199,14 +213,9 @@ fun summaryLetterHtml(s: YearSummary, logoUrl: String): String {
         .note { margin-top: 16px; font-size: 9.5pt; }
         .gen { margin-top: 18px; font-size: 8.5pt; color: #6b5a48; }
         </style></head><body>
-        <div class=head><img src="${esc(logoUrl)}" alt=""><div><h1>${esc(s.orgName)}</h1>
-        <p>${esc(s.tagline)}</p><p>${esc(s.orgPlace)} · ${esc(s.email)} · ${esc(s.website)}</p></div></div>
-        <div class=body>${if (officers.isNotEmpty()) "<div class=side><p><b>Office bearers</b></p>$officers</div>" else ""}
-        <div class=main><h2>${esc(title)}</h2>
-        <p>${esc(s.orgName)}, ${esc(s.orgPlace)}, ${esc(s.orgStatus)}, EIN ${esc(s.ein)}.</p>
-        <p>${s.year} contributions of <b>${esc(s.personName)}</b>${if (s.personEmail.isNotBlank()) " (${esc(s.personEmail)})" else ""}</p>
-        $empty${table("Donations", s.donations, s.totalDonations, false)}${table("Registrations", s.registrations, s.totalRegistrations, true)}$all
-        <p class=gen>For your records. Please check with your tax consultant on what you can deduct. Questions:
-        ${esc(s.email)}. Printed from ayyappasamaaj.org on ${esc(summaryDay(s.generated))}.</p>
+        <div class=head><img src="${esc(logoUrl)}" alt=""><div><h1>${esc(orgName)}</h1>
+        <p>${esc(tagline)}</p><p>${esc(place)} · ${esc(email)} · ${esc(website)}</p></div></div>
+        <div class=body>${if (side.isNotEmpty()) "<div class=side><p><b>Office bearers</b></p>$side</div>" else ""}
+        <div class=main>$main
         </div></div></body></html>"""
 }
