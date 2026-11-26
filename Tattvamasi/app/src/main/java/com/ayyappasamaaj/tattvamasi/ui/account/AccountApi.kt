@@ -91,6 +91,11 @@ object AccountApi {
         val hours = call("GET", "/api/volunteers/mine/", token)
         // Volunteer tools (VolunteerTools.kt): only the pages this person may open
         val tools = call("GET", "/api/core/my-pages/", token)
+        val volunteerHours = if (hours.code == 200) parseVolunteerHours(hours.body) else null
+        // Sign up as a volunteer (VolunteerSignUp.kt): only asked for someone who isn't one
+        val signUp = if (volunteerHours != null && !volunteerHours.isVolunteer) {
+            call("GET", "/api/volunteers/sign-up/", token).let { if (it.code == 200) parseVolunteerSignUp(it.body) else null }
+        } else null
         if (donations.code == 401 || summary.code == 401) return null
         return Overview(
             name = if (info.code == 200) parseName(info.body) else null,
@@ -98,7 +103,8 @@ object AccountApi {
             donations = if (donations.code == 200) parseDonations(donations.body) else emptyList(),
             year = if (summary.code == 200) parseYear(summary.body) else null,
             failed = listOf(registrations, donations, summary).any { it.code != 200 },
-            hours = if (hours.code == 200) parseVolunteerHours(hours.body) else null,
+            hours = volunteerHours,
+            signUp = signUp,
             tools = if (tools.code == 200) parseToolPages(tools.body) else emptyList(),
         )
     }
@@ -174,6 +180,12 @@ object AccountApi {
         return parseAddHours(reply.code, reply.body)
     }
 
+    /** Sign up as a volunteer (the website's double opt-in, volunteers/optin.py). */
+    suspend fun signUpAsVolunteer(token: String): VolunteerSignUpResult {
+        val reply = call("POST", "/api/volunteers/sign-up/", token)
+        return parseVolunteerSignUpAnswer(reply.code, reply.body)
+    }
+
     /** Delete my account: the website emails a link to the account's address (core/account_deletion.py). */
     suspend fun requestDeletion(token: String): Deletion {
         val reply = call("POST", "/api/core/delete-account/", token)
@@ -231,7 +243,7 @@ data class YearTotals(val year: Int, val donations: String, val registrations: S
 
 data class Overview(val name: String? = null, val registrations: List<Registration>, val donations: List<Donation>,
                     val year: YearTotals?, val failed: Boolean, val hours: VolunteerHours? = null,
-                    val tools: List<ToolPage> = emptyList())
+                    val tools: List<ToolPage> = emptyList(), val signUp: VolunteerSignUp? = null)
 
 private fun JSONObject.text(name: String): String? = if (isNull(name)) null else optString(name).ifBlank { null }
 

@@ -26,6 +26,13 @@ import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Newspaper
 import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.Accessibility
+import androidx.compose.material.icons.outlined.AlternateEmail
+import androidx.compose.material.icons.outlined.Cookie
+import androidx.compose.material.icons.outlined.Copyright
+import androidx.compose.material.icons.outlined.Gavel
+import androidx.compose.material.icons.outlined.Handshake
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -255,7 +262,15 @@ private val contactLinks = listOf(
     ContactLink("Join the mailing list", Icons.Outlined.Newspaper, "https://ayyappasamaaj.org/mailing-list/"),
     ContactLink("Facebook", Icons.Outlined.Group, "https://www.facebook.com/ayyappa.samaaj.us"),
     ContactLink("YouTube", Icons.Outlined.SmartDisplay, "https://www.youtube.com/@AyyappasamaajOrg"),
+    ContactLink("Instagram", Icons.Outlined.PhotoCamera, "https://www.instagram.com/ayyappasamaaj"),
+    ContactLink("X", Icons.Outlined.AlternateEmail, "https://x.com/ayyappasamaaj"),
+    // The website footer's pages (Nov 26: missing from the app)
+    ContactLink("Community partners", Icons.Outlined.Handshake, "https://ayyappasamaaj.org/community-partners/"),
     ContactLink("Privacy policy", Icons.Outlined.PrivacyTip, "https://ayyappasamaaj.org/privacy-policy/"),
+    ContactLink("Terms and conditions", Icons.Outlined.Gavel, "https://ayyappasamaaj.org/terms-and-conditions/"),
+    ContactLink("Cookie policy", Icons.Outlined.Cookie, "https://ayyappasamaaj.org/cookie-policy/"),
+    ContactLink("Accessibility", Icons.Outlined.Accessibility, "https://ayyappasamaaj.org/accessibility/"),
+    ContactLink("Credits", Icons.Outlined.Copyright, "https://ayyappasamaaj.org/credits/"),
 )
 
 private const val EMAIL = "info@ayyappasamaaj.org"

@@ -35,11 +35,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Share
@@ -84,6 +88,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -103,27 +108,38 @@ import kotlin.math.roundToInt
  * (pinch to zoom), and round buttons at the bottom right: Save (on this phone), Share and the language. Dragging it
  * down (from the handle, or the PDF when it's at its top) slides it away; so does Back. The maintainer's design,
  * Nov 21 (https://claude.ai/artifact/8gcAHq92Jxy8nzg86EZdGC, "Latest"). As on the iOS app (PDFReaderView.swift).
+ *
+ * Signed in, a Playlist button adds the open text (the language shown) to one of the account's playlists
+ * (Playlists.kt). Opened from a playlist, Previous and Next at the bottom left go through it ([onOpen] opens another
+ * text in the same panel).
  */
 @Composable
-fun PdfPopup(item: ReadingItem, onClose: () -> Unit) {
+fun PdfPopup(item: ReadingItem, onOpen: (ReadingItem) -> Unit = {}, onClose: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val versions = item.text.versions
-    var language by rememberSaveable(item.text.id) {
+    var language by rememberSaveable(item.text.id, item.startLanguage) {
         mutableStateOf((versions.firstOrNull { it.language == item.startLanguage } ?: versions.first()).language)
     }
     val version = versions.firstOrNull { it.language == language } ?: versions.first()
     LaunchedEffect(Unit) { SavedTexts.load(context) }
     val savedList by SavedTexts.saved.collectAsState()
     val saved = savedList.any { it.slug == item.categorySlug && it.title == item.text.title }
+    // Playlists are the account's: the button shows while signed in, for a text the website knows by its id
+    val account by AccountStore.state.collectAsState()
+    val pdfId = pdfIdOf(version.pageUrl)
+    var adding by remember { mutableStateOf<Int?>(null) }
+    adding?.let { id -> AddToPlaylistDialog(id, version.language, item.text.title) { adding = null } }
+    // One panel for a whole playlist: going to its next text doesn't slide the reader in again
+    val panel = item.playlist?.let { "playlist:" + it.name } ?: item.text.id
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val height = constraints.maxHeight.toFloat().coerceAtLeast(1f)
         val threshold = with(LocalDensity.current) { 140.dp.toPx() }
         // How far down the panel is: the full height while it slides in, 0 when open
-        var down by remember(item.text.id) { mutableFloatStateOf(height) }
-        var closing by remember(item.text.id) { mutableStateOf(false) }
-        LaunchedEffect(item.text.id) { animate(down, 0f, animationSpec = tween(260)) { v, _ -> down = v } }
+        var down by remember(panel) { mutableFloatStateOf(height) }
+        var closing by remember(panel) { mutableStateOf(false) }
+        LaunchedEffect(panel) { animate(down, 0f, animationSpec = tween(260)) { v, _ -> down = v } }
 
         fun close() {
             if (closing) return
@@ -141,7 +157,7 @@ fun PdfPopup(item: ReadingItem, onClose: () -> Unit) {
         BackHandler { close() }
 
         // Pulling the PDF down when it's at its top moves the panel; pushing up brings it back first
-        val pull = remember(item.text.id) {
+        val pull = remember(panel) {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                     if (available.y < 0f && down > 0f) {
@@ -209,14 +225,52 @@ fun PdfPopup(item: ReadingItem, onClose: () -> Unit) {
                     Toast.makeText(context, if (now) "Saved on this phone" else "Removed from Saved", Toast.LENGTH_SHORT).show()
                 },
                 onShare = { share(context, item.text.title, version.pageUrl) },
+                onPlaylist = if (account.user != null && pdfId != null) ({ adding = pdfId }) else null,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             )
+            item.playlist?.let { play ->
+                PlaylistButtons(play, onOpen, Modifier.align(Alignment.BottomStart).padding(16.dp))
+            }
         }
     }
 }
 
-/** The round buttons at the bottom right, from the top: Save, Share, and the language (its other languages open to
- *  its left; none when the text has one language). */
+/** Playing a playlist: Previous and Next round buttons at the bottom left, with where it's at ("2 of 7"). */
+@Composable
+private fun PlaylistButtons(play: PlaylistPlay, onOpen: (ReadingItem) -> Unit, modifier: Modifier) {
+    val previous = play.previous
+    val next = play.next
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            "${play.at + 1} of ${play.items.size} · ${play.name}",
+            style = MaterialTheme.typography.labelMedium,
+            color = AppColors.ink,
+            maxLines = 1,
+            modifier = Modifier
+                .widthIn(max = 200.dp)
+                .background(AppColors.card, RoundedCornerShape(50))
+                .border(1.dp, AppColors.lineStrong, RoundedCornerShape(50))
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+                .semantics { contentDescription = "Playlist ${play.name}: ${play.at + 1} of ${play.items.size}" },
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (previous != null) {
+                RoundButton(48.dp, "Previous: " + previous.text.title, onClick = { onOpen(previous) }) {
+                    Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, contentDescription = null, tint = AppColors.ink)
+                }
+            }
+            if (next != null) {
+                RoundButton(48.dp, "Next: " + next.text.title, background = AppColors.forest, border = false,
+                    onClick = { onOpen(next) }) {
+                    Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null, tint = AppColors.saffron)
+                }
+            }
+        }
+    }
+}
+
+/** The round buttons at the bottom right, from the top: Playlist (signed in), Save, Share, and the language (its other
+ *  languages open to its left; none when the text has one language). */
 @Composable
 private fun ReaderButtons(
     languages: List<String>,
@@ -225,10 +279,16 @@ private fun ReaderButtons(
     saved: Boolean,
     onSave: () -> Unit,
     onShare: () -> Unit,
+    onPlaylist: (() -> Unit)?,
     modifier: Modifier,
 ) {
     var open by remember { mutableStateOf(false) }
     Column(modifier, horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (onPlaylist != null) {
+            RoundButton(48.dp, "Add to a playlist", Modifier.padding(end = 5.dp), onClick = { open = false; onPlaylist() }) {
+                Icon(Icons.AutoMirrored.Outlined.PlaylistAdd, contentDescription = null, tint = AppColors.ink)
+            }
+        }
         RoundButton(48.dp, if (saved) "Saved on this phone, tap to remove" else "Save on this phone",
             Modifier.padding(end = 5.dp), onClick = { open = false; onSave() }) {
             Icon(if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, contentDescription = null,

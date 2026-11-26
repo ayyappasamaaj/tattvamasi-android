@@ -110,7 +110,7 @@ fun DonateSheet() {
     }
 
     LaunchedEffect(Unit) { if (state.options == null) DonateStore.load() }
-    BackHandler { DonateStore.close() }
+    BackHandler { if (state.zelle) DonateStore.closeZelle() else DonateStore.close() }
 
     fun present(secret: String, shown: String, isMonthly: Boolean) {
         val options = state.options ?: return
@@ -143,10 +143,10 @@ fun DonateSheet() {
             .imePadding(),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(4.dp)) {
-            IconButton(onClick = { DonateStore.close() }) {
+            IconButton(onClick = { if (state.zelle) DonateStore.closeZelle() else DonateStore.close() }) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back", tint = AppColors.ink)
             }
-            Text("Donate", style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
+            Text(if (state.zelle) "Zelle Donation" else "Donate", style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
         }
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -154,6 +154,7 @@ fun DonateSheet() {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     val options = state.options
                     when {
+                        state.zelle -> ZellePage(state, signedIn)
                         state.thanks != null -> Thanks(state.thanks!!) { DonateStore.close() }
                         options == null && !state.failed -> Row(Modifier.fillMaxWidth().padding(24.dp),
                             horizontalArrangement = Arrangement.Center) {
@@ -278,8 +279,12 @@ fun DonateSheet() {
                                     }
                                 }
                             }
+                            // Zelle: reported in the app (ZelleReport.kt); checks stay on the website
+                            TextButton(onClick = { DonateStore.openZelle() }) {
+                                Text("I sent a Zelle gift", color = AppColors.clayDark)
+                            }
                             TextButton(onClick = { openWebPage(context, AccountApi.site + "/donate/") }) {
-                                Text("Prefer Zelle or a check? Give on our website", color = AppColors.clayDark)
+                                Text("Prefer a check? Give on our website", color = AppColors.clayDark)
                             }
                         }
                     }

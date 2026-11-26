@@ -46,6 +46,8 @@ object AccountStore {
         val report: Report? = null,
         val reportFailed: Boolean = false,
         val appleOffered: Boolean = false,          // the website has Sign in with Apple (Continue with Apple shows)
+        val volunteerBusy: Boolean = false,         // Sign up as a volunteer: waiting for the website
+        val volunteerMessage: String? = null,       // its answer
     )
 
     enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION, HOURS, ADD_HOURS, REPORT, ZELLE, CHECKS }
@@ -141,6 +143,27 @@ object AccountStore {
                 _state.update { it.copy(page = Page.HOURS, hoursMessage = result.message) }
                 loadHours(result.year)
                 refresh()  // My account's card shows the new total
+            }
+        }
+    }
+
+    /** Sign up as a volunteer (VolunteerSignUp.kt), or send the confirmation email again. */
+    suspend fun signUpAsVolunteer() {
+        val current = token ?: return
+        _state.update { it.copy(volunteerBusy = true, volunteerMessage = null) }
+        val result = try {
+            AccountApi.signUpAsVolunteer(current)
+        } finally {
+            _state.update { it.copy(volunteerBusy = false) }
+        }
+        when (result) {
+            VolunteerSignUpResult.SignedOut -> forget("Your sign-in has ended. Please sign in again.")
+            is VolunteerSignUpResult.Failed -> _state.update { it.copy(volunteerMessage = result.message) }
+            is VolunteerSignUpResult.Done -> {
+                _state.update {
+                    it.copy(volunteerMessage = result.message, overview = it.overview?.copy(signUp = result.state))
+                }
+                if (result.state.isVolunteer) refresh()  // My volunteer hours shows
             }
         }
     }
