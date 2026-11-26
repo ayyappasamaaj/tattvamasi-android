@@ -12,7 +12,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.ayyappasamaaj.tattvamasi.notifications.AppNotifications
+import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
+import com.ayyappasamaaj.tattvamasi.ui.account.AppleSignIn
 import com.ayyappasamaaj.tattvamasi.ui.AppRoot
 import com.ayyappasamaaj.tattvamasi.ui.Shot
 import com.ayyappasamaaj.tattvamasi.ui.theme.Appearance
@@ -20,6 +23,7 @@ import com.ayyappasamaaj.tattvamasi.ui.theme.TattvamasiTheme
 import com.ayyappasamaaj.tattvamasi.ui.theme.appIsDark
 import com.ayyappasamaaj.tattvamasi.update.RequiredUpdate
 import com.ayyappasamaaj.tattvamasi.update.RequiredUpdateScreen
+import kotlinx.coroutines.launch
 
 /** The redesigned app (Compose), one activity for every section. The system splash screen shows the app
  *  icon while it starts; the app then draws edge to edge, behind the status and navigation bars. The bars'
@@ -31,7 +35,10 @@ class MainActivity : ComponentActivity() {
         Appearance.load(this)
         super.onCreate(savedInstanceState)
         AppNotifications.start(this)
-        if (savedInstanceState == null) AppNotifications.tapped(intent?.getStringExtra(EXTRA_URL))
+        if (savedInstanceState == null) {
+            AppNotifications.tapped(intent?.getStringExtra(EXTRA_URL))
+            appleRedirect(intent)
+        }
         if (BuildConfig.DEBUG) {  // the store screenshots only: that screen, in Light mode
             Shot.screen = intent?.getStringExtra("shot")
             if (Shot.screen != null) Appearance.set(this, Appearance.Choice.LIGHT)
@@ -57,6 +64,15 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         AppNotifications.tapped(intent.getStringExtra(EXTRA_URL))
+        appleRedirect(intent)
+    }
+
+    /** Back from Continue with Apple (AppleRedirectActivity): finish signing in. */
+    private fun appleRedirect(intent: Intent?) {
+        val uri = intent?.data ?: return
+        if (!AppleSignIn.isRedirect(uri)) return
+        val redirect = AppleSignIn.redirect(this, uri)
+        lifecycleScope.launch { AccountStore.finishApple(redirect) }
     }
 
     companion object {

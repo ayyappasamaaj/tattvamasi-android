@@ -33,6 +33,22 @@
             </intent-filter>
         </activity>
 
+        <!-- Continue with Apple (ui/account/AppleSignIn.kt): the website's redirect with the one-time code, to the app
+             only (the website sends it nowhere else; the code is useless without the app's PKCE verifier) -->
+        <activity
+            android:name=".AppleRedirectActivity"
+            android:exported="true"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.ayyappasamaaj.tattvamasi" android:host="signin" android:path="/apple" />
+            </intent-filter>
+        </activity>
+
         <!-- The Namavali player: plays in the background, with the lock screen's and earphones' controls. Exported
              so the system's media controls (and Bluetooth, Android Auto) can reach the media session, as Media3 asks -->
         <service

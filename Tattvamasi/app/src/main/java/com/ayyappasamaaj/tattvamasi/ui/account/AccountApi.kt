@@ -65,6 +65,17 @@ object AccountApi {
             .put("provider", "google").put("process", "login")
             .put("token", JSONObject().put("client_id", GoogleSignIn.webClientId).put("id_token", idToken))))
 
+    /** Continue with Apple (AppleSignIn.kt): the website's one-time code and the app's PKCE verifier. */
+    suspend fun signInWithAppleCode(code: String, verifier: String): SignIn =
+        parseSignIn(call("POST", "/api/core/app-sign-in/token/", body = JSONObject()
+            .put("code", code).put("code_verifier", verifier)))
+
+    /** Whether the website offers Sign in with Apple (its keys are set): allauth's config lists "apple". */
+    suspend fun appleOffered(): Boolean {
+        val reply = call("GET", "/_allauth/app/v1/config")
+        return reply.code == 200 && parseAppleOffered(reply.body)
+    }
+
     suspend fun signOut(token: String) {
         call("DELETE", "/_allauth/app/v1/auth/session", token)
     }
@@ -245,6 +256,13 @@ fun parseSignIn(reply: AccountApi.Reply): SignIn {
     val message = json.optJSONArray("errors")?.optJSONObject(0)?.text("message")
     return SignIn.Refused(message ?: "That email and password don't match an account.")
 }
+
+/** allauth's app config: whether "apple" is among the sign-in providers. */
+fun parseAppleOffered(body: String): Boolean = runCatching {
+    val providers = JSONObject(body).optJSONObject("data")?.optJSONObject("socialaccount")?.optJSONArray("providers")
+        ?: return@runCatching false
+    (0 until providers.length()).any { providers.optJSONObject(it)?.optString("id") == "apple" }
+}.getOrDefault(false)
 
 fun parseRegistrations(body: String): List<Registration> {
     val list = JSONObject(body).optJSONArray("registrations") ?: return emptyList()
