@@ -23,7 +23,6 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material.icons.outlined.Landscape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +30,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.annotation.DrawableRes
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -90,10 +94,18 @@ import com.ayyappasamaaj.tattvamasi.ui.yatra.YatraScreen
 /** The app's five sections, as on the iOS app and in the website menu's order: a bottom bar on a phone, a side rail
  *  on a tablet or an unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. About moved to the
  *  top-right menu for Festivals (AppMenu.kt, Nov 25, 2026). */
-enum class Destination(val label: String, val icon: ImageVector) {
+enum class Destination(
+    val label: String,
+    val icon: ImageVector?,
+    /** A drawn icon in place of [icon] (the Pujas tab's nilavilakku) */
+    @DrawableRes val iconRes: Int? = null,
+    /** The full name, where there's room (a tablet's side rail) and for TalkBack; [label] fits a phone's bar */
+    val fullName: String = label,
+) {
     Home("Home", Icons.Outlined.Home),
     Events("Events", Icons.Outlined.CalendarMonth),
-    Festivals("Festivals", Icons.Outlined.Celebration),
+    // "Pujas" on a phone (the maintainer's call, Nov 25, 2026: House Puja is here, and even Vishu is a puja in temples)
+    Festivals("Pujas", null, R.drawable.ic_pujas_lamp, fullName = "Festivals & Pujas"),
     Sabarimala("Sabarimala", Icons.Outlined.Landscape),
     Publications("Publications", Icons.AutoMirrored.Outlined.MenuBook),
 }
@@ -190,6 +202,9 @@ fun AppRoot() {
         if (needsPrompt) askPermission.launch(Manifest.permission.POST_NOTIFICATIONS) else AppNotifications.asked(context)
     }
 
+    // A side rail (tablet, unfolded foldable) has room for a tab's full name
+    val railShown = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()) !=
+        NavigationSuiteType.NavigationBar
     CompositionLocalProvider(LocalLinkHandler provides openLink) {
         NavigationSuiteScaffold(
             navigationSuiteItems = {
@@ -208,11 +223,17 @@ fun AppRoot() {
                             }
                             current = destination
                         },
-                        icon = { Icon(destination.icon, contentDescription = null) },
-                        // 12sp so "Publications" fits the narrowest phones' five-item bar
+                        icon = {
+                            destination.iconRes?.let { Icon(painterResource(it), contentDescription = null) }
+                                ?: Icon(destination.icon!!, contentDescription = null)
+                        },
+                        // 12sp so "Publications" fits the narrowest phones' five-item bar; the full name on a tablet's
+                        // side rail, and for TalkBack everywhere
                         label = {
-                            Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp))
+                            Text(if (railShown) destination.fullName else destination.label, maxLines = if (railShown) 2 else 1,
+                                 overflow = TextOverflow.Ellipsis,
+                                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+                                 modifier = Modifier.semantics { contentDescription = destination.fullName })
                         },
                     )
                 }
