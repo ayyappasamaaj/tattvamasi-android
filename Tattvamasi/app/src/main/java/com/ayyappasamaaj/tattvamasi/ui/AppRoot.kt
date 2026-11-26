@@ -7,6 +7,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.em
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -305,31 +313,48 @@ fun BannerHeader() {
             alignment = if (maxWidth >= 600.dp) Alignment.CenterEnd else Alignment.BottomEnd,
             modifier = Modifier.matchParentSize(),
         )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+        // The website's header logo (Nov 25, 2026; its templates/partials/site_header.html): the round medallion, the
+        // name in Samarkan beside it at the circle's top, and the tagline in a cream band at its bottom, as one block at
+        // the top left, in the sky above the hills. The website's sizes (a phone's, or a tablet's from 600dp), scaled
+        // down on a narrow phone so the block and the menu button both fit.
+        val wide = maxWidth >= 600.dp
+        val circle = if (wide) 100f else 68f
+        val nameWidth = if (wide) 370f else 250f
+        val gap = if (wide) 12f else 10f
+        val room = (maxWidth.value - 24f - 48f)  // the side margins and the menu button
+        val k = minOf(1f, room / (circle + gap + nameWidth))
+        Row(
+            verticalAlignment = Alignment.Top,
             modifier = Modifier
-                .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 12.dp)
-                .semantics(mergeDescendants = true) { heading() },
+                .heightIn(min = if (wide) 150.dp else 110.dp)
+                .padding(start = 12.dp, top = 10.dp, bottom = 12.dp)
+                .semantics(mergeDescendants = true) {
+                    heading()
+                    contentDescription = "Ayyappa Samaaj. Gathering Place for Ayyappa Devotees Worldwide"
+                },
         ) {
-            Image(
-                painter = painterResource(R.drawable.app_logo),
-                contentDescription = "Ayyappa Samaaj",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.widthIn(max = 236.dp),
-            )
-            Text(
-                "Gathering Place for Ayyappa Devotees Worldwide",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF2A2620),  // dark in both modes: the backing stays white
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .background(Color.White.copy(alpha = 0.78f), RoundedCornerShape(6.dp))
-                    .padding(horizontal = 8.dp, vertical = 1.dp),
-            )
+            Image(painterResource(R.drawable.header_medallion), contentDescription = null,
+                modifier = Modifier.size((circle * k).dp))
+            Box(Modifier.padding(start = (gap * k).dp).height((circle * k).dp)) {
+                Image(painterResource(R.drawable.header_name), contentDescription = null, contentScale = ContentScale.Fit,
+                    modifier = Modifier.width((nameWidth * k).dp).align(Alignment.TopStart))
+                // The tagline: one line in a cream band, its bottom on the circle's bottom; cream with dark text in
+                // dark mode too, as it sits on the photo
+                Text(
+                    "Gathering Place for Ayyappa Devotees Worldwide",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = ((if (wide) 16f else 12.5f) * k).sp, fontWeight = FontWeight(600), lineHeight = 1.25.em),
+                    color = Color(0xFF2A2620),
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .border(1.dp, Color(0xFFE3C77A), RoundedCornerShape(50))
+                        .background(Color(0xEBFFFAEE), RoundedCornerShape(50))
+                        .padding(horizontal = ((if (wide) 12f else 8f) * k).dp, vertical = (2f * k).dp),
+                )
+            }
         }
         // The menu (AppMenu.kt): My account (signing in is optional), About, Settings; a small button at the corner, on
         // a white backing so it shows on the picture in both modes
