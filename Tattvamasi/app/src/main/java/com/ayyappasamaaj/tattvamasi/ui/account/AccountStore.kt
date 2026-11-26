@@ -46,7 +46,7 @@ object AccountStore {
         val reportFailed: Boolean = false,
     )
 
-    enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION, HOURS, ADD_HOURS, REPORT, ZELLE, CHECKS, EXPENSE }
+    enum class Page { SUMMARY, DONATIONS, REGISTRATIONS, REGISTRATION, HOURS, ADD_HOURS, REPORT, ZELLE, CHECKS }
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state

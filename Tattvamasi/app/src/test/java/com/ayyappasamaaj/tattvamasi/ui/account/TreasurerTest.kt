@@ -53,20 +53,3 @@ class TreasurerTest {
             "url": "/donate/checks/", "app_screen": "checks"}]}""")[0].appScreen)
     }
 }
-
-class ExpenseFormTest {
-    @Test
-    fun theExpenseForm() {
-        val f = parseExpenseForm("""{"events": [{"id": 1, "name": "Mandalam", "has_weekends": true}, {"id": 2, "name": "Vishu", "has_weekends": false}],
-            "default_event": 1, "categories": {"1": [{"group": "Flowers", "options": [{"id": 5, "label": "Flowers (general)"}, {"id": 6, "label": "Garlands"}]}],
-              "2": []},
-            "weekends": [{"value": "auto", "label": "The nearest weekend to the date"}, {"value": "none", "label": "Not a weekend"}],
-            "web_url": "https://ayyappasamaaj.org/donate/event-expenses/"}""")!!
-        assertEquals(1, f.defaultEvent)
-        assertTrue(f.events[0].hasWeekends)
-        assertEquals("Garlands", f.categories[1]!![0].options[1].label)
-        assertEquals(emptyList<CategoryGroup>(), f.categories[2])
-        assertEquals("auto" to "The nearest weekend to the date", f.weekends[0])
-        assertTrue(ToolPage("Treasurer", "Expense management", "/donate/event-expenses/", "", appScreen = "expense").inApp)
-    }
-}

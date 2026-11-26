@@ -103,7 +103,6 @@ fun AccountSheet() {
                 AccountStore.Page.REPORT -> "Report"
                 AccountStore.Page.ZELLE -> "Zelle Donations"
                 AccountStore.Page.CHECKS -> "Check and Cash Donations"
-                AccountStore.Page.EXPENSE -> "Add an Expense"
                 null -> "My Account"
             }, style = MaterialTheme.typography.headlineSmall, color = AppColors.ink,
                 modifier = Modifier.semantics { heading() })
@@ -124,7 +123,6 @@ fun AccountSheet() {
                         state.page == AccountStore.Page.REPORT -> ReportPage(state)
                         state.page == AccountStore.Page.ZELLE -> ZellePage()
                         state.page == AccountStore.Page.CHECKS -> ChecksPage()
-                        state.page == AccountStore.Page.EXPENSE -> ExpensePage()
                         else -> SignedIn(state)
                     }
                     AddressFooter()
