@@ -70,4 +70,30 @@ class GuidesTest {
         assertEquals(GuideTarget("vratam", "food"), GuideTarget.decode(GuideTarget("vratam", "food").encode()))
         assertEquals(GuideTarget("vratam"), GuideTarget.decode("vratam"))
     }
+
+    @Test
+    fun festivalsAndEachGuidesTab() {
+        // The website's answer since #749 (Nov 25): the Festivals & Pujas pages beside the guides
+        val json = """{"version": 1, "guides": [
+            {"slug": "vratam", "title": "Observing the Vratam", "name": "Observing the Vratam", "tab": "sabarimala",
+             "url": "https://ayyappasamaaj.org/vratam/", "intro": [],
+             "sections": [{"id": "a", "title": "A", "blocks": [{"html": "<p>x</p>"}], "sections": []}]},
+            {"slug": "vishu", "title": "Vishu", "name": "Vishu", "tab": "festivals",
+             "url": "https://ayyappasamaaj.org/vishu/", "intro": [],
+             "sections": [{"id": "kani", "title": "Vishu Kani", "blocks": [{"html": "<p>y</p>"}], "sections": []}]}],
+            "festivals": [
+              {"slug": "house-puja", "name": "House Puja and Bhajan", "summary": "How to host", "image": "",
+               "url": "https://ayyappasamaaj.org/house-puja-bhajan/"},
+              {"slug": "vishu", "name": "Vishu", "summary": "The new year", "image": "https://ayyappasamaaj.org/static/images/vishu.webp",
+               "url": "https://ayyappasamaaj.org/vishu/"}]}"""
+        val parsed = parseGuides(json)!!
+        assertEquals(listOf("sabarimala", "festivals"), parsed.map { it.tab })
+        val festivals = parseFestivals(json)
+        assertEquals(listOf("house-puja", "vishu"), festivals.map { it.slug })
+        assertEquals("", festivals[0].image)
+        assertEquals("https://ayyappasamaaj.org/static/images/vishu.webp", festivals[1].image)
+        // An older copy: no list, every guide on Sabarimala
+        assertEquals(emptyList<Festival>(), parseFestivals("""{"version": 1, "guides": []}"""))
+        assertEquals("sabarimala", guides.first().tab)
+    }
 }

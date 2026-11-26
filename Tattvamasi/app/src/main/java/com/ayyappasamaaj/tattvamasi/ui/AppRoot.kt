@@ -23,7 +23,6 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Landscape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +30,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.annotation.DrawableRes
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -60,13 +64,14 @@ import com.ayyappasamaaj.tattvamasi.notifications.NotificationTarget
 import com.ayyappasamaaj.tattvamasi.notifications.notificationTarget
 import kotlinx.coroutines.delay
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
-import com.ayyappasamaaj.tattvamasi.ui.about.AboutScreen
+import com.ayyappasamaaj.tattvamasi.ui.festivals.FestivalsScreen
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountSheet
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.donate.DonateSheet
 import com.ayyappasamaaj.tattvamasi.ui.register.RegisterSheet
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsScreen
 import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuideContent
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuidesStore
 import com.ayyappasamaaj.tattvamasi.ui.home.SlidesStore
@@ -86,14 +91,23 @@ import com.ayyappasamaaj.tattvamasi.ui.shruti.TanpuraSheet
 import com.ayyappasamaaj.tattvamasi.ui.yatra.NamavaliPlayer
 import com.ayyappasamaaj.tattvamasi.ui.yatra.YatraScreen
 
-/** The app's five sections, as on the iOS app: a bottom bar on a phone, a side rail on a tablet or an
- *  unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. */
-enum class Destination(val label: String, val icon: ImageVector) {
+/** The app's five sections, as on the iOS app and in the website menu's order: a bottom bar on a phone, a side rail
+ *  on a tablet or an unfolded foldable, chosen by NavigationSuiteScaffold from the window's size. About moved to the
+ *  top-right menu for Festivals (AppMenu.kt, Nov 25, 2026). */
+enum class Destination(
+    val label: String,
+    val icon: ImageVector?,
+    /** A drawn icon in place of [icon] (the Pujas tab's nilavilakku) */
+    @DrawableRes val iconRes: Int? = null,
+    /** The full name, where there's room (a tablet's side rail) and for TalkBack; [label] fits a phone's bar */
+    val fullName: String = label,
+) {
     Home("Home", Icons.Outlined.Home),
     Events("Events", Icons.Outlined.CalendarMonth),
-    Publications("Publications", Icons.AutoMirrored.Outlined.MenuBook),
+    // "Pujas" on a phone (the maintainer's call, Nov 25, 2026: House Puja is here, and even Vishu is a puja in temples)
+    Festivals("Pujas", null, R.drawable.ic_pujas_lamp, fullName = "Festivals & Pujas"),
     Sabarimala("Sabarimala", Icons.Outlined.Landscape),
-    About("About us", Icons.Outlined.Info),
+    Publications("Publications", Icons.AutoMirrored.Outlined.MenuBook),
 }
 
 /** The screen a Debug build was started on for the store screenshots (MainActivity, `--es shot <screen>`). */
@@ -110,6 +124,7 @@ fun AppRoot() {
     LaunchedEffect(Unit) { PublicationsStore.start() }
     val publications by PublicationsStore.state.collectAsState()
     var openGuide by rememberSaveable { mutableStateOf<String?>(null) }  // GuideTarget.encode() of the guide shown
+    var openFestival by rememberSaveable { mutableStateOf<String?>(null) }  // the same, on the Festivals tab
     val context = LocalContext.current
     LaunchedEffect(Unit) { AccountStore.init(context) }  // signed in from last time (ui/account)
     LaunchedEffect(Unit) { ShrutiPlayer.init(context) }  // the tanpura's remembered key, for the Tanpura row
@@ -118,6 +133,7 @@ fun AppRoot() {
     val slides by SlidesStore.state.collectAsState()
     val guides by GuidesStore.state.collectAsState()
     val openingDates by GuidesStore.dates.collectAsState()
+    val festivals by GuidesStore.festivals.collectAsState()
     // The Sahasranama Yatra, open on the tab it was opened from (Home or Publications), as on iOS
     var homeYatra by rememberSaveable { mutableStateOf(false) }
     var publicationsYatra by rememberSaveable { mutableStateOf(false) }
@@ -152,10 +168,7 @@ fun AppRoot() {
     val openLink: (String) -> Boolean = remember(guides) {
         { url ->
             val target = guideTarget(url, guides)
-            if (target != null) {
-                openGuide = target.encode()
-                current = Destination.Sabarimala
-            }
+            if (target != null) showGuide(target, guides, { openGuide = it }, { openFestival = it }) { current = it }
             target != null
         }
     }
@@ -168,7 +181,7 @@ fun AppRoot() {
         if (!events.loaded && !events.failed) return@LaunchedEffect
         when (val target = notificationTarget(url, events.events, guides)) {
             is NotificationTarget.Event -> { openEvent = target.key; current = Destination.Events }
-            is NotificationTarget.Guide -> { openGuide = target.target.encode(); current = Destination.Sabarimala }
+            is NotificationTarget.Guide -> showGuide(target.target, guides, { openGuide = it }, { openFestival = it }) { current = it }
             is NotificationTarget.Web -> openWebPage(context, target.url)
             NotificationTarget.Events -> { openEvent = null; current = Destination.Events }
             NotificationTarget.Home -> current = Destination.Home
@@ -189,6 +202,9 @@ fun AppRoot() {
         if (needsPrompt) askPermission.launch(Manifest.permission.POST_NOTIFICATIONS) else AppNotifications.asked(context)
     }
 
+    // A side rail (tablet, unfolded foldable) has room for a tab's full name
+    val railShown = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()) !=
+        NavigationSuiteType.NavigationBar
     CompositionLocalProvider(LocalLinkHandler provides openLink) {
         NavigationSuiteScaffold(
             navigationSuiteItems = {
@@ -198,6 +214,7 @@ fun AppRoot() {
                         onClick = {
                             if (destination == Destination.Events && current == Destination.Events) openEvent = null
                             if (destination == Destination.Sabarimala && current == Destination.Sabarimala) openGuide = null
+                            if (destination == Destination.Festivals && current == Destination.Festivals) openFestival = null
                             if (destination == Destination.Home && current == Destination.Home) { homeYatra = false; yatraPlaces.removeState("home") }
                             if (destination == Destination.Publications && current == Destination.Publications) {
                                 reading = null
@@ -206,11 +223,17 @@ fun AppRoot() {
                             }
                             current = destination
                         },
-                        icon = { Icon(destination.icon, contentDescription = null) },
-                        // 12sp so "Publications" fits the narrowest phones' five-item bar
+                        icon = {
+                            destination.iconRes?.let { Icon(painterResource(it), contentDescription = null) }
+                                ?: Icon(destination.icon!!, contentDescription = null)
+                        },
+                        // 12sp so "Publications" fits the narrowest phones' five-item bar; the full name on a tablet's
+                        // side rail, and for TalkBack everywhere
                         label = {
-                            Text(destination.label, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp))
+                            Text(if (railShown) destination.fullName else destination.label, maxLines = if (railShown) 2 else 1,
+                                 overflow = TextOverflow.Ellipsis,
+                                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+                                 modifier = Modifier.semantics { contentDescription = destination.fullName })
                         },
                     )
                 }
@@ -248,7 +271,9 @@ fun AppRoot() {
                     Destination.Sabarimala -> SabarimalaScreen(guides, openGuide?.let(GuideTarget::decode), openingDates) {
                         openGuide = it?.encode()
                     }
-                    Destination.About -> AboutScreen()
+                    Destination.Festivals -> FestivalsScreen(guides, festivals, openFestival?.let(GuideTarget::decode)) {
+                        openFestival = it?.encode()
+                    }
                 }
             }
         }
@@ -257,7 +282,8 @@ fun AppRoot() {
         // Donate, over any screen (Home's Donate tile), and My account above it (Donate's Sign In opens it)
         DonateSheet()
         RegisterSheet()
-        // My account, over any screen (opened from the person button on the banner)
+        // About or Settings (the top-right menu), then My account above them
+        AppMenuSheet()
         AccountSheet()
     }
 }
@@ -305,22 +331,9 @@ fun BannerHeader() {
                     .padding(horizontal = 8.dp, vertical = 1.dp),
             )
         }
-        // My account (ui/account): signing in is optional, so a small button at the corner, on a white backing so it
-        // shows on the picture in both modes
-        IconButton(
-            onClick = { AccountStore.open() },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(top = 2.dp, end = 6.dp),
-        ) {
-            Icon(
-                Icons.Outlined.AccountCircle,
-                contentDescription = "My account",
-                tint = Color(0xFF2A2620),
-                modifier = Modifier.background(Color.White.copy(alpha = 0.78f), RoundedCornerShape(50)).padding(4.dp),
-            )
-        }
+        // The menu (AppMenu.kt): My account (signing in is optional), About, Settings; a small button at the corner, on
+        // a white backing so it shows on the picture in both modes
+        MenuButton(Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(top = 2.dp, end = 6.dp))
     }
 }
 
@@ -355,5 +368,18 @@ fun AppScreen(overlay: @Composable () -> Unit = {}, content: @Composable () -> U
             }
             overlay()
         }
+    }
+}
+
+
+/** A guide opens on its own tab: a Festivals & Pujas page on Festivals, the others on Sabarimala. */
+private fun showGuide(target: GuideTarget, guides: List<GuideContent>, sabarimala: (String) -> Unit,
+                      festivals: (String) -> Unit, go: (Destination) -> Unit) {
+    if (guides.firstOrNull { it.slug == target.slug }?.tab == "festivals") {
+        festivals(target.encode())
+        go(Destination.Festivals)
+    } else {
+        sabarimala(target.encode())
+        go(Destination.Sabarimala)
     }
 }
