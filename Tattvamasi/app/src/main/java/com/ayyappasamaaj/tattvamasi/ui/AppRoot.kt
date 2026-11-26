@@ -110,7 +110,7 @@ import com.ayyappasamaaj.tattvamasi.ui.yatra.YatraScreen
 enum class Destination(
     val label: String,
     val icon: ImageVector?,
-    /** A drawn icon in place of [icon] (the Pujas tab's nilavilakku) */
+    /** A drawn icon in place of [icon] (the Pujas tab's kalasam) */
     @DrawableRes val iconRes: Int? = null,
     /** The full name, where there's room (a tablet's side rail) and for TalkBack; [label] fits a phone's bar */
     val fullName: String = label,
@@ -118,7 +118,7 @@ enum class Destination(
     Home("Home", Icons.Outlined.Home),
     Events("Events", Icons.Outlined.CalendarMonth),
     // "Pujas" on a phone (the maintainer's call, Nov 25, 2026: House Puja is here, and even Vishu is a puja in temples)
-    Festivals("Pujas", null, R.drawable.ic_pujas_lamp, fullName = "Festivals & Pujas"),
+    Festivals("Pujas", null, R.drawable.ic_pujas_kalasam, fullName = "Festivals & Pujas"),
     Sabarimala("Sabarimala", Icons.Outlined.Landscape),
     Publications("Publications", Icons.AutoMirrored.Outlined.MenuBook),
 }
