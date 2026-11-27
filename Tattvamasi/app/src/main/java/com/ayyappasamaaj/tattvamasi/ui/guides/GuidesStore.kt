@@ -23,7 +23,8 @@ import java.net.URL
  * from the website is saved on the phone, and the app ships with a copy (assets/guides.json) for a first start
  * without a connection. Once per app run it checks the website for a newer copy, and keeps every guide's
  * pictures (about 3 MB) in the image cache so they show offline too. The Sabarimala opening dates come in the same
- * file ([dates]; null in a copy from before Nov 19, 2026).
+ * file ([dates]; null in a copy from before Nov 19, 2026), and so do the website footer's pages About > Contact reads
+ * in the app ([aboutPages], with their guides under tab "about"; from Nov 26, 2026).
  */
 object GuidesStore {
     private const val TAG = "GuidesStore"
@@ -37,6 +38,9 @@ object GuidesStore {
     /** The Festivals tab's pages, in the website menu's order */
     private val _festivals = MutableStateFlow<List<Festival>>(emptyList())
     val festivals: StateFlow<List<Festival>> = _festivals.asStateFlow()
+    /** About > Contact's website pages read in the app (Privacy policy and the like), in the website footer's order */
+    private val _aboutPages = MutableStateFlow<List<AboutPage>>(emptyList())
+    val aboutPages: StateFlow<List<AboutPage>> = _aboutPages.asStateFlow()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var started = false
 
@@ -52,6 +56,7 @@ object GuidesStore {
             if (local != null) _state.value = local
             _dates.value = savedText?.let(::parseOpeningDates) ?: bundled?.let(::parseOpeningDates)
             _festivals.value = savedText?.let(::parseFestivals)?.ifEmpty { null } ?: bundled?.let(::parseFestivals).orEmpty()
+            _aboutPages.value = savedText?.let(::parseAboutPages)?.ifEmpty { null } ?: bundled?.let(::parseAboutPages).orEmpty()
 
             val text = runCatching { download() }.onFailure { AppLog.w(TAG, "guides: " + it.message) }.getOrNull()
             val fresh = text?.let(::parseGuides)
@@ -59,6 +64,7 @@ object GuidesStore {
                 _state.value = fresh
                 parseOpeningDates(text)?.let { _dates.value = it }
                 parseFestivals(text).takeIf { it.isNotEmpty() }?.let { _festivals.value = it }
+                parseAboutPages(text).takeIf { it.isNotEmpty() }?.let { _aboutPages.value = it }
                 runCatching { saved.writeText(text) }.onFailure { AppLog.w(TAG, "save: " + it.message) }
             }
             keepPictures(app, _state.value)

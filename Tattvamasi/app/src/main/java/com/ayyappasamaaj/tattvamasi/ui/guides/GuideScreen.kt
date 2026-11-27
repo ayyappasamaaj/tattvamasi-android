@@ -69,15 +69,16 @@ import kotlinx.coroutines.android.awaitFrame
  * One of the pilgrimage guides, in the app: the introduction, then each section as a card that opens and closes
  * (as on the website), with sub-sections inside. Reads from the copy kept on the phone, so it works offline.
  * [section], when set, is opened and scrolled to (a link to ayyappasamaaj.org/vratam/#food); [onShown] is then
- * called so it isn't scrolled to again.
+ * called so it isn't scrolled to again. [backLabel] names where Back goes ("Contact" for a page opened from About).
  */
 @Composable
-fun GuideScreen(guide: GuideContent, section: String?, onBack: () -> Unit, onShown: () -> Unit = {}) {
+fun GuideScreen(guide: GuideContent, section: String?, onBack: () -> Unit, onShown: () -> Unit = {},
+                backLabel: String = "Sabarimala") {
     val context = LocalContext.current
     val expanded = rememberSaveable(guide.slug, saver = expandedSaver) { mutableStateOf(emptySet<String>()) }
     val list = rememberLazyListState()
     val all = remember(guide) { guide.sections.flatMap { it.all() }.map { it.id } }
-    val headerItems = 3  // the Back row, the introduction and Open all
+    val headerItems = if (all.isEmpty()) 2 else 3  // the Back row, the introduction and Open all
 
     LaunchedEffect(guide.slug, section) {
         if (section == null) return@LaunchedEffect
@@ -100,7 +101,7 @@ fun GuideScreen(guide: GuideContent, section: String?, onBack: () -> Unit, onSho
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = onBack, contentPadding = PaddingValues(horizontal = 4.dp)) {
                         Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null, tint = AppColors.clayDark)
-                        Text("Sabarimala", color = AppColors.clayDark, modifier = Modifier.padding(start = 6.dp))
+                        Text(backLabel, color = AppColors.clayDark, modifier = Modifier.padding(start = 6.dp))
                     }
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = {
@@ -112,7 +113,8 @@ fun GuideScreen(guide: GuideContent, section: String?, onBack: () -> Unit, onSho
             }
         }
         item(key = "intro") { ReadableWidth { GuideBlocks(guide.intro) } }
-        item(key = "toggle") {
+        // Open all, unless there's nothing to open (an About page that's all introduction)
+        if (all.isNotEmpty()) item(key = "toggle") {
             ReadableWidth {
                 val allOpen = expanded.value.containsAll(all)
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {

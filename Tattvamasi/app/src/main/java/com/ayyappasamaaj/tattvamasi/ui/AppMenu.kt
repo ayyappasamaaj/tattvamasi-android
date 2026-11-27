@@ -39,7 +39,10 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.ayyappasamaaj.tattvamasi.notifications.NotificationsCard
+import com.ayyappasamaaj.tattvamasi.ui.about.AboutPart
 import com.ayyappasamaaj.tattvamasi.ui.about.AboutScreen
+import com.ayyappasamaaj.tattvamasi.ui.about.ContactPage
+import com.ayyappasamaaj.tattvamasi.ui.about.ContactPageScreen
 import com.ayyappasamaaj.tattvamasi.ui.account.AccountStore
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppearanceCard
@@ -58,9 +61,30 @@ object AppMenu {
 
     private val _page = MutableStateFlow<Page?>(null)
     val page: StateFlow<Page?> = _page
+    /** About's part shown (About us, Our Board, Contact), kept while one of Contact's pages is open over it */
+    private val _part = MutableStateFlow(AboutPart.About)
+    val part: StateFlow<AboutPart> = _part
+    /** One of Contact's pages over About (a form, or a website page read in the app), or null */
+    private val _contact = MutableStateFlow<ContactPage?>(null)
+    val contact: StateFlow<ContactPage?> = _contact
 
-    fun open(page: Page) = _page.update { page }
-    fun close() = _page.update { null }
+    fun open(page: Page) {
+        _part.update { AboutPart.About }
+        _contact.update { null }
+        _page.update { page }
+    }
+    fun close() {
+        _contact.update { null }
+        _page.update { null }
+    }
+    fun showPart(part: AboutPart) = _part.update { part }
+    /** One of Contact's pages, over About's Contact (from Contact's rows, or a link to the page elsewhere in the app). */
+    fun openContact(page: ContactPage) {
+        _part.update { AboutPart.Contact }
+        _contact.update { page }
+        _page.update { Page.About }
+    }
+    fun closeContact() = _contact.update { null }
 }
 
 /** The person button at the banner's corner, and its menu. */
@@ -101,8 +125,24 @@ fun MenuButton(modifier: Modifier = Modifier) {
 @Composable
 fun AppMenuSheet() {
     val page by AppMenu.page.collectAsState()
+    val contact by AppMenu.contact.collectAsState()
+    val part by AppMenu.part.collectAsState()
     val shown = page ?: return
     BackHandler { AppMenu.close() }
+    // One of About > Contact's pages over About (ui/about/ContactPages.kt); Back returns to Contact
+    val contactPage = contact
+    if (shown == AppMenu.Page.About && contactPage != null) {
+        BackHandler { AppMenu.closeContact() }
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(AppColors.cream)
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+        ) { ContactPageScreen(contactPage) { AppMenu.closeContact() } }
+        return
+    }
     Column(
         Modifier
             .fillMaxSize()
@@ -120,7 +160,7 @@ fun AppMenuSheet() {
                 modifier = Modifier.semantics { heading() })
         }
         when (shown) {
-            AppMenu.Page.About -> AboutScreen(showTitle = false)
+            AppMenu.Page.About -> AboutScreen(part, onPart = AppMenu::showPart, showTitle = false)
             AppMenu.Page.Settings -> Column(
                 Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
             ) {

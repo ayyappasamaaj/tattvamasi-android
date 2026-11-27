@@ -38,7 +38,8 @@ data class GuideContent(
     val url: String,
     val intro: List<GuideBlock>,
     val sections: List<GuideSection>,
-    /** The website menu's section it's under: "sabarimala" or "festivals" (website: pages/app_guides.py) */
+    /** The website menu's section it's under: "sabarimala", "festivals", or "about" for the footer's pages shown in
+     *  About > Contact (website: pages/app_guides.py) */
     val tab: String = "sabarimala",
 ) {
     /** The ids of the sections from the top of the guide down to [id] (empty if it isn't in this guide). */
@@ -108,7 +109,7 @@ fun parseGuides(json: String): List<GuideContent>? = runCatching {
             sections = parseSections(it.optJSONArray("sections")),
             tab = it.optString("tab").ifBlank { "sabarimala" },
         )
-    }.filter { it.sections.isNotEmpty() }.takeIf { it.isNotEmpty() }
+    }.filter { it.sections.isNotEmpty() || (it.tab == ABOUT_TAB && it.intro.isNotEmpty()) }.takeIf { it.isNotEmpty() }
 }.getOrNull()
 
 /** One of the website menu's Festivals & Pujas pages, for the Festivals tab: its guide's slug, short name, one-line
@@ -123,6 +124,28 @@ fun parseFestivals(json: String): List<Festival> = runCatching {
             it.optString("image").takeIf { url -> url.startsWith("https://") }.orEmpty(), it.optString("url"))
     }.filter { it.slug.isNotBlank() && it.name.isNotBlank() }
 }.getOrDefault(emptyList())
+
+/** The guides' tab for the website footer's pages (Privacy policy and the like), read in About > Contact. */
+const val ABOUT_TAB = "about"
+
+/** One of the website footer's pages About > Contact opens in the app: its guide's slug, name and page. */
+data class AboutPage(val slug: String, val name: String, val url: String)
+
+/** The footer pages' list beside the guides (website: pages/app_guides.py "about_pages"; empty in a copy from before
+ *  Nov 26, 2026). A page given as a path ("/credits/") gets the website's address. */
+fun parseAboutPages(json: String): List<AboutPage> = runCatching {
+    val list = JSONObject(json).optJSONArray("about_pages") ?: return@runCatching emptyList()
+    (0 until list.length()).mapNotNull { list.optJSONObject(it) }.map {
+        val url = it.optString("url")
+        AboutPage(it.optString("slug"), it.optString("name"),
+            if (url.startsWith("/")) "https://ayyappasamaaj.org$url" else url)
+    }.filter { it.slug.isNotBlank() && it.name.isNotBlank() }
+}.getOrDefault(emptyList())
+
+/** The footer page [slug] to read in the app (a guide with tab "about"), or null when the copy on the phone doesn't
+ *  have it (an older website, or offline with an older saved copy): the page then opens in the in-app browser. */
+fun aboutGuide(slug: String, guides: List<GuideContent>): GuideContent? =
+    guides.firstOrNull { it.tab == ABOUT_TAB && it.slug == slug }
 
 /** Where a link inside the app goes when it's one of the guides: the guide, and the section if the link names one. */
 data class GuideTarget(val slug: String, val section: String? = null) {

@@ -1,6 +1,7 @@
 package com.ayyappasamaaj.tattvamasi.ui.about
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -45,6 +46,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -63,9 +65,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayyappasamaaj.tattvamasi.ui.AddressFooter
+import com.ayyappasamaaj.tattvamasi.ui.AppMenu
 import com.ayyappasamaaj.tattvamasi.ui.ReadableWidth
 import com.ayyappasamaaj.tattvamasi.ui.ScreenTitle
 import com.ayyappasamaaj.tattvamasi.ui.card
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuideContent
+import com.ayyappasamaaj.tattvamasi.ui.guides.GuidesStore
+import com.ayyappasamaaj.tattvamasi.ui.guides.aboutGuide
+import com.ayyappasamaaj.tattvamasi.ui.openSocialLink
 import com.ayyappasamaaj.tattvamasi.ui.openWebPage
 import com.ayyappasamaaj.tattvamasi.ui.theme.AppColors
 
@@ -74,11 +81,11 @@ enum class AboutPart(val title: String) { About("About us"), Board("Our Board"),
 
 /**
  * About us: About us, Our Board and Contact, switched with segmented buttons. The text is the website's
- * (ayyappasamaaj.org/about/ and /contact/); the Board comes from the website. As on the iOS app (AboutView.swift).
+ * (ayyappasamaaj.org/about/ and /contact/); the Board comes from the website. [part] is kept by the menu (AppMenu),
+ * so Back from one of Contact's pages returns to Contact. As on the iOS app (AboutView.swift).
  */
 @Composable
-fun AboutScreen(showTitle: Boolean = true) {
-    var part by rememberSaveable { mutableStateOf(AboutPart.About) }
+fun AboutScreen(part: AboutPart, onPart: (AboutPart) -> Unit, showTitle: Boolean = true) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
@@ -89,7 +96,7 @@ fun AboutScreen(showTitle: Boolean = true) {
                     AboutPart.entries.forEachIndexed { index, option ->
                         SegmentedButton(
                             selected = option == part,
-                            onClick = { part = option },
+                            onClick = { onPart(option) },
                             shape = SegmentedButtonDefaults.itemShape(index, AboutPart.entries.size),
                             colors = SegmentedButtonDefaults.colors(
                                 activeContainerColor = AppColors.claySoft, activeContentColor = AppColors.clayDark,
@@ -255,29 +262,58 @@ private fun EarlierYear(board: Board) {
     }
 }
 
-private data class ContactLink(val title: String, val icon: ImageVector, val url: String)
+/** What a Contact row opens. */
+internal sealed interface ContactAction {
+    /** A native form over About (ContactPages.kt) */
+    data class Form(val page: ContactPage) : ContactAction
+    /** The Samaaj's page on a social network: its app if installed, else the in-app browser (openSocialLink) */
+    data object Social : ContactAction
+    /** A website page read in the app, from the guides feed (tab "about", this slug); else the in-app browser */
+    data class Page(val slug: String) : ContactAction
+}
 
-private val contactLinks = listOf(
-    ContactLink("Write to us", Icons.Outlined.Drafts, "https://ayyappasamaaj.org/contact/"),
-    ContactLink("Join the mailing list", Icons.Outlined.Newspaper, "https://ayyappasamaaj.org/mailing-list/"),
-    ContactLink("Facebook", Icons.Outlined.Group, "https://www.facebook.com/ayyappa.samaaj.us"),
-    ContactLink("YouTube", Icons.Outlined.SmartDisplay, "https://www.youtube.com/@AyyappasamaajOrg"),
-    ContactLink("Instagram", Icons.Outlined.PhotoCamera, "https://www.instagram.com/ayyappasamaaj"),
-    ContactLink("X", Icons.Outlined.AlternateEmail, "https://x.com/ayyappasamaaj"),
-    // The website footer's pages (Nov 26: missing from the app)
-    ContactLink("Community partners", Icons.Outlined.Handshake, "https://ayyappasamaaj.org/community-partners/"),
-    ContactLink("Privacy policy", Icons.Outlined.PrivacyTip, "https://ayyappasamaaj.org/privacy-policy/"),
-    ContactLink("Terms and conditions", Icons.Outlined.Gavel, "https://ayyappasamaaj.org/terms-and-conditions/"),
-    ContactLink("Cookie policy", Icons.Outlined.Cookie, "https://ayyappasamaaj.org/cookie-policy/"),
-    ContactLink("Accessibility", Icons.Outlined.Accessibility, "https://ayyappasamaaj.org/accessibility/"),
-    ContactLink("Credits", Icons.Outlined.Copyright, "https://ayyappasamaaj.org/credits/"),
+internal data class ContactLink(val title: String, val icon: ImageVector, val url: String, val action: ContactAction)
+
+internal val contactLinks = listOf(
+    ContactLink("Write to us", Icons.Outlined.Drafts, "https://ayyappasamaaj.org/contact/",
+        ContactAction.Form(ContactPage.WriteToUs)),
+    ContactLink("Join the mailing list", Icons.Outlined.Newspaper, "https://ayyappasamaaj.org/mailing-list/",
+        ContactAction.Form(ContactPage.MailingList)),
+    ContactLink("Facebook", Icons.Outlined.Group, "https://www.facebook.com/ayyappa.samaaj.us", ContactAction.Social),
+    ContactLink("YouTube", Icons.Outlined.SmartDisplay, "https://www.youtube.com/@AyyappasamaajOrg", ContactAction.Social),
+    ContactLink("Instagram", Icons.Outlined.PhotoCamera, "https://www.instagram.com/ayyappasamaaj", ContactAction.Social),
+    ContactLink("X", Icons.Outlined.AlternateEmail, "https://x.com/ayyappasamaaj", ContactAction.Social),
+    // The website footer's pages (Nov 26: read in the app, from the guides feed's "about" pages)
+    ContactLink("Community partners", Icons.Outlined.Handshake, "https://ayyappasamaaj.org/community-partners/",
+        ContactAction.Page("community-partners")),
+    ContactLink("Privacy policy", Icons.Outlined.PrivacyTip, "https://ayyappasamaaj.org/privacy-policy/",
+        ContactAction.Page("privacy-policy")),
+    ContactLink("Terms and conditions", Icons.Outlined.Gavel, "https://ayyappasamaaj.org/terms-and-conditions/",
+        ContactAction.Page("terms")),
+    ContactLink("Cookie policy", Icons.Outlined.Cookie, "https://ayyappasamaaj.org/cookie-policy/",
+        ContactAction.Page("cookie-policy")),
+    ContactLink("Accessibility", Icons.Outlined.Accessibility, "https://ayyappasamaaj.org/accessibility/",
+        ContactAction.Page("accessibility")),
+    ContactLink("Credits", Icons.Outlined.Copyright, "https://ayyappasamaaj.org/credits/", ContactAction.Page("credits")),
 )
+
+/** Opens a Contact row: its form, its social app, or its page (in the app when the guides feed has it). */
+private fun openContactLink(context: Context, link: ContactLink, guides: List<GuideContent>) {
+    when (val action = link.action) {
+        is ContactAction.Form -> AppMenu.openContact(action.page)
+        ContactAction.Social -> openSocialLink(context, link.url)
+        is ContactAction.Page ->
+            if (aboutGuide(action.slug, guides) != null) AppMenu.openContact(ContactPage.Website(action.slug))
+            else openWebPage(context, link.url)
+    }
+}
 
 private const val EMAIL = "info@ayyappasamaaj.org"
 
 @Composable
 private fun Contact() {
     val context = LocalContext.current
+    val guides by GuidesStore.state.collectAsState()
     Column(Modifier.fillMaxWidth().card(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             "Whether you are wearing the mala for the first time, sponsoring a puja, or want to volunteer during " +
@@ -309,7 +345,7 @@ private fun Contact() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 52.dp)
-                    .clickable(role = Role.Button) { openWebPage(context, link.url) },
+                    .clickable(role = Role.Button) { openContactLink(context, link, guides) },
             ) {
                 Icon(link.icon, contentDescription = null, tint = AppColors.clay)
                 Text(link.title, style = MaterialTheme.typography.bodyLarge, color = AppColors.ink,

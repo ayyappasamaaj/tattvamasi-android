@@ -3,11 +3,14 @@ package com.ayyappasamaaj.tattvamasi.ui
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.CalendarContract
 import android.widget.Toast
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import com.ayyappasamaaj.tattvamasi.ui.events.AppEvent
 import com.ayyappasamaaj.tattvamasi.ui.theme.Appearance
 import java.net.URLEncoder
@@ -60,6 +63,49 @@ fun openWebPage(context: Context, url: String) {
         start(context, Intent(Intent.ACTION_VIEW, Uri.parse(url)), "No browser to open the page")
     }
 }
+
+/**
+ * The Samaaj's Facebook, YouTube, Instagram or X page: in that app when it's installed, else in the app's own browser
+ * (openWebPage). Android 11 and later say themselves whether an app other than a browser takes the link
+ * (FLAG_ACTIVITY_REQUIRE_NON_BROWSER); before that, the app checks which apps take it ([socialApp]). As the iOS app's
+ * About > Contact (AboutView.swift), which opens universal links only.
+ */
+fun openSocialLink(context: Context, url: String) {
+    val uri = url.toUri()
+    val intent = Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER))
+        } catch (_: ActivityNotFoundException) {
+            openWebPage(context, url)
+        }
+        return
+    }
+    val packages = context.packageManager
+    val handlers = packages.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        .map { it.activityInfo.packageName }
+    // Any web address's apps: the browsers (a page with no app of its own goes to these)
+    val browsers = packages.queryIntentActivities(
+        Intent(Intent.ACTION_VIEW, "https://example.com/".toUri()).addCategory(Intent.CATEGORY_BROWSABLE),
+        PackageManager.MATCH_ALL,
+    ).map { it.activityInfo.packageName }
+    val app = socialApp(handlers, browsers)
+    if (app == null) {
+        openWebPage(context, url)
+        return
+    }
+    try {
+        context.startActivity(intent.setPackage(app))
+    } catch (_: ActivityNotFoundException) {
+        openWebPage(context, url)
+    }
+}
+
+/** The app (its package) that takes a social link before Android 11: the first of the link's [handlers] that isn't
+ *  one of the [browsers], or null when only browsers take it (the app isn't installed). */
+fun socialApp(handlers: List<String>, browsers: Collection<String>): String? =
+    handlers.firstOrNull { it !in browsers }
 
 /**
  * Add to calendar: the phone's calendar app opens with the event filled in, and the person saves it there. Needs
