@@ -96,4 +96,30 @@ class GuidesTest {
         assertEquals(emptyList<Festival>(), parseFestivals("""{"version": 1, "guides": []}"""))
         assertEquals("sabarimala", guides.first().tab)
     }
+
+    @Test
+    fun aboutPagesBesideTheGuides() {
+        // The live feed's guides (Nov 26), with the about pages the website adds (shared contract, section C)
+        val json = javaClass.classLoader!!.getResource("guides-about-sample.json")!!.readText()
+        val parsed = parseGuides(json)!!
+        assertEquals(listOf("virtual-q", "vishu", "privacy-policy", "credits"), parsed.map { it.slug })
+        assertEquals(listOf("sabarimala", "festivals", ABOUT_TAB, ABOUT_TAB), parsed.map { it.tab })
+        val privacy = parsed.first { it.slug == "privacy-policy" }
+        assertEquals(listOf("what-we-collect", "the-apps"), privacy.sections.map { it.id })
+        assertTrue(privacy.sections[1].blocks[0] is GuideBlock.Text)
+        assertEquals(listOf("https://ayyappasamaaj.org/static/images/logo_2x.png"),
+            parsed.first { it.slug == "credits" }.pictures)
+        val pages = parseAboutPages(json)
+        assertEquals(listOf("community-partners", "privacy-policy", "terms", "cookie-policy", "accessibility", "credits"),
+            pages.map { it.slug })
+        assertEquals(AboutPage("terms", "Terms and conditions", "https://ayyappasamaaj.org/terms-and-conditions/"), pages[2])
+        // A page given as a path gets the website's address
+        assertEquals("https://ayyappasamaaj.org/credits/", pages[5].url)
+        // A link to one of them, elsewhere in the app, opens it in About
+        assertEquals(GuideTarget("privacy-policy", "the-apps"),
+            guideTarget("https://ayyappasamaaj.org/privacy-policy/#the-apps", parsed))
+        // An older feed: no list
+        assertEquals(emptyList<AboutPage>(), parseAboutPages("""{"version": 1, "guides": []}"""))
+        assertEquals(emptyList<AboutPage>(), parseAboutPages("not json"))
+    }
 }

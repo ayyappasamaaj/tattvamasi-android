@@ -83,6 +83,8 @@ import com.ayyappasamaaj.tattvamasi.ui.events.EventsStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuideContent
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuideTarget
 import com.ayyappasamaaj.tattvamasi.ui.guides.GuidesStore
+import com.ayyappasamaaj.tattvamasi.ui.guides.ABOUT_TAB
+import com.ayyappasamaaj.tattvamasi.ui.about.ContactPage
 import com.ayyappasamaaj.tattvamasi.ui.home.SlidesStore
 import com.ayyappasamaaj.tattvamasi.ui.guides.guideTarget
 import com.ayyappasamaaj.tattvamasi.ui.home.HomeScreen
@@ -424,10 +426,14 @@ fun AppScreen(overlay: @Composable () -> Unit = {}, content: @Composable () -> U
 }
 
 
-/** A guide opens on its own tab: a Festivals & Pujas page on Festivals, the others on Sabarimala. */
+/** A guide opens on its own tab: a Festivals & Pujas page on Festivals, a website footer page (Privacy policy and the
+ *  like) in About > Contact, the others on Sabarimala. */
 private fun showGuide(target: GuideTarget, guides: List<GuideContent>, sabarimala: (String) -> Unit,
                       festivals: (String) -> Unit, go: (Destination) -> Unit) {
-    if (guides.firstOrNull { it.slug == target.slug }?.tab == "festivals") {
+    val tab = guides.firstOrNull { it.slug == target.slug }?.tab
+    if (tab == ABOUT_TAB) {
+        AppMenu.openContact(ContactPage.Website(target.slug))
+    } else if (tab == "festivals") {
         festivals(target.encode())
         go(Destination.Festivals)
     } else {

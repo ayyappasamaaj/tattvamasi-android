@@ -1,0 +1,701 @@
+{
+ "version": 1,
+ "guides": [
+  {
+   "slug": "virtual-q",
+   "name": "Sabarimala Virtual Q",
+   "tab": "sabarimala",
+   "title": "Sabarimala Virtual Q Booking Guide",
+   "url": "https://ayyappasamaaj.org/sabarimala-virtual-q/",
+   "intro": [
+    {
+     "html": "<p>Swamiye Saranam Ayyappa</p><h3>Sabarimala Virtual Q</h3><p>Every pilgrim to the Sabarimala Sannidhanam needs a Virtual Q slot. This guide explains what the Virtual Q is, the documents to keep ready, how to create your profile and book your slot, and what happens if you don't get one.</p>"
+    }
+   ],
+   "sections": [
+    {
+     "id": "what-is-it",
+     "title": "What Is the Sabarimala Virtual Q?",
+     "blocks": [
+      {
+       "html": "<p>The <b>Sabarimala Virtual Q</b> is an online reservation and crowd-management system run by the Kerala Police and the Travancore Devaswom Board (TDB) for pilgrims visiting the Sabarimala Sannidhanam temple in Keralam, India.</p><h3>Key Details of the System</h3><ul><li><b>Purpose:</b> It regulates the flow of devotees, prevents massive overcrowding at Pamba and the Sannidhanam, and ensures a safer, more orderly darshan of Lord Ayyappa.</li><li><b>Free booking:</b> The virtual queue slot booking is completely free of cost.</li><li><b>Daily caps:</b> The system limits online slots (typically around 70,000 slots per day, with limited spot-booking alternatives available at designated centers). This number changes from year to year, and sometimes mid-season, depending on the rush.</li><li><b>Registration process:</b> Pilgrims must register on the official portal using a valid mobile number or email address, upload required identity details/photos, and select a preferred date, time slot, and route.</li><li><b>Exemptions:</b> Children under the age of 5 are exempt from the virtual queue requirement.</li><li><b>Verification:</b> Upon booking, devotees receive a virtual queue coupon or QR code that must be verified along with original photo ID cards at designated police/board counters (such as at Pamba).</li></ul><p>Book your slot and check for official updates on the Travancore Devaswom Board's official website: <a href=\"https://sabarimalaonline.org\">sabarimalaonline.org</a></p>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "documents",
+     "title": "Documents to Prepare Before Registering",
+     "blocks": [
+      {
+       "html": "<p>To book a Virtual Q slot, you first create an official pilgrim profile and then reserve your time slot. Make sure you have the following digital files saved on your computer or mobile device before opening the website:</p><ul><li><b>Photograph:</b> A clear, passport-size digital photo of each pilgrim (the allowed file size ranges from <b>30 KB to 1 MB</b> depending on the upload field, so compress the photo for a smooth upload).</li><li><b>Identity proof:</b> A government-issued photo ID (such as an <b>Aadhaar Card, Voter ID, or Passport</b>). School or college ID cards are acceptable for children between 5 and 18 years old.</li><li><b>Active contact info:</b> A working mobile number and email address to receive <b>One-Time Passwords (OTPs)</b>.</li></ul>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "profile",
+     "title": "How to Create Your Profile (Sign Up)",
+     "blocks": [
+      {
+       "html": "<ol><li>Go to the <a href=\"https://sabarimalaonline.org\">official Sabarimala online portal</a>.</li><li>Click the <b>\"Register\"</b> or <b>\"Sign Up\"</b> button on that portal's homepage (not the Sign Up button on this website).</li><li>Fill in your personal details, including your <b>Name, Address, Date of Birth, and Gender</b>.</li><li>Choose your ID proof type (e.g., Aadhaar) and enter the exact <b>Identity Card Number</b>.</li><li><b>Upload your passport photo</b> from your device.</li><li>Create a secure password, agree to the terms and conditions, and click <b>\"Continue\"</b>.</li><li>Enter the <b>OTP sent via SMS</b> to your mobile number to verify and activate your profile account.</li></ol>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "booking",
+     "title": "How to Book Your Virtual Q Slot",
+     "blocks": [
+      {
+       "html": "<ol><li><b>Log in:</b> Use your newly registered mobile number or email address along with your password to access the portal.</li><li><b>Navigate to booking:</b> Click on the <b>\"Virtual Q Booking\"</b> icon on your main user dashboard.</li><li><b>Add group members (optional):</b> If you are traveling with a group, click <b>\"Add Pilgrim\"</b> or <b>\"Create Group\"</b> to add up to 5 co-pilgrims by typing in their individual details, IDs, and uploading their photos. <i>Note: Children under 5 do not require a slot.</i></li><li><b>Check availability:</b> View the calendar.<ul><li><b>Green dates</b> have available slots.</li><li><b>Red dates</b> are completely booked/sold out.</li></ul></li><li><b>Select details:</b> Click on a green date, then choose your preferred <b>Time Slot</b> (hourly block) and <b>Trekking Route</b> (e.g., the standard Pamba-Sannidhanam path).</li><li><b>Confirm and download:</b> Click <b>\"Book Now\"</b> to confirm. Your <b>Virtual Q Coupon</b>, with a unique QR code, your photo and your slot time, will be generated. <b>Download the PDF</b> to your phone and print a copy to carry with you.</li><li><b>Carry the printed coupon and the original ID you used for the booking when you go to Sabarimala.</b> Photocopies of the ID are not accepted.</li></ol>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "no-slot",
+     "title": "What Happens If I Don't Get a Virtual Q Slot?",
+     "blocks": [
+      {
+       "html": "<p>If you travel to Sabarimala without a pre-booked <b>Virtual Q ticket</b>, you will still be allowed to have a darshan of Lord Ayyappa, but you will face significant administrative hurdles, very long wait times, and the risk of being turned away if crowd limits are reached.</p><p>The government and the Kerala High Court have put strict rules in place to manage the heavy rush, but there is one fallback for pilgrims who arrive without an online booking:</p><h3>Spot Booking Counters</h3><p>The Travancore Devaswom Board (TDB) operates official <b>Spot Booking Centers</b> at key transit hubs leading to the temple (such as Nilakkal and Vandiperiyar).</p><ul><li><b>The process:</b> You must physically queue up at these counters, present a valid government-issued photo ID (like your Aadhaar Card, Passport, or Voter ID), and have your information digitized.</li><li><b>The catch:</b> These spot-booking slots are strictly capped and allocated dynamically based on cancellations. If the daily quota is already exhausted by the time you reach the counter, you will not receive a pass and could face major delays.</li></ul><h3>The Risks of Skipping the Virtual Q</h3><p>If you choose to bypass the online system entirely, be prepared for the following consequences:</p><ul><li><b>Extreme waiting times:</b> Online Virtual Q ticket holders are funneled into a separate, faster-moving queue at the <i>Pathinettampadi</i> (18 Holy Steps). Non-ticket holders or those waiting for open slots face unpredictable, massive bottlenecks that can add many hours to the trek.</li><li><b>Sudden quota reductions:</b> During peak season rush (like the <i>Mandalam-Makaravilakku</i> festival), the Kerala High Court frequently orders the TDB to drastically cut down or completely suspend spot bookings at standard locations like Pamba or Erumeli to prevent stampedes. If you rely on spot booking during these times, you risk not being allowed past the transit camps.</li><li><b>Disrupted travel plans:</b> The Kerala Police strictly enforce time slots. Arriving without a confirmed time means you may be forced to wait at the base camps (Nilakkal or Pamba) until a dynamic slot frees up, throwing off your entire travel, food, and lodging schedule.</li></ul>"
+      }
+     ],
+     "sections": []
+    }
+   ]
+  },
+  {
+   "slug": "vishu",
+   "name": "Vishu",
+   "tab": "festivals",
+   "title": "Vishu and the South Indian New Year",
+   "url": "https://ayyappasamaaj.org/vishu/",
+   "intro": [
+    {
+     "html": "<p>Swamiye Saranam Ayyappa</p><h3>Vishu</h3><p>Vishu and the South Indian New Year, with Ugadi and Varsha Pirappu: each April we welcome the new year with a grand feast and a program of music and dance by children and adults.</p>"
+    }
+   ],
+   "sections": [
+    {
+     "id": "the-new-year",
+     "title": "The South Indian New Year",
+     "blocks": [
+      {
+       "html": "<p>In April, much of South India celebrates its new year:</p><ul><li><b>Vishu</b> in Keralam, on the first day of the month of Medam, when the sun enters Mesha (Aries), usually April 14 or 15.</li><li><b>Varsha Pirappu</b> (Puthandu) in Tamil Nadu, on the first day of the month of Chithirai, the same day.</li><li><b>Ugadi</b> in Andhra Pradesh, Telangana and Karnataka, on the first day of the bright half of the lunar month of Chaitra, in March or April.</li></ul><p>Ayyappa Samaaj celebrates them together, as one community, with families from every part of South India.</p>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "vishu-kani",
+     "title": "Vishu Kani",
+     "blocks": [
+      {
+       "image": "https://ayyappasamaaj.org/static/images/festivals/vishu-kani.webp",
+       "alt": "A Vishu Kani before a brass idol of Lord Ayyappa garlanded with yellow konna flowers: a bell-metal uruli holding raw rice, coins, a golden cucumber, mangoes, jackfruit, bananas, a halved coconut and a mirror, beside a lit nilavilakku"
+      },
+      {
+       "html": "<p>The heart of Vishu is the <b>Vishu Kani</b>, the first thing one sees on New Year's morning. It is believed that what you see first sets the course of the year, so the night before, the family arranges an auspicious sight in a bell-metal uruli: raw rice, a golden cucumber (kani vellari), yellow konna flowers (Indian laburnum), fruits, a halved coconut, gold, a mirror, a sacred book and a picture of Lord Krishna or Lord Ayyappa, lit by a nilavilakku.</p><p>At dawn, each member of the family is led with eyes closed to open them before the Kani: a sight of light, prosperity and the Lord to begin the year.</p>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "traditions",
+     "title": "Kaineettam, the Feast and the Flavors of the Year",
+     "blocks": [
+      {
+       "html": "<p><b>Vishu Kaineettam.</b> Elders give coins or money to the children and younger members of the family, a blessing that the year will bring plenty.</p><p><b>The feast.</b> Vishu is celebrated with a grand sadya, and Varsha Pirappu with a meal that includes maanga pachadi, made with raw mango, jaggery and neem flowers. Ugadi pachadi, too, mixes sweet, sour, salty, bitter, spicy and tangy flavors: a reminder to accept the joys and sorrows of the coming year alike.</p>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "vishu-at-sabarimala",
+     "title": "Vishu at Sabarimala",
+     "blocks": [
+      {
+       "html": "<p>The Sabarimala temple opens for the Vishu festival in the month of Medam, and on Vishu morning devotees have the darshan of the Vishu Kani arranged before Lord Ayyappa. When the temple opens for Vishu each year is on our <a href=\"https://ayyappasamaaj.org/sabarimala-opening-dates/\">Sabarimala Opening Dates</a> page.</p>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "our-celebration",
+     "title": "Our Celebration",
+     "blocks": [
+      {
+       "html": "<p>We celebrate the South Indian New Year festivals each April with a grand feast and a program of cultural performances, with children and adults taking part in music and dance. Recent celebrations have drawn more than 300 guests.</p><p>This year's date, place and any registration are on <a href=\"https://ayyappasamaaj.org/events/\">Upcoming Events</a> and our <a href=\"https://ayyappasamaaj.org/calendar/\">Calendar</a> as soon as they are set. To hear about it first, <a href=\"https://ayyappasamaaj.org/mailing-list/\">join the mailing list</a>.</p>"
+      }
+     ],
+     "sections": []
+    }
+   ]
+  },
+  {
+   "slug": "privacy-policy",
+   "name": "Privacy policy",
+   "tab": "about",
+   "title": "Privacy Policy",
+   "url": "https://ayyappasamaaj.org/privacy-policy/",
+   "intro": [
+    {
+     "html": "<p>Last updated November 26, 2026.</p>"
+    }
+   ],
+   "sections": [
+    {
+     "id": "what-we-collect",
+     "title": "What we collect",
+     "blocks": [
+      {
+       "html": "<p>Your name and email when you write to us.</p><p><b>Data</b>: Name, email</p>"
+      }
+     ],
+     "sections": []
+    },
+    {
+     "id": "the-apps",
+     "title": "The Tattvamasi apps",
+     "blocks": [
+      {
+       "html": "<ul><li>Name</li><li>Email</li></ul>"
+      }
+     ],
+     "sections": []
+    }
+   ]
+  },
+  {
+   "slug": "credits",
+   "name": "Credits",
+   "tab": "about",
+   "title": "Credits",
+   "url": "https://ayyappasamaaj.org/credits/",
+   "intro": [
+    {
+     "html": "<p>Photos and artwork on this site.</p>"
+    },
+    {
+     "image": "https://ayyappasamaaj.org/static/images/logo_2x.png",
+     "alt": "The Ayyappa Samaaj logo"
+    }
+   ],
+   "sections": []
+  },
+  {
+   "slug": "cookie-policy",
+   "name": "Cookie policy",
+   "tab": "about",
+   "title": "Cookie Policy",
+   "url": "https://ayyappasamaaj.org/cookie-policy/",
+   "intro": [],
+   "sections": []
+  }
+ ],
+ "festivals": [
+  {
+   "slug": "vishu",
+   "name": "Vishu",
+   "summary": "Vishu, Varsha Pirappu and Ugadi: the Vishu Kani, Kaineettam, the feast, Vishu at Sabarimala, and our April celebration with music and dance.",
+   "image": "https://ayyappasamaaj.org/static/images/festivals/vishu-kani.webp",
+   "url": "https://ayyappasamaaj.org/vishu/"
+  }
+ ],
+ "opening_dates": {
+  "name": "Sabarimala Opening Dates",
+  "season": "2026–27",
+  "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/",
+  "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/calendar.ics",
+  "source": {
+   "name": "Travancore Devaswom Board",
+   "url": "https://sabarimalaonline.org/#/devaswom-calender"
+  },
+  "time_zone": "Asia/Kolkata",
+  "crowds": [
+   "Quiet",
+   "Moderate",
+   "High",
+   "Extreme"
+  ],
+  "periods": [
+   {
+    "id": "monthly-2026-02-12",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Kumbham)",
+    "opens": "2026-02-12",
+    "opens_time": "5:00 PM",
+    "closes": "2026-02-17",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Kumbham begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-02-12",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Kumbham): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-02-17",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Kumbham): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-02-12/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-02-12.ics"
+   },
+   {
+    "id": "monthly-2026-03-14",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Meenam)",
+    "opens": "2026-03-14",
+    "opens_time": "5:00 PM",
+    "closes": "2026-03-19",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Meenam begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-03-14",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Meenam): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-03-19",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Meenam): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-03-14/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-03-14.ics"
+   },
+   {
+    "id": "utsavam-2026-03-22",
+    "kind": "utsavam",
+    "name": "Utsavam",
+    "title": "Utsavam",
+    "opens": "2026-03-22",
+    "opens_time": "5:00 PM",
+    "closes": "2026-04-01",
+    "closes_time": "10:00 PM",
+    "crowd": null,
+    "about": "The Utsavam is the temple's annual festival. It begins with the Kodiyettu (hoisting of the festival flag) and ends with the Arattu, the deity's ceremonial bath at Pamba, on Painkuni Uthram, the day of Uthram, Lord Ayyappa's birth star.",
+    "key_dates": [
+     {
+      "date": "2026-03-22",
+      "time": "5:00 PM",
+      "what": "Utsavam: temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-03-23",
+      "time": "5:00 PM",
+      "what": "Kodiyettu (flag hoisting)",
+      "role": null
+     },
+     {
+      "date": "2026-04-01",
+      "time": "5:00 PM",
+      "what": "Painkuni Uthram and Arattu",
+      "role": null
+     },
+     {
+      "date": "2026-04-01",
+      "time": "10:00 PM",
+      "what": "Utsavam: temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/utsavam-2026-03-22/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/utsavam-2026-03-22.ics"
+   },
+   {
+    "id": "vishu-2026-04-10",
+    "kind": "vishu",
+    "name": "Vishu",
+    "title": "Meda Vishu festival",
+    "opens": "2026-04-10",
+    "opens_time": "5:00 PM",
+    "closes": "2026-04-18",
+    "closes_time": "10:00 PM",
+    "crowd": "Moderate",
+    "about": "Vishu, the Malayalam New Year, falls in the month of Medam. On Vishu morning devotees have the Vishukkani darshan, the first auspicious sight of the new year, at the Sannidhanam.",
+    "key_dates": [
+     {
+      "date": "2026-04-10",
+      "time": "5:00 PM",
+      "what": "Meda Vishu festival: temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-04-15",
+      "time": "5:00 PM",
+      "what": "Meda Vishu",
+      "role": null
+     },
+     {
+      "date": "2026-04-18",
+      "time": "10:00 PM",
+      "what": "Meda Vishu festival: temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/vishu-2026-04-10/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/vishu-2026-04-10.ics"
+   },
+   {
+    "id": "monthly-2026-05-14",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Edavam)",
+    "opens": "2026-05-14",
+    "opens_time": "5:00 PM",
+    "closes": "2026-05-19",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Edavam begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-05-14",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Edavam): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-05-19",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Edavam): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-05-14/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-05-14.ics"
+   },
+   {
+    "id": "prathishta-2026-05-25",
+    "kind": "prathishta",
+    "name": "Idol Installation Day",
+    "title": "Idol Installation Day",
+    "opens": "2026-05-25",
+    "opens_time": "5:00 PM",
+    "closes": "2026-05-26",
+    "closes_time": "10:00 PM",
+    "crowd": null,
+    "about": "Idol Installation Day (Prathishta Dinam) marks the anniversary of the installation of the idol at the Sannidhanam. The temple opens for the special pujas of the day.",
+    "key_dates": [
+     {
+      "date": "2026-05-25",
+      "time": "5:00 PM",
+      "what": "Idol Installation Day: temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-05-26",
+      "time": "10:00 PM",
+      "what": "Idol Installation Day: temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/prathishta-2026-05-25/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/prathishta-2026-05-25.ics"
+   },
+   {
+    "id": "monthly-2026-06-14",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Mithunam)",
+    "opens": "2026-06-14",
+    "opens_time": "5:00 PM",
+    "closes": "2026-06-19",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Mithunam begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-06-14",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Mithunam): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-06-19",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Mithunam): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-06-14/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-06-14.ics"
+   },
+   {
+    "id": "monthly-2026-07-16",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Karkidakam)",
+    "opens": "2026-07-16",
+    "opens_time": "5:00 PM",
+    "closes": "2026-07-21",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Karkidakam begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-07-16",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Karkidakam): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-07-21",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Karkidakam): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-07-16/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-07-16.ics"
+   },
+   {
+    "id": "monthly-2026-08-16",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Chingam)",
+    "opens": "2026-08-16",
+    "opens_time": "5:00 PM",
+    "closes": "2026-08-21",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Chingam begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-08-16",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Chingam): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-08-21",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Chingam): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-08-16/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-08-16.ics"
+   },
+   {
+    "id": "onam-2026-08-24",
+    "kind": "onam",
+    "name": "Onam",
+    "title": "Onam festival",
+    "opens": "2026-08-24",
+    "opens_time": "5:00 PM",
+    "closes": "2026-08-28",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "The temple opens for Onam, Keralam's harvest festival, with special pujas and offerings for the festival days.",
+    "key_dates": [
+     {
+      "date": "2026-08-24",
+      "time": "5:00 PM",
+      "what": "Onam festival: temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-08-28",
+      "time": "10:00 PM",
+      "what": "Onam festival: temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/onam-2026-08-24/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/onam-2026-08-24.ics"
+   },
+   {
+    "id": "monthly-2026-09-16",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Kanni)",
+    "opens": "2026-09-16",
+    "opens_time": "5:00 PM",
+    "closes": "2026-09-21",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Kanni begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-09-16",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Kanni): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-09-21",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Kanni): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-09-16/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-09-16.ics"
+   },
+   {
+    "id": "monthly-2026-10-17",
+    "kind": "monthly",
+    "name": "Monthly puja",
+    "title": "Monthly Puja (Thulam)",
+    "opens": "2026-10-17",
+    "opens_time": "5:00 PM",
+    "closes": "2026-10-22",
+    "closes_time": "10:00 PM",
+    "crowd": "Quiet",
+    "about": "Each Malayalam month the temple opens for the monthly pujas (masa puja). It opens on the evening before the month of Thulam begins and stays open for the first days of the month, closing at night on the last day. These are usually the quietest times to visit.",
+    "key_dates": [
+     {
+      "date": "2026-10-17",
+      "time": "5:00 PM",
+      "what": "Monthly Puja (Thulam): temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-10-22",
+      "time": "10:00 PM",
+      "what": "Monthly Puja (Thulam): temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-10-17/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/monthly-2026-10-17.ics"
+   },
+   {
+    "id": "chithira-2026-11-06",
+    "kind": "chithira",
+    "name": "Sree Chithira Attathirunal",
+    "title": "Sree Chithira Attathirunal",
+    "opens": "2026-11-06",
+    "opens_time": "5:00 PM",
+    "closes": "2026-11-07",
+    "closes_time": "10:00 PM",
+    "crowd": null,
+    "about": "The temple opens to mark the birthday (Attathirunal) of Sree Chithira Thirunal Balarama Varma, the last Maharaja of Travancore.",
+    "key_dates": [
+     {
+      "date": "2026-11-06",
+      "time": "5:00 PM",
+      "what": "Sree Chithira Attathirunal: temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-11-07",
+      "time": "10:00 PM",
+      "what": "Sree Chithira Attathirunal: temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/chithira-2026-11-06/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/chithira-2026-11-06.ics"
+   },
+   {
+    "id": "mandala-2026-11-16",
+    "kind": "mandala",
+    "name": "Mandalam season",
+    "title": "Mandala Puja Mahotsavam",
+    "opens": "2026-11-16",
+    "opens_time": "5:00 PM",
+    "closes": "2026-12-27",
+    "closes_time": "10:00 PM",
+    "crowd": "Extreme",
+    "about": "The Mandalam season is the 42-day season of pilgrimage at the heart of the year. Pilgrims observe the vratam, wear the mala and carry the Irumudi up the eighteen holy steps. The season ends with the Mandala Puja, after which the temple closes for a few days before Makaravilakku.",
+    "key_dates": [
+     {
+      "date": "2026-11-16",
+      "time": "5:00 PM",
+      "what": "Mandala Puja Mahotsavam: temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2026-12-27",
+      "time": "5:00 PM",
+      "what": "Mandala Puja",
+      "role": null
+     },
+     {
+      "date": "2026-12-27",
+      "time": "10:00 PM",
+      "what": "Mandala Puja Mahotsavam: temple closes",
+      "role": "closes"
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/mandala-2026-11-16/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/mandala-2026-11-16.ics"
+   },
+   {
+    "id": "makaravilakku-2026-12-30",
+    "kind": "makaravilakku",
+    "name": "Makaravilakku season",
+    "title": "Makaravilakku festival",
+    "opens": "2026-12-30",
+    "opens_time": "5:00 PM",
+    "closes": null,
+    "closes_time": null,
+    "crowd": "Extreme",
+    "about": "The temple reopens after the Mandalam season for Makaravilakku. On Makara Sankranti the Thiruvabharanam, the sacred ornaments brought in procession from Pandalam, adorn the deity, and pilgrims watch for the Makarajyothi on Ponnambalamedu at dusk.",
+    "key_dates": [
+     {
+      "date": "2026-12-30",
+      "time": "5:00 PM",
+      "what": "Makaravilakku festival: temple opens",
+      "role": "opens"
+     },
+     {
+      "date": "2027-01-14",
+      "time": "5:00 PM",
+      "what": "Makaravilakku Day",
+      "role": null
+     }
+    ],
+    "url": "https://ayyappasamaaj.org/sabarimala-opening-dates/makaravilakku-2026-12-30/",
+    "calendar": "https://ayyappasamaaj.org/sabarimala-opening-dates/makaravilakku-2026-12-30.ics"
+   }
+  ]
+ },
+ "about_pages": [
+  {
+   "slug": "community-partners",
+   "name": "Community partners",
+   "url": "https://ayyappasamaaj.org/community-partners/"
+  },
+  {
+   "slug": "privacy-policy",
+   "name": "Privacy policy",
+   "url": "https://ayyappasamaaj.org/privacy-policy/"
+  },
+  {
+   "slug": "terms",
+   "name": "Terms and conditions",
+   "url": "https://ayyappasamaaj.org/terms-and-conditions/"
+  },
+  {
+   "slug": "cookie-policy",
+   "name": "Cookie policy",
+   "url": "https://ayyappasamaaj.org/cookie-policy/"
+  },
+  {
+   "slug": "accessibility",
+   "name": "Accessibility",
+   "url": "https://ayyappasamaaj.org/accessibility/"
+  },
+  {
+   "slug": "credits",
+   "name": "Credits",
+   "url": "/credits/"
+  }
+ ]
+}
