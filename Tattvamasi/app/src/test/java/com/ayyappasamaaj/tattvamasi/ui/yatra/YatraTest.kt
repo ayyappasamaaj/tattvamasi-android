@@ -98,6 +98,42 @@ class YatraTest {
     }
 
     @Test
+    fun aDayOpensEarlyOnceTheDayBeforeIsFinished() {
+        val today = start.plusDays(1)  // Day 2
+        // Days 1–4 chanted: Days 3, 4 and 5 open early; Day 6 still waits for its date
+        val ahead = Progress(start = start, chanted = (1..16).toSet())
+        assertTrue(yatra.isOpen(2, ahead, today))
+        assertFalse(yatra.isOpenEarly(2, ahead, today))  // open on its date
+        assertTrue(yatra.isOpen(5, ahead, today))
+        assertTrue(yatra.isOpenEarly(5, ahead, today))
+        assertFalse(yatra.isOpen(6, ahead, today))
+        assertFalse(yatra.isOpen(6, Progress(start = start), today))
+        // The day count, the dates and the streak stay by the calendar
+        assertEquals(2, yatra.currentDay(ahead, today))
+        assertEquals(2, yatra.todayNumber(ahead, today))
+        assertEquals(start.plusDays(4), yatra.dateOf(5, ahead, today))
+        assertEquals(2, yatra.streak(ahead, today))
+        assertEquals(2, yatra.daysAhead(ahead, today))  // Days 3 and 4
+        assertEquals(0, yatra.daysAhead(Progress(start = start, chanted = (1..8).toSet()), today))
+        assertEquals(0, yatra.daysAhead(Progress(start = start), today))
+        // Before the yatra begins, Day 1 is open and finishing it opens Day 2
+        val early = Progress(start = start, chanted = (1..4).toSet())
+        assertTrue(yatra.isOpenEarly(2, early, start.minusDays(3)))
+        assertEquals(0, yatra.daysAhead(early, start.minusDays(3)))  // Day 1 counts as today, so not ahead
+        // Day 40 opens once Day 39 is finished, Day 41 once Day 40 is recited
+        val verses = Progress(start = start, chanted = (1..155).toSet())
+        assertTrue(yatra.isOpen(40, verses, today))
+        assertFalse(yatra.isOpen(41, verses, today))
+        val recited = verses.copy(recited = true)
+        assertTrue(yatra.isOpen(41, recited, today))
+        assertTrue(yatra.isOpenEarly(41, recited, today))
+        assertEquals(38, yatra.daysAhead(recited, today))  // Days 3–40; Day 41 is never "finished"
+        assertEquals(2, yatra.streak(recited, today))
+        // Nothing past Day 41
+        assertFalse(yatra.isOpen(42, recited, today))
+    }
+
+    @Test
     fun theLampStreakCountsDaysInARow() {
         val chanted = (1..12).toSet()  // days 1–3
         val progress = Progress(start = start, chanted = chanted)

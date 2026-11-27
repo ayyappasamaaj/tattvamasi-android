@@ -602,6 +602,11 @@ private fun StageCard(
                     color = if (now) AppColors.clayDark else if (done) YatraColors.gold else AppColors.ink)
                 Text("Days ${days.first}–${days.last} · ${yatra.namesOfStage(index)} names" + if (now) " · You are here" else "",
                     style = MaterialTheme.typography.bodySmall, color = AppColors.muted)
+                val ahead = if (now) yatra.daysAhead(progress, today) else 0
+                if (ahead > 0) {
+                    Text("You’re $ahead day${if (ahead > 1) "s" else ""} ahead", style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight(600), color = AppColors.clayDark)
+                }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 days.forEach { d -> Stone(yatra, progress, today, d, current, Modifier.weight(1f)) { onDay(d) } }
@@ -610,7 +615,7 @@ private fun StageCard(
     }
 }
 
-/** A day-stone: gold once done, outlined today, closed until its day. */
+/** A day-stone: gold once done, outlined today, closed until its day (or until the day before is finished). */
 @Composable
 internal fun Stone(
     yatra: Yatra,

@@ -313,7 +313,20 @@ class Yatra(val feed: YatraFeed, val data: YatraData) {
 
     fun currentDay(progress: Progress, today: LocalDate): Int = todayNumber(progress, today).coerceIn(1, finalDay)
 
-    fun isOpen(day: Int, progress: Progress, today: LocalDate): Boolean = day <= currentDay(progress, today)
+    /**
+     * A day opens on its date, or as soon as the day before is finished (learn ahead; Day 40 and Day 41 too). The day
+     * count, the dates and the streak stay by the calendar.
+     */
+    fun isOpen(day: Int, progress: Progress, today: LocalDate): Boolean =
+        day <= currentDay(progress, today) || (day in 2..finalDay && dayDone(day - 1, progress))
+
+    /** Open before its date, because the day before is finished. */
+    fun isOpenEarly(day: Int, progress: Progress, today: LocalDate): Boolean =
+        day > currentDay(progress, today) && isOpen(day, progress, today)
+
+    /** How many days are finished beyond today ("You’re 3 days ahead"). */
+    fun daysAhead(progress: Progress, today: LocalDate): Int =
+        (currentDay(progress, today) + 1..finalDay).count { dayDone(it, progress) }
 
     fun dateOf(day: Int, progress: Progress, today: LocalDate): LocalDate =
         startDate(progress, today).plusDays((day - 1).toLong())
