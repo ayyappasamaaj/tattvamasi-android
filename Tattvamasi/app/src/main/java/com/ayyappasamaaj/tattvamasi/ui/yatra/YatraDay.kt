@@ -106,9 +106,20 @@ internal fun DayView(
                 Text("Day $day opens on ${shortDate(date)}", style = MaterialTheme.typography.headlineSmall,
                     color = AppColors.ink, textAlign = TextAlign.Center)
                 Text("One day at a time.", style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
+                // Learn ahead: finishing the day before opens it now
+                val previous = day - 1
+                if (previous >= 1) {
+                    Text("Finish Day $previous to open it now.", style = MaterialTheme.typography.bodyLarge,
+                        color = AppColors.inkSoft, textAlign = TextAlign.Center)
+                    if (yatra.isOpen(previous, progress, today)) {
+                        OutlinedButton(onClick = { onDay(previous) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                            Text("Go to Day $previous", color = AppColors.clayDark)
+                        }
+                    }
+                }
                 PrimaryButton("Back to the path", onClick = onPath)
             }
-            day == yatra.reciteDay -> ReciteDay(yatra, progress, day, onPath)
+            day == yatra.reciteDay -> ReciteDay(yatra, progress, today, day, onPath, onDay)
             day == yatra.finalDay -> FinalDay(yatra, progress, day, onPath)
             else -> {
                 val steps = yatra.steps(day)
@@ -619,6 +630,10 @@ private fun LampStep(yatra: Yatra, progress: Progress, today: LocalDate, day: In
                         .border(1.dp, AppColors.saffron, RoundedCornerShape(16.dp)).padding(14.dp)) {
                         Eyebrow("Tomorrow · Day $next", color = AppColors.clay)
                         Text(yatra.teaser(next), style = MaterialTheme.typography.bodyLarge, color = AppColors.inkSoft)
+                        // Learn ahead: the next day opens now that this one is finished
+                        if (yatra.isOpenEarly(next, progress, today)) {
+                            PrimaryButton("Continue to Day $next →", modifier = Modifier.padding(top = 10.dp)) { onDay(next) }
+                        }
                     }
                 }
                 yatra.quiz(day)?.let { QuickCheck(yatra, it) }
@@ -685,9 +700,9 @@ private fun Reflection(day: Int, progress: Progress, onSave: (String) -> Unit) {
     }
 }
 
-/** Day 40: the whole stotram, from the dhyānam to the last verse. */
+/** Day 40: the whole stotram, from the dhyānam to the last verse; once recited, Day 41 opens (learn ahead). */
 @Composable
-private fun ReciteDay(yatra: Yatra, progress: Progress, day: Int, onPath: () -> Unit) {
+private fun ReciteDay(yatra: Yatra, progress: Progress, today: LocalDate, day: Int, onPath: () -> Unit, onDay: (Int) -> Unit) {
     val context = LocalContext.current
     val data = yatra.data
     Column(Modifier.fillMaxSize()) {
@@ -718,8 +733,11 @@ private fun ReciteDay(yatra: Yatra, progress: Progress, day: Int, onPath: () -> 
             }
         }
         Row(Modifier.fillMaxWidth().background(AppColors.card).padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End) {
-            if (progress.recited) {
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
+            if (progress.recited && yatra.isOpenEarly(yatra.finalDay, progress, today)) {
+                TextButton(onClick = onPath) { Text("✓ Recited · back to the path", color = AppColors.clayDark) }
+                PrimaryButton("Continue to Day ${yatra.finalDay} →") { onDay(yatra.finalDay) }
+            } else if (progress.recited) {
                 PrimaryButton("✓ Recited · back to the path", onClick = onPath)
             } else {
                 PrimaryButton("I have recited all ${yatra.totalVerses} verses/1000 names", lamp = true) {
